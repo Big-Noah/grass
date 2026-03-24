@@ -1,0 +1,426 @@
+.muukal-header {
+  --muukal-accent: #ff565c;
+  --muukal-text: #222222;
+  --muukal-border: #ececec;
+  --muukal-shadow: 0 10px 28px rgba(20, 20, 20, 0.08);
+  position: relative;
+  z-index: 30;
+  width: 100%;
+  background: #ffffff;
+  color: var(--muukal-text);
+  font-size: 16px;
+}
+
+.muukal-header *,
+.muukal-header *::before,
+.muukal-header *::after {
+  box-sizing: border-box;
+}
+
+.muukal-header__inner {
+  width: min(1400px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.muukal-header__promo {
+  border-bottom: 1px solid var(--muukal-border);
+  background: #f7f7f7;
+  font-size: 14px;
+}
+
+.muukal-header__promo .muukal-header__inner,
+.muukal-header__main .muukal-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.muukal-header__promo-link,
+.muukal-header__utility-link,
+.muukal-header__utility-icon,
+.muukal-header__logo,
+.muukal-header__menu a,
+.muukal-header__hamburger {
+  color: inherit;
+  text-decoration: none;
+}
+
+.muukal-header__promo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  color: var(--muukal-accent);
+}
+
+.muukal-header__promo-icon {
+  width: 8px;
+  height: 8px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.muukal-header__utilities {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.muukal-header__utilities--top {
+  font-size: 14px;
+}
+
+.muukal-header__utility-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+}
+
+.muukal-header__main {
+  position: relative;
+  background: #ffffff;
+}
+
+.muukal-header__main .muukal-header__inner {
+  min-height: 88px;
+}
+
+.muukal-header__brand {
+  flex: 0 0 auto;
+}
+
+.muukal-header__logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.muukal-header__logo-image {
+  max-width: 190px;
+  width: auto;
+  height: auto;
+}
+
+.muukal-header__logo-text {
+  color: var(--muukal-accent);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.muukal-header__nav-wrap {
+  flex: 1 1 auto;
+}
+
+.muukal-header__nav .muukal-header__menu,
+.muukal-header__mobile-nav .muukal-header__mobile-menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.muukal-header__nav .muukal-header__menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.muukal-header__nav .muukal-header__menu > li {
+  position: relative;
+  padding: 0 8px;
+}
+
+.muukal-header__nav .muukal-header__menu > li > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 88px;
+  padding: 18px 0;
+  font-size: 16px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+.muukal-header__nav .muukal-header__menu > li:hover > a,
+.muukal-header__nav .muukal-header__menu > li.current-menu-item > a,
+.muukal-header__nav .muukal-header__menu > li.current-menu-ancestor > a {
+  color: var(--muukal-accent);
+}
+
+.muukal-header__nav .sub-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 280px;
+  margin: 0;
+  padding: 20px 24px;
+  list-style: none;
+  background: #ffffff;
+  border-top: 3px solid var(--muukal-accent);
+  box-shadow: var(--muukal-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.muukal-header__nav .sub-menu li {
+  position: relative;
+}
+
+.muukal-header__nav .sub-menu a {
+  display: block;
+  padding: 8px 0;
+  color: var(--muukal-text);
+  line-height: 1.4;
+}
+
+.muukal-header__nav .sub-menu li:hover > a,
+.muukal-header__nav .sub-menu .current-menu-item > a,
+.muukal-header__nav .sub-menu .current-menu-ancestor > a {
+  color: var(--muukal-accent);
+}
+
+.muukal-header__nav .menu-item-has-children:hover > .sub-menu,
+.muukal-header__nav .menu-item-has-children:focus-within > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.muukal-header__nav .sub-menu .sub-menu {
+  top: -23px;
+  left: calc(100% + 12px);
+}
+
+.muukal-header__search-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #dbdbdb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #696969;
+  cursor: pointer;
+}
+
+.muukal-header__search-icon,
+.muukal-header__hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+}
+
+.muukal-header svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.muukal-header__utility-icon svg,
+.muukal-header__hamburger svg {
+  width: 18px;
+  height: 18px;
+}
+
+.muukal-header__mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.muukal-header__mobile-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  margin: 3px auto;
+  background: var(--muukal-text);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.muukal-header__search-panel,
+.muukal-header__mobile-panel {
+  border-top: 1px solid var(--muukal-border);
+  background: #ffffff;
+}
+
+.muukal-header__search-panel .muukal-header__inner {
+  padding: 16px 0 20px;
+}
+
+.muukal-header__search-panel .woocommerce-product-search {
+  display: flex;
+  gap: 12px;
+}
+
+.muukal-header__search-panel input[type="search"] {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid #d9d9d9;
+}
+
+.muukal-header__mobile-panel .muukal-header__inner {
+  padding: 16px 0 24px;
+}
+
+.muukal-header__mobile-menu li {
+  border-bottom: 1px solid var(--muukal-border);
+}
+
+.muukal-header__mobile-menu a {
+  display: block;
+  padding: 14px 0;
+  color: var(--muukal-text);
+}
+
+.muukal-header.is-scrolled .muukal-header__main {
+  box-shadow: 0 6px 20px rgba(20, 20, 20, 0.06);
+}
+
+.muukal-trustpilot-bar {
+  background: var(--muukal-trustpilot-bg, #f3f3f3);
+  padding: var(--muukal-trustpilot-padding, 10px 0);
+}
+
+.muukal-trustpilot-bar__inner {
+  width: min(var(--muukal-trustpilot-width, 1400px), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.muukal-trustpilot-bar__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 28px;
+  color: #1f2933;
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.muukal-trustpilot-bar__label {
+  font-weight: 700;
+}
+
+.muukal-trustpilot-bar__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.muukal-trustpilot-bar__star {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  background: #dcdcdc;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.muukal-trustpilot-bar__star.is-filled {
+  background: #00b67a;
+}
+
+.muukal-trustpilot-bar__star.is-half {
+  background: linear-gradient(90deg, #00b67a 50%, #dcdcdc 50%);
+}
+
+.muukal-trustpilot-bar__summary {
+  color: #3d4a57;
+}
+
+.muukal-trustpilot-bar__reviews {
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+.muukal-trustpilot-bar__brand {
+  color: #00b67a;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .muukal-header__nav-wrap {
+    display: none;
+  }
+
+  .muukal-header__search-toggle,
+  .muukal-header__hamburger {
+    display: none;
+  }
+
+  .muukal-header__mobile-toggle {
+    display: inline-flex;
+  }
+
+  .muukal-header__main .muukal-header__inner {
+    min-height: 76px;
+  }
+
+  .muukal-header__logo-image {
+    max-width: 160px;
+  }
+
+  .muukal-header__logo-text {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 767px) {
+  .muukal-header__inner {
+    width: min(100% - 24px, 1400px);
+  }
+
+  .muukal-trustpilot-bar__inner {
+    width: min(100% - 24px, 1400px);
+  }
+
+  .muukal-trustpilot-bar__content {
+    flex-wrap: wrap;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .muukal-header__promo .muukal-header__inner {
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .muukal-header__utilities--top {
+    display: none;
+  }
+
+  .muukal-header__main .muukal-header__inner {
+    min-height: 68px;
+  }
+
+  .muukal-header__logo-image {
+    max-width: 140px;
+  }
+
+  .muukal-header__logo-text {
+    font-size: 28px;
+  }
+}
