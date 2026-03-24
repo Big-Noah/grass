@@ -10,14 +10,22 @@
 .muukal-loop-item .product-wrapper {
 	position: relative;
 	width: 100%;
+	border: 1px solid #e6e6e6;
+	background: #fff;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.muukal-loop-item .product-wrapper:hover {
+	border-color: #ff979b;
+	box-shadow: 0 4px 18px rgba(255, 151, 155, 0.12);
 }
 
 .muukal-loop-item .product-img {
 	position: relative;
 	display: block;
 	overflow: hidden;
-	background: #f7f7f7;
-	aspect-ratio: 1 / 1;
+	background: transparent;
+	aspect-ratio: 2 / 1;
 }
 
 .muukal-loop-item .muukal-product-image {
@@ -26,11 +34,29 @@
 	display: block;
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
+	object-fit: contain;
+	object-position: center;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.muukal-loop-item .fir_pimg,
+.muukal-loop-item .sec_pimg {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	object-position: center;
 	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .muukal-loop-item .muukal-product-image-primary {
+	opacity: 1;
+	z-index: 1;
+}
+
+.muukal-loop-item .fir_pimg {
 	opacity: 1;
 	z-index: 1;
 }
@@ -40,7 +66,17 @@
 	z-index: 2;
 }
 
+.muukal-loop-item .sec_pimg {
+	opacity: 0;
+	z-index: 2;
+}
+
 .muukal-loop-item .product-wrapper:hover .muukal-product-image-primary {
+	opacity: 0;
+	transform: scale(1.02);
+}
+
+.muukal-loop-item .product-wrapper:hover .fir_pimg {
 	opacity: 0;
 	transform: scale(1.02);
 }
@@ -50,62 +86,77 @@
 	transform: scale(1.02);
 }
 
+.muukal-loop-item .product-wrapper:hover .sec_pimg {
+	opacity: 1;
+	transform: scale(1.02);
+}
+
 .muukal-loop-item .product-content {
-	padding-top: 12px;
+	padding-top: 10px;
 }
 
 .muukal-loop-item .ip-colors {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 12px;
+	gap: 10px;
 }
 
 .muukal-loop-item .ip-colors-box {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: 6px;
 	align-items: center;
 }
 
+.muukal-loop-item .ip-cspan,
 .muukal-loop-item .ip-cspan.muukal-swatch-button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: inline-block;
 	flex-shrink: 0;
-	width: 22px;
-	height: 22px;
+	width: 24px;
+	height: 24px;
 	padding: 2px;
-	border: 1px solid transparent;
+	border: 1px solid #d7d7d7;
 	border-radius: 999px;
 	overflow: hidden;
 	background: #fff;
 	cursor: pointer;
 	line-height: 0;
+	vertical-align: top;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.muukal-loop-item .ip-cspan:hover,
+.muukal-loop-item .ip-cspan.muukal-swatch-button:hover {
+	border-color: #ff565c;
+	box-shadow: 0 0 0 1px rgba(255, 86, 92, 0.12);
+}
+
+.muukal-loop-item .ip-cspan.choose-color,
 .muukal-loop-item .ip-cspan.muukal-swatch-button.is-active {
-	border-color: #111;
+	border-color: #ff565c;
+	box-shadow: 0 0 0 1px rgba(255, 86, 92, 0.12);
 }
 
 .muukal-loop-item .ip-cimg {
 	display: block;
-	width: 100%;
-	height: 100%;
+	width: 18px;
+	height: 18px;
 	max-width: none;
-	border-radius: inherit;
+	border-radius: 999px;
 	object-fit: cover;
 }
 
 .muukal-loop-item .pro-price {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 4px;
 	flex-wrap: wrap;
 	color: #111;
 	font-size: 16px;
-	line-height: 1.4;
+	line-height: 1.2;
 	text-align: right;
+	white-space: nowrap;
 }
 
 .muukal-loop-item .o_price {
