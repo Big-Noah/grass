@@ -72,13 +72,16 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	flex-shrink: 0;
 	width: 22px;
 	height: 22px;
-	padding: 0;
+	padding: 2px;
 	border: 1px solid transparent;
 	border-radius: 999px;
-	background: transparent;
+	overflow: hidden;
+	background: #fff;
 	cursor: pointer;
+	line-height: 0;
 }
 
 .muukal-loop-item .ip-cspan.muukal-swatch-button.is-active {
@@ -87,9 +90,11 @@
 
 .muukal-loop-item .ip-cimg {
 	display: block;
-	width: 16px;
-	height: 16px;
-	border-radius: 999px;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	border-radius: inherit;
+	object-fit: cover;
 }
 
 .muukal-loop-item .pro-price {
