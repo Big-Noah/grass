@@ -1,0 +1,143 @@
+.muukal-loop-item,
+.muukal-loop-item * {
+	box-sizing: border-box;
+}
+
+.muukal-loop-item {
+	width: 100%;
+}
+
+.muukal-loop-item .product-wrapper {
+	position: relative;
+	width: 100%;
+}
+
+.muukal-loop-item .product-img {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	background: #f7f7f7;
+	aspect-ratio: 1 / 1;
+}
+
+.muukal-loop-item .muukal-product-image {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.muukal-loop-item .muukal-product-image-primary {
+	opacity: 1;
+	z-index: 1;
+}
+
+.muukal-loop-item .muukal-product-image-secondary {
+	opacity: 0;
+	z-index: 2;
+}
+
+.muukal-loop-item .product-wrapper:hover .muukal-product-image-primary {
+	opacity: 0;
+	transform: scale(1.02);
+}
+
+.muukal-loop-item .product-wrapper:hover .muukal-product-image-secondary {
+	opacity: 1;
+	transform: scale(1.02);
+}
+
+.muukal-loop-item .product-content {
+	padding-top: 12px;
+}
+
+.muukal-loop-item .ip-colors {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.muukal-loop-item .ip-colors-box {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.muukal-loop-item .ip-cspan.muukal-swatch-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	background: transparent;
+	cursor: pointer;
+}
+
+.muukal-loop-item .ip-cspan.muukal-swatch-button.is-active {
+	border-color: #111;
+}
+
+.muukal-loop-item .ip-cimg {
+	display: block;
+	width: 16px;
+	height: 16px;
+	border-radius: 999px;
+}
+
+.muukal-loop-item .pro-price {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	color: #111;
+	font-size: 16px;
+	line-height: 1.4;
+	text-align: right;
+}
+
+.muukal-loop-item .o_price {
+	color: #7a7a7a;
+	font-weight: 300;
+}
+
+.muukal-loop-item .g-price {
+	color: #111;
+	font-weight: 400;
+}
+
+.muukal-loop-item .sale-flag-side {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 4;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: rgba(17, 17, 17, 0.92);
+	color: #fff;
+	font-size: 12px;
+	line-height: 1;
+}
+
+.muukal-loop-item .sale-text {
+	display: block;
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.muukal-loop-item .ip-colors {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.muukal-loop-item .pro-price {
+		text-align: left;
+	}
+}
