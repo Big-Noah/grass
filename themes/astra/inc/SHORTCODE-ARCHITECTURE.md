@@ -6,6 +6,7 @@
 3. 在 `assets/css/` 新建这个模块自己的 CSS
 4. 如果有交互，在 `assets/js/` 新建这个模块自己的 JS
 5. `functions.php` 只负责把短代码入口文件引进来
+6、我如果让你用MCP 那要求的网址是 https://muukal.com/
 
 
 
