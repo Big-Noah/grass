@@ -205,4 +205,3 @@ require_once ASTRA_THEME_DIR . 'inc/core/deprecated/deprecated-functions.php';
 
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/header-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/index-nav-box-shortcode.php';
-require_once ASTRA_THEME_DIR . 'inc/shortcodes/home-product-tabs-shortcode.php';
