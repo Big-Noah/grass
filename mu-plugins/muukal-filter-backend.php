@@ -271,6 +271,148 @@ function muukal_filter_render_sort_dropdown() {
     return ob_get_clean();
 }
 
+function muukal_filter_hidden_query_fields_v2($exclude = array()) {
+    foreach ($_GET as $key => $value) {
+        if (in_array($key, $exclude, true)) {
+            continue;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                ?>
+                <input type="hidden" name="<?php echo esc_attr($key); ?>[]" value="<?php echo esc_attr(sanitize_text_field(wp_unslash($item))); ?>">
+                <?php
+            }
+            continue;
+        }
+        ?>
+        <input type="hidden" name="<?php echo esc_attr($key); ?>" value="<?php echo esc_attr(sanitize_text_field(wp_unslash($value))); ?>">
+        <?php
+    }
+}
+
+function muukal_filter_render_dropdown_v2($key, $label, $terms) {
+    $current_value = muukal_filter_attribute_request_value($key);
+    $current_label = $label;
+
+    foreach ($terms as $term) {
+        if (strcasecmp($current_value, $term->name) === 0 || $current_value === $term->slug) {
+            $current_label = $term->name;
+            break;
+        }
+    }
+
+    ob_start();
+    ?>
+    <li class="dropdown muukal-filter-item">
+        <button class="muukal-filter-toggle" type="button" aria-expanded="false">
+            <span><?php echo esc_html($current_label === $label ? $label : $current_label); ?></span>
+            <span class="muukal-filter-arrow">&#9662;</span>
+        </button>
+        <div class="muukal-filter-menu">
+            <a class="muukal-filter-option<?php echo $current_value === '' ? ' is-active' : ''; ?>" href="<?php echo esc_url(muukal_filter_build_url(array(), array($key))); ?>">All</a>
+            <?php foreach ($terms as $term) : ?>
+                <?php $is_active = strcasecmp($current_value, $term->name) === 0 || $current_value === $term->slug; ?>
+                <a class="muukal-filter-option<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url(muukal_filter_build_url(array($key => $term->slug))); ?>">
+                    <?php echo esc_html($term->name); ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </li>
+    <?php
+
+    return ob_get_clean();
+}
+
+function muukal_filter_render_price_dropdown_v2() {
+    $min_price   = isset($_GET['min_price']) ? sanitize_text_field(wp_unslash($_GET['min_price'])) : '';
+    $max_price   = isset($_GET['max_price']) ? sanitize_text_field(wp_unslash($_GET['max_price'])) : '';
+    $price_floor = 0;
+    $price_cap   = 300;
+
+    if (function_exists('wc_get_products')) {
+        $lowest = wc_get_products(array('status' => 'publish', 'limit' => 1, 'return' => 'objects', 'orderby' => 'price', 'order' => 'ASC'));
+        $highest = wc_get_products(array('status' => 'publish', 'limit' => 1, 'return' => 'objects', 'orderby' => 'price', 'order' => 'DESC'));
+
+        if (!empty($lowest[0]) && $lowest[0] instanceof WC_Product) {
+            $price_floor = max(0, (int) floor((float) $lowest[0]->get_price()));
+        }
+        if (!empty($highest[0]) && $highest[0] instanceof WC_Product) {
+            $price_cap = max($price_floor + 10, (int) ceil((float) $highest[0]->get_price()));
+        }
+    }
+
+    $price_cap   = (int) ceil($price_cap / 10) * 10;
+    $current_min = $min_price !== '' ? max($price_floor, (int) $min_price) : $price_floor;
+    $current_max = $max_price !== '' ? min($price_cap, (int) $max_price) : $price_cap;
+    $current_max = max($current_min, $current_max);
+
+    ob_start();
+    ?>
+    <li class="dropdown muukal-filter-item muukal-filter-item-price">
+        <button class="muukal-filter-toggle" type="button" aria-expanded="false">
+            <span>Price</span>
+            <span class="muukal-filter-arrow">&#9662;</span>
+        </button>
+        <div class="muukal-filter-menu muukal-filter-menu-price">
+            <form class="muukal-filter-price-form" method="get" action="<?php echo esc_url(muukal_filter_current_archive_url()); ?>">
+                <?php muukal_filter_hidden_query_fields_v2(array('min_price', 'max_price')); ?>
+                <div class="muukal-price-slider" data-min="<?php echo esc_attr($price_floor); ?>" data-max="<?php echo esc_attr($price_cap); ?>">
+                    <div class="muukal-price-track"></div>
+                    <div class="muukal-price-progress"></div>
+                    <input class="muukal-price-range muukal-price-range-min" type="range" min="<?php echo esc_attr($price_floor); ?>" max="<?php echo esc_attr($price_cap); ?>" step="1" value="<?php echo esc_attr($current_min); ?>">
+                    <input class="muukal-price-range muukal-price-range-max" type="range" min="<?php echo esc_attr($price_floor); ?>" max="<?php echo esc_attr($price_cap); ?>" step="1" value="<?php echo esc_attr($current_max); ?>">
+                    <div class="muukal-price-values">
+                        <span class="muukal-price-value-min"></span>
+                        <span class="muukal-price-value-max"></span>
+                    </div>
+                    <div class="muukal-price-inputs">
+                        <label><span>Min</span><input class="muukal-price-input muukal-price-input-min" type="number" min="<?php echo esc_attr($price_floor); ?>" max="<?php echo esc_attr($price_cap); ?>" step="1" name="min_price" value="<?php echo esc_attr($current_min); ?>"></label>
+                        <label><span>Max</span><input class="muukal-price-input muukal-price-input-max" type="number" min="<?php echo esc_attr($price_floor); ?>" max="<?php echo esc_attr($price_cap); ?>" step="1" name="max_price" value="<?php echo esc_attr($current_max); ?>"></label>
+                    </div>
+                </div>
+                <div class="muukal-filter-price-actions">
+                    <a class="muukal-filter-clear" href="<?php echo esc_url(muukal_filter_build_url(array(), array('min_price', 'max_price'))); ?>">Clear</a>
+                    <button class="muukal-filter-apply" type="submit">Apply</button>
+                </div>
+            </form>
+        </div>
+    </li>
+    <?php
+
+    return ob_get_clean();
+}
+
+function muukal_filter_render_sort_dropdown_v2() {
+    $current_sort = isset($_GET['sort']) ? sanitize_key(wp_unslash($_GET['sort'])) : 'recommended';
+    $sort_options = array(
+        'recommended' => 'Recommended',
+        'newest' => 'Newest Arrivals',
+        'price_desc' => 'Price: High to Low',
+        'price_asc' => 'Price: Low to High',
+        'best_sellers' => 'Best Sellers',
+    );
+
+    ob_start();
+    ?>
+    <li class="dropdown muukal-filter-item">
+        <button class="muukal-filter-toggle" type="button" aria-expanded="false">
+            <span>Sort By: <?php echo esc_html(muukal_filter_sort_label($current_sort)); ?></span>
+            <span class="muukal-filter-arrow">&#9662;</span>
+        </button>
+        <div class="muukal-filter-menu">
+            <?php foreach ($sort_options as $value => $label) : ?>
+                <a class="muukal-filter-option<?php echo $current_sort === $value ? ' is-active' : ''; ?>" href="<?php echo esc_url(muukal_filter_build_url(array('sort' => $value))); ?>">
+                    <?php echo esc_html($label); ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </li>
+    <?php
+
+    return ob_get_clean();
+}
+
 function muukal_filter_shortcode($atts = array()) {
     if (!function_exists('wc_attribute_taxonomy_name')) {
         return '';
@@ -304,18 +446,26 @@ function muukal_filter_shortcode($atts = array()) {
         .muukal-filter-toggle {
             display: inline-flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
+            min-width: 112px;
+            min-height: 44px;
             border: 1px solid #d8d8d8;
             background: #fff;
             color: #1f1f1f;
             font-size: 14px;
             line-height: 1;
-            padding: 12px 16px;
+            padding: 11px 16px;
             border-radius: 999px;
             cursor: pointer;
         }
         .muukal-filter-arrow {
             font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+        .muukal-filter-item:hover .muukal-filter-arrow,
+        .muukal-filter-item:focus-within .muukal-filter-arrow {
+            transform: rotate(180deg);
         }
         .muukal-filter-menu {
             position: absolute;
@@ -323,10 +473,10 @@ function muukal_filter_shortcode($atts = array()) {
             left: 0;
             z-index: 30;
             display: none;
-            min-width: 220px;
+            min-width: 240px;
             max-height: 360px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #e5e5e5;
             border-radius: 16px;
             background: #fff;
@@ -338,27 +488,174 @@ function muukal_filter_shortcode($atts = array()) {
         }
         .muukal-filter-option {
             display: block;
-            padding: 9px 10px;
+            padding: 10px 12px;
             border-radius: 10px;
             color: #222;
             text-decoration: none;
             white-space: nowrap;
+            font-size: 14px;
+            line-height: 1.3;
         }
         .muukal-filter-option:hover,
         .muukal-filter-option.is-active {
             background: #f4f4f4;
+        }
+        .muukal-filter-menu-price {
+            min-width: 320px;
+        }
+        .muukal-filter-price-form {
+            margin: 0;
+        }
+        .muukal-price-slider {
+            position: relative;
+            padding-top: 12px;
+        }
+        .muukal-price-track,
+        .muukal-price-progress {
+            position: absolute;
+            top: 20px;
+            height: 4px;
+            border-radius: 999px;
+        }
+        .muukal-price-track {
+            left: 0;
+            right: 0;
+            background: #ececec;
+        }
+        .muukal-price-progress {
+            background: #111827;
+        }
+        .muukal-price-range {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            margin: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            pointer-events: none;
+        }
+        .muukal-price-range::-webkit-slider-thumb {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #111827;
+            border-radius: 50%;
+            background: #fff;
+            -webkit-appearance: none;
+            appearance: none;
+            pointer-events: auto;
+        }
+        .muukal-price-range::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #111827;
+            border-radius: 50%;
+            background: #fff;
+            pointer-events: auto;
+        }
+        .muukal-price-range::-moz-range-track {
+            background: transparent;
+        }
+        .muukal-price-values {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+            color: #111827;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .muukal-price-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .muukal-price-inputs label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: #475467;
+            font-size: 13px;
+        }
+        .muukal-price-input {
+            height: 40px;
+            padding: 0 10px;
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
+        }
+        .muukal-filter-price-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .muukal-filter-clear,
+        .muukal-filter-apply {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .muukal-filter-clear {
+            color: #475467;
+            border: 1px solid #d0d5dd;
+            background: #fff;
+        }
+        .muukal-filter-apply {
+            color: #fff;
+            border: 1px solid #111827;
+            background: #111827;
+        }
+        .woocommerce.elementor-widget-loop-grid.elementor-grid-4 > .elementor-widget-container > .elementor-loop-container.elementor-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        @media (max-width: 1024px) {
+            .woocommerce.elementor-widget-loop-grid.elementor-grid-4 > .elementor-widget-container > .elementor-loop-container.elementor-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 767px) {
+            .muukal-filter-nav {
+                gap: 10px;
+            }
+            .muukal-filter-item,
+            .muukal-filter-toggle {
+                width: 100%;
+            }
+            .muukal-filter-menu {
+                position: static;
+                min-width: 100%;
+                margin-top: 8px;
+                box-shadow: none;
+            }
+            .woocommerce.elementor-widget-loop-grid.elementor-grid-4 > .elementor-widget-container > .elementor-loop-container.elementor-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 520px) {
+            .woocommerce.elementor-widget-loop-grid.elementor-grid-4 > .elementor-widget-container > .elementor-loop-container.elementor-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     <ul class="nav navbar-nav filter-nav muukal-filter-nav">
         <?php
         foreach ($requested_sections as $section) {
             if ($section === 'price') {
-                echo muukal_filter_render_price_dropdown();
+                echo muukal_filter_render_price_dropdown_v2();
                 continue;
             }
 
             if ($section === 'sort') {
-                echo muukal_filter_render_sort_dropdown();
+                echo muukal_filter_render_sort_dropdown_v2();
                 continue;
             }
 
@@ -382,10 +679,74 @@ function muukal_filter_shortcode($atts = array()) {
                 continue;
             }
 
-            echo muukal_filter_render_dropdown($section, $definitions[$section]['label'], $terms);
+            echo muukal_filter_render_dropdown_v2($section, $definitions[$section]['label'], $terms);
         }
         ?>
     </ul>
+    <script>
+        (function() {
+            function formatPrice(value) {
+                return '$' + Math.round(Number(value) || 0);
+            }
+
+            function syncPriceSlider(root) {
+                var minRange = root.querySelector('.muukal-price-range-min');
+                var maxRange = root.querySelector('.muukal-price-range-max');
+                var minInput = root.querySelector('.muukal-price-input-min');
+                var maxInput = root.querySelector('.muukal-price-input-max');
+                var minValue = root.querySelector('.muukal-price-value-min');
+                var maxValue = root.querySelector('.muukal-price-value-max');
+                var progress = root.querySelector('.muukal-price-progress');
+                var minBound = Number(root.getAttribute('data-min') || 0);
+                var maxBound = Number(root.getAttribute('data-max') || 0);
+                var min = Number(minRange.value || minBound);
+                var max = Number(maxRange.value || maxBound);
+
+                if (min > max) {
+                    if (document.activeElement === minRange || document.activeElement === minInput) {
+                        max = min;
+                        maxRange.value = String(max);
+                    } else {
+                        min = max;
+                        minRange.value = String(min);
+                    }
+                }
+
+                minInput.value = String(min);
+                maxInput.value = String(max);
+                minValue.textContent = formatPrice(min);
+                maxValue.textContent = formatPrice(max);
+
+                if (maxBound > minBound) {
+                    var left = ((min - minBound) / (maxBound - minBound)) * 100;
+                    var right = ((max - minBound) / (maxBound - minBound)) * 100;
+                    progress.style.left = left + '%';
+                    progress.style.width = Math.max(right - left, 0) + '%';
+                }
+            }
+
+            document.querySelectorAll('.muukal-price-slider').forEach(function(root) {
+                var minRange = root.querySelector('.muukal-price-range-min');
+                var maxRange = root.querySelector('.muukal-price-range-max');
+                var minInput = root.querySelector('.muukal-price-input-min');
+                var maxInput = root.querySelector('.muukal-price-input-max');
+
+                [minRange, maxRange, minInput, maxInput].forEach(function(input) {
+                    input.addEventListener('input', function() {
+                        if (input === minInput) {
+                            minRange.value = input.value;
+                        }
+                        if (input === maxInput) {
+                            maxRange.value = input.value;
+                        }
+                        syncPriceSlider(root);
+                    });
+                });
+
+                syncPriceSlider(root);
+            });
+        })();
+    </script>
     <?php
 
     return ob_get_clean();
@@ -402,6 +763,9 @@ function muukal_collection_nav_shortcode($atts = array()) {
             'parent' => '',
             'include' => implode(',', muukal_filter_collection_term_slugs()),
             'show_all' => 'yes',
+            'show_recommend' => 'yes',
+            'recommend_label' => 'RECOMMEND',
+            'recommend_url' => '',
         ),
         $atts,
         'muukal_collection_nav'
@@ -436,49 +800,95 @@ function muukal_collection_nav_shortcode($atts = array()) {
         $all_url = wc_get_page_permalink('shop');
     }
 
+    $recommend_url = $atts['recommend_url'] !== '' ? esc_url_raw($atts['recommend_url']) : $all_url;
+    $recommend_active = $current_term_id === 0;
+
     ob_start();
     ?>
     <style>
         .muukal-collection-nav-wrap {
-            margin: 0 0 20px;
+            margin: 0 0 28px;
             text-align: center;
         }
         .muukal-collection-nav {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px 18px;
+            gap: 10px 26px;
             margin: 0;
             padding: 0;
             list-style: none;
         }
+        .muukal-collection-nav-item {
+            display: flex;
+        }
         .muukal-collection-link {
-            display: inline-block;
-            color: #111;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #111827;
             text-decoration: none;
-            font-size: 18px;
-            line-height: 1.35;
-            padding: 4px 2px;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s ease, color 0.2s ease;
+            font-size: 17px;
+            font-weight: 500;
+            line-height: 1.2;
+            letter-spacing: 0.01em;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
         }
         .muukal-collection-link:hover,
         .muukal-collection-link.is-active {
             border-color: #111;
         }
+        .muukal-collection-link:hover {
+            opacity: 0.72;
+        }
+        .muukal-collection-link.is-recommend {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+        @media (max-width: 767px) {
+            .muukal-collection-nav {
+                justify-content: flex-start;
+                gap: 8px 18px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 6px;
+                scrollbar-width: none;
+            }
+            .muukal-collection-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .muukal-collection-link {
+                white-space: nowrap;
+                font-size: 15px;
+            }
+            .muukal-collection-link.is-recommend {
+                font-size: 16px;
+            }
+        }
     </style>
     <div class="text-center mb10 muukal-collection-nav-wrap">
         <div class="mt20"></div>
         <ul class="muukal-collection-nav">
-            <?php if ($atts['show_all'] === 'yes' && $all_url !== '') : ?>
-                <li>
+            <?php if ($atts['show_recommend'] === 'yes' && $recommend_url !== '') : ?>
+                <li class="muukal-collection-nav-item">
+                    <a class="topic_o_link fs18 muukal-collection-link muukal-collection-recommend is-recommend<?php echo $recommend_active ? ' is-active' : ''; ?>" href="<?php echo esc_url($recommend_url); ?>">
+                        <?php echo esc_html($atts['recommend_label']); ?>
+                    </a>
+                </li>
+            <?php elseif ($atts['show_all'] === 'yes' && $all_url !== '') : ?>
+                <li class="muukal-collection-nav-item">
                     <a class="topic_o_link fs18 muukal-collection-link<?php echo $current_term_id === 0 ? ' is-active' : ''; ?>" href="<?php echo esc_url($all_url); ?>">
                         View All
                     </a>
                 </li>
             <?php endif; ?>
             <?php foreach ($terms as $term) : ?>
-                <li>
+                <li class="muukal-collection-nav-item">
                     <a class="topic_o_link fs18 muukal-collection-link<?php echo $current_term_id === (int) $term->term_id ? ' is-active' : ''; ?>" href="<?php echo esc_url(get_term_link($term)); ?>">
                         <?php echo esc_html($term->name); ?>
                     </a>
