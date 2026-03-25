@@ -94,15 +94,46 @@
 		}
 
 		function applyEyes(leftEye, rightEye) {
-			var m = getMetrics();
 			var eyeDistance = distance(leftEye, rightEye);
 			var widthFactor = state.selectedFrame && state.selectedFrame.widthFactor ? state.selectedFrame.widthFactor : 2.15;
 			var yOffset = state.selectedFrame && state.selectedFrame.yOffset ? state.selectedFrame.yOffset : 0.02;
-			var width = eyeDistance * widthFactor;
-			var height = width * ((frame.naturalHeight || 1) / (frame.naturalWidth || 1));
 			var cx = (leftEye.x + rightEye.x) / 2;
 			var cy = (leftEye.y + rightEye.y) / 2;
 			var rotate = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI);
+			var naturalWidth = frame.naturalWidth || 1;
+			var naturalHeight = frame.naturalHeight || 1;
+			var leftEyeX = state.selectedFrame && typeof state.selectedFrame.leftEyeX === 'number' ? state.selectedFrame.leftEyeX : NaN;
+			var leftEyeY = state.selectedFrame && typeof state.selectedFrame.leftEyeY === 'number' ? state.selectedFrame.leftEyeY : NaN;
+			var rightEyeX = state.selectedFrame && typeof state.selectedFrame.rightEyeX === 'number' ? state.selectedFrame.rightEyeX : NaN;
+			var rightEyeY = state.selectedFrame && typeof state.selectedFrame.rightEyeY === 'number' ? state.selectedFrame.rightEyeY : NaN;
+			var useAnchors =
+				isFinite(leftEyeX) &&
+				isFinite(leftEyeY) &&
+				isFinite(rightEyeX) &&
+				isFinite(rightEyeY) &&
+				rightEyeX > leftEyeX &&
+				rightEyeX - leftEyeX > 0.05;
+
+			if (useAnchors) {
+				var anchorSpanX = (rightEyeX - leftEyeX) * naturalWidth;
+				var scale = anchorSpanX > 0 ? eyeDistance / anchorSpanX : 0;
+				var width = naturalWidth * scale;
+				var height = naturalHeight * scale;
+				var anchorCenterX = ((leftEyeX + rightEyeX) / 2) * width;
+				var anchorCenterY = ((leftEyeY + rightEyeY) / 2) * height;
+
+				state.auto.width = width;
+				state.auto.x = cx - anchorCenterX;
+				state.auto.y = cy - anchorCenterY;
+				state.auto.rotate = rotate;
+				state.manual = { x: 0, y: 0, rotate: 0, scale: 1 };
+				syncSliders();
+				render();
+				return;
+			}
+
+			var width = eyeDistance * widthFactor;
+			var height = width * (naturalHeight / naturalWidth);
 
 			state.auto.width = width;
 			state.auto.x = cx - width / 2;
@@ -131,7 +162,11 @@
 						autoCenter();
 					};
 					frame.src = item.url;
-					setStatus(config.i18n.frameSelected);
+					if (!/\.png(?:$|\?)/i.test(item.url || '')) {
+						setStatus(config.i18n.badFrameFormat || config.i18n.frameSelected);
+					} else {
+						setStatus(config.i18n.frameSelected);
+					}
 				});
 				framesBox.appendChild(btn);
 				if (idx === 0) {

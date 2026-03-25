@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.0.0' );
+define( 'FACEPP_TRYON_VERSION', '1.0.1' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -27,14 +27,26 @@ function facepp_tryon_defaults() {
 		'frame_1_url'  => '',
 		'frame_1_wf'   => '2.15',
 		'frame_1_yo'   => '0.02',
+		'frame_1_lx'   => '0.32',
+		'frame_1_ly'   => '0.43',
+		'frame_1_rx'   => '0.68',
+		'frame_1_ry'   => '0.43',
 		'frame_2_name' => 'Frame 2',
 		'frame_2_url'  => '',
 		'frame_2_wf'   => '2.15',
 		'frame_2_yo'   => '0.02',
+		'frame_2_lx'   => '0.32',
+		'frame_2_ly'   => '0.43',
+		'frame_2_rx'   => '0.68',
+		'frame_2_ry'   => '0.43',
 		'frame_3_name' => 'Frame 3',
 		'frame_3_url'  => '',
 		'frame_3_wf'   => '2.15',
 		'frame_3_yo'   => '0.02',
+		'frame_3_lx'   => '0.32',
+		'frame_3_ly'   => '0.43',
+		'frame_3_rx'   => '0.68',
+		'frame_3_ry'   => '0.43',
 		'model_1_name' => 'Model 1',
 		'model_1_url'  => '',
 		'model_2_name' => 'Model 2',
@@ -65,6 +77,10 @@ function facepp_tryon_get_frames() {
 			'url'         => esc_url_raw( $url ),
 			'widthFactor' => isset( $settings[ 'frame_' . $i . '_wf' ] ) ? (float) $settings[ 'frame_' . $i . '_wf' ] : 2.15,
 			'yOffset'     => isset( $settings[ 'frame_' . $i . '_yo' ] ) ? (float) $settings[ 'frame_' . $i . '_yo' ] : 0.02,
+			'leftEyeX'    => isset( $settings[ 'frame_' . $i . '_lx' ] ) ? (float) $settings[ 'frame_' . $i . '_lx' ] : 0.32,
+			'leftEyeY'    => isset( $settings[ 'frame_' . $i . '_ly' ] ) ? (float) $settings[ 'frame_' . $i . '_ly' ] : 0.43,
+			'rightEyeX'   => isset( $settings[ 'frame_' . $i . '_rx' ] ) ? (float) $settings[ 'frame_' . $i . '_rx' ] : 0.68,
+			'rightEyeY'   => isset( $settings[ 'frame_' . $i . '_ry' ] ) ? (float) $settings[ 'frame_' . $i . '_ry' ] : 0.43,
 		);
 	}
 
@@ -108,7 +124,14 @@ function facepp_tryon_sanitize_settings( $input ) {
 			$output[ $key ] = esc_url_raw( trim( (string) $value ) );
 			continue;
 		}
-		if ( false !== strpos( $key, '_wf' ) || false !== strpos( $key, '_yo' ) ) {
+		if (
+			false !== strpos( $key, '_wf' ) ||
+			false !== strpos( $key, '_yo' ) ||
+			false !== strpos( $key, '_lx' ) ||
+			false !== strpos( $key, '_ly' ) ||
+			false !== strpos( $key, '_rx' ) ||
+			false !== strpos( $key, '_ry' )
+		) {
 			$output[ $key ] = (string) (float) $value;
 			continue;
 		}
@@ -193,6 +216,7 @@ function facepp_tryon_enqueue_assets() {
 			'encodeFailed'   => 'This image cannot be sent to Face++ (cross-origin blocked). Use local upload or WordPress Media image.',
 			'frameSelected'  => 'Frame selected.',
 			'manualReset'    => 'Manual adjustments reset.',
+			'badFrameFormat' => 'Frame image should be a transparent PNG. JPG or white-background product photos will not align correctly.',
 		),
 	);
 
@@ -423,6 +447,10 @@ function facepp_tryon_render_settings_page() {
 						<?php facepp_tryon_field( 'frame_' . $i . '_url', 'Frame ' . $i . ' PNG URL', 'url', true ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_wf', 'Frame ' . $i . ' Width Factor', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_yo', 'Frame ' . $i . ' Y Offset', 'number' ); ?>
+						<?php facepp_tryon_field( 'frame_' . $i . '_lx', 'Frame ' . $i . ' Left Eye X (0-1)', 'number' ); ?>
+						<?php facepp_tryon_field( 'frame_' . $i . '_ly', 'Frame ' . $i . ' Left Eye Y (0-1)', 'number' ); ?>
+						<?php facepp_tryon_field( 'frame_' . $i . '_rx', 'Frame ' . $i . ' Right Eye X (0-1)', 'number' ); ?>
+						<?php facepp_tryon_field( 'frame_' . $i . '_ry', 'Frame ' . $i . ' Right Eye Y (0-1)', 'number' ); ?>
 					<?php endfor; ?>
 					<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 						<?php facepp_tryon_field( 'model_' . $i . '_name', 'Test Model ' . $i . ' Name' ); ?>
@@ -433,6 +461,7 @@ function facepp_tryon_render_settings_page() {
 			<?php submit_button(); ?>
 		</form>
 		<p><strong>Endpoint tips:</strong> US 通常用 <code>https://api-us.faceplusplus.com/facepp/v3/detect</code>；中国区通常用 <code>https://api-cn.faceplusplus.com/facepp/v3/detect</code>。Key/Secret 必须和区域匹配。</p>
+		<p><strong>Frame tips:</strong> 请优先使用透明 PNG 正面镜框图。Left/Right Eye X/Y 表示镜框素材里左右镜片中心点的相对位置，范围通常在 <code>0</code> 到 <code>1</code> 之间。</p>
 	</div>
 	<?php
 }
