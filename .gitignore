@@ -1,0 +1,5 @@
+/uploads/
+/cache/
+/upgrade/
+/*.sql
+/*.tar.gz
