@@ -19,6 +19,7 @@ function facepp_tryon_defaults() {
 	return array(
 		'api_key'      => 'xWz1g1fxB0aEYffwQphC5UOF1C3QqIee',
 		'api_secret'   => '77LQsA8iG0QCaQy6PTHT-JUbqq2U-3Uq',
+		'api_endpoint' => 'https://api-us.faceplusplus.com/facepp/v3/detect',
 		'button_label' => 'Try On',
 		'modal_title'  => 'Virtual Try On',
 		'helper_text'  => 'Upload a front-face portrait, run auto align, then fine-tune if needed.',
@@ -101,6 +102,10 @@ function facepp_tryon_sanitize_settings( $input ) {
 		}
 		if ( in_array( $key, array( 'api_key', 'api_secret' ), true ) ) {
 			$output[ $key ] = sanitize_text_field( (string) $value );
+			continue;
+		}
+		if ( 'api_endpoint' === $key ) {
+			$output[ $key ] = esc_url_raw( trim( (string) $value ) );
 			continue;
 		}
 		if ( false !== strpos( $key, '_wf' ) || false !== strpos( $key, '_yo' ) ) {
@@ -202,7 +207,12 @@ function facepp_tryon_ajax_detect() {
 	$settings   = facepp_tryon_get_settings();
 	$api_key    = isset( $settings['api_key'] ) ? trim( (string) $settings['api_key'] ) : '';
 	$api_secret = isset( $settings['api_secret'] ) ? trim( (string) $settings['api_secret'] ) : '';
+	$endpoint   = isset( $settings['api_endpoint'] ) ? trim( (string) $settings['api_endpoint'] ) : '';
 	$image_data = isset( $_POST['image'] ) ? (string) wp_unslash( $_POST['image'] ) : '';
+
+	if ( '' === $endpoint ) {
+		$endpoint = 'https://api-us.faceplusplus.com/facepp/v3/detect';
+	}
 
 	if ( '' === $api_key || '' === $api_secret ) {
 		wp_send_json_error(
@@ -232,7 +242,7 @@ function facepp_tryon_ajax_detect() {
 	);
 
 	$response = wp_remote_post(
-		'https://api-us.faceplusplus.com/facepp/v3/detect',
+		$endpoint,
 		array(
 			'timeout' => 20,
 			'body'    => $payload,
@@ -404,6 +414,7 @@ function facepp_tryon_render_settings_page() {
 				<tbody>
 					<?php facepp_tryon_field( 'api_key', 'Face++ API Key' ); ?>
 					<?php facepp_tryon_field( 'api_secret', 'Face++ API Secret', 'password' ); ?>
+					<?php facepp_tryon_field( 'api_endpoint', 'Face++ Detect Endpoint' ); ?>
 					<?php facepp_tryon_field( 'button_label', 'Open Button Label' ); ?>
 					<?php facepp_tryon_field( 'modal_title', 'Modal Title' ); ?>
 					<?php facepp_tryon_field( 'helper_text', 'Helper Text' ); ?>
@@ -421,6 +432,7 @@ function facepp_tryon_render_settings_page() {
 			</table>
 			<?php submit_button(); ?>
 		</form>
+		<p><strong>Endpoint tips:</strong> US 通常用 <code>https://api-us.faceplusplus.com/facepp/v3/detect</code>；中国区通常用 <code>https://api-cn.faceplusplus.com/facepp/v3/detect</code>。Key/Secret 必须和区域匹配。</p>
 	</div>
 	<?php
 }

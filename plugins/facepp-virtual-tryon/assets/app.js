@@ -247,6 +247,8 @@
 					setStatus(config.i18n.noFace);
 				} else if (e && e.code === 'encode_failed') {
 					setStatus(config.i18n.encodeFailed || config.i18n.detectFailed);
+				} else if (e && e.message) {
+					setStatus(e.message);
 				} else {
 					setStatus(config.i18n.detectFailed);
 				}
