@@ -20,7 +20,9 @@
   padding-right: 0;
 }
 
-.muukal-featured-collection-nav .nav-link {
+.muukal-featured-collection-nav .nav-link,
+.entry-content .muukal-featured-collection-nav a.nav-link,
+.ast-single-post .entry-content .muukal-featured-collection-nav a.nav-link {
   display: block;
   margin: 0 8px;
   padding: 12px 23px;
@@ -33,6 +35,7 @@
   letter-spacing: 1px;
   line-height: 14px;
   text-decoration: none;
+  text-decoration-line: none;
   text-transform: uppercase;
 }
 
