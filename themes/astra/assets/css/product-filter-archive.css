@@ -25,11 +25,11 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 18px;
-	padding: 18px 0 16px;
+	gap: 16px;
+	padding: 16px 0 14px;
 	border-top: 1px solid #ececec;
 	color: #666;
-	font-size: 14px;
+	font-size: 13px;
 }
 
 .muukal-filter-breadcrumb a {
@@ -38,15 +38,15 @@
 }
 
 .breadcrumb-count {
-	margin-left: 12px;
-	margin-right: 12px;
+	margin-left: 8px;
+	margin-right: 8px;
 	color: #555;
 }
 
 .breadcrumb-filder-item {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
 }
 
 .filder-item-span {
@@ -55,9 +55,10 @@
 
 .filder-item-cross {
 	color: #111;
-	font-size: 18px;
+	font-size: 15px;
 	line-height: 1;
 	cursor: pointer;
+	opacity: 0.7;
 }
 
 .breadcrumb-clear {
@@ -70,7 +71,7 @@
 }
 
 .muukal-filter-toolbar {
-	padding: 16px 0 18px;
+	padding: 14px 0 16px;
 	border-top: 1px solid #ececec;
 	border-bottom: 1px solid #ececec;
 }
@@ -79,7 +80,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 28px;
+	gap: 24px;
 }
 
 .muukal-filter-item {
@@ -89,34 +90,42 @@
 .muukal-filter-item > .dropdown-toggle {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
 	padding: 0;
 	border: 0;
 	background: transparent;
 	color: #111;
-	font-size: 16px;
+	font-size: 15px;
 	font-weight: 400;
 	line-height: 1.4;
 	text-decoration: none;
 	box-shadow: none;
+	letter-spacing: 0;
 }
 
 .muukal-filter-item > .dropdown-toggle.filter-nav-choose {
-	color: #5eb6ef;
+	color: #111;
+	font-weight: 500;
 }
 
 .muukal-filter-arrow {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 12px;
-	height: 12px;
-	font-size: 11px;
+	width: 10px;
+	height: 10px;
 	line-height: 1;
+	opacity: 0.7;
 }
 
 .muukal-filter-arrow::before {
-	content: "\25BE";
+	content: "";
+	display: block;
+	width: 6px;
+	height: 6px;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform: rotate(45deg) translateY(-1px);
 }
 
 .muukal-filter-item.is-open .dropdown-menu {
@@ -126,32 +135,33 @@
 .dropdown-menu.filter-opt-box,
 .dropdown-menu.filter-color-box {
 	position: absolute;
-	top: calc(100% + 18px);
+	top: calc(100% + 14px);
 	left: 0;
 	z-index: 80;
 	display: none;
 	min-width: 220px;
 	max-height: 420px;
-	padding: 14px 18px;
+	padding: 14px 16px;
 	overflow: auto;
-	border: 1px solid #ececec;
+	border: 1px solid #e7e7e7;
+	border-radius: 2px;
 	background: #fff;
-	box-shadow: 0 18px 40px rgba(17, 24, 39, 0.12);
+	box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
 }
 
 .dropdown-menu.filter-shape-box {
-	min-width: 260px;
+	min-width: 270px;
 }
 
 .dropdown-menu.filter-color-box {
-	min-width: 360px;
+	min-width: 330px;
 }
 
 .filter-icon {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 7px 0;
+	padding: 6px 0;
 	color: #111;
 	font-size: 14px;
 	line-height: 1.45;
@@ -163,7 +173,7 @@
 	flex: 0 0 14px;
 	width: 14px;
 	height: 14px;
-	border: 1px solid #b8b8b8;
+	border: 1px solid #c7c7c7;
 }
 
 .filter-icon-choose .muukal-filter-check::after {
@@ -176,6 +186,10 @@
 	border-right: 1px solid #111;
 	border-bottom: 1px solid #111;
 	transform: rotate(45deg);
+}
+
+.filter-icon-choose {
+	font-weight: 500;
 }
 
 .shape_icon {
@@ -323,9 +337,9 @@
 	justify-content: center;
 	height: 34px;
 	padding: 0 12px;
-	border: 0;
-	background: #111;
-	color: #fff;
+	border: 1px solid #111;
+	background: #fff;
+	color: #111;
 	font-size: 12px;
 	font-weight: 600;
 	box-shadow: none;
@@ -386,7 +400,7 @@
 	}
 
 	.muukal-filter-groups {
-		gap: 18px;
+		gap: 14px;
 	}
 
 	.muukal-filter-item,
