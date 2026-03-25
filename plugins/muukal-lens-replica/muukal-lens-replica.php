@@ -24,13 +24,59 @@ function muukal_lens_replica_get_config() {
 	return $config;
 }
 
+/**
+ * Merge runtime product context into the lens config.
+ *
+ * @return array
+ */
+function muukal_lens_replica_get_runtime_config() {
+	$config  = muukal_lens_replica_get_config();
+	$product = $config['product'];
+
+	if ( function_exists( 'wc_get_product' ) ) {
+		$current_product = null;
+
+		if ( isset( $GLOBALS['product'] ) && $GLOBALS['product'] instanceof WC_Product ) {
+			$current_product = $GLOBALS['product'];
+		} elseif ( get_the_ID() ) {
+			$current_product = wc_get_product( get_the_ID() );
+		}
+
+		if ( $current_product instanceof WC_Product ) {
+			$product['id']          = $current_product->get_id();
+			$product['code']        = $current_product->get_sku() ? $current_product->get_sku() : $product['code'];
+			$product['describe']    = $current_product->get_name();
+			$product['name']        = $current_product->get_name();
+			$product['frame_price'] = (float) ( $current_product->get_price() ? $current_product->get_price() : $product['frame_price'] );
+
+			$size_terms = wc_get_product_terms(
+				$current_product->get_id(),
+				'pa_size',
+				array(
+					'fields' => 'names',
+				)
+			);
+
+			if ( ! empty( $size_terms ) && ! is_wp_error( $size_terms ) ) {
+				$product['size'] = (string) $size_terms[0];
+			}
+		}
+	}
+
+	$config['product'] = $product;
+
+	return $config;
+}
+
 function muukal_lens_replica_register_assets() {
 	wp_register_style( 'muukal-lens-replica', MUUKAL_LENS_REPLICA_URL . 'assets/muukal-lens-replica.css', array(), MUUKAL_LENS_REPLICA_VERSION );
 	wp_register_script( 'muukal-lens-replica', MUUKAL_LENS_REPLICA_URL . 'assets/muukal-lens-replica.js', array(), MUUKAL_LENS_REPLICA_VERSION, true );
 }
 add_action( 'init', 'muukal_lens_replica_register_assets' );
 
-function muukal_lens_replica_enqueue_assets() {
+function muukal_lens_replica_enqueue_assets( $runtime_config = null ) {
+	$runtime_config = is_array( $runtime_config ) ? $runtime_config : muukal_lens_replica_get_runtime_config();
+
 	wp_enqueue_style( 'muukal-lens-replica' );
 	wp_enqueue_script( 'muukal-lens-replica' );
 	wp_localize_script(
@@ -39,14 +85,14 @@ function muukal_lens_replica_enqueue_assets() {
 		array(
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 			'nonce'   => wp_create_nonce( 'muukal_lens_replica_build_payload' ),
-			'config'  => muukal_lens_replica_get_config(),
+			'config'  => $runtime_config,
 		)
 	);
 }
 
 function muukal_lens_replica_shortcode() {
-	muukal_lens_replica_enqueue_assets();
-	$config  = muukal_lens_replica_get_config();
+	$config  = muukal_lens_replica_get_runtime_config();
+	muukal_lens_replica_enqueue_assets( $config );
 	$product = $config['product'];
 
 	ob_start();
@@ -59,7 +105,7 @@ function muukal_lens_replica_shortcode() {
 		<section id="lens_container" class="container-fluid" hidden>
 			<div id="lens_mask" data-close="1"></div>
 			<div id="lens_box" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $config['ui']['drawer_title'] ); ?>">
-				<div id="lens_left_close" data-close="1" aria-label="Close">&times;</div>
+				<div id="lens_left_close" data-close="1" aria-label="Close"><i class="icon dripicons-cross"></i></div>
 				<div class="container pb-60 ncpd1200_max_w">
 					<div class="row">
 						<div id="lensbox_left" class="col-12 col-xl-9">

@@ -3,6 +3,33 @@
 
 	var config = window.muukalLensReplicaConfig || {};
 	var schema = config.config || {};
+	var usageImages = {
+		1: 'https://img.muukal.com//img/home/frame/usage_1.jpg',
+		2: 'https://img.muukal.com//img/home/frame/usage_2.jpg',
+		3: 'https://img.muukal.com//img/home/frame/usage_3.jpg',
+		4: 'https://img.muukal.com//img/home/frame/usage_4.jpg',
+		5: 'https://img.muukal.com//img/home/frame/usage_5.jpg',
+		20: 'https://img.muukal.com//img/home/frame/usage_20.jpg'
+	};
+	var lensTypeImages = {
+		1: 'https://img.muukal.com//img/home/frame/lens_type_1.jpg',
+		3: 'https://img.muukal.com//img/home/frame/lens_type_3.jpg',
+		4: 'https://img.muukal.com//img/home/frame/lens_type_4.jpg',
+		6: 'https://img.muukal.com//img/home/frame/lens_type_6.jpg',
+		7: 'https://img.muukal.com//img/home/frame/lens_type_7.jpg',
+		8: 'https://img.muukal.com//img/home/frame/lens_type_8.jpg'
+	};
+	var lensIndexImages = {
+		2: 'https://img.muukal.com//img/home/frame/lens_index_2.jpg',
+		3: 'https://img.muukal.com//img/home/frame/lens_index_3.jpg',
+		4: 'https://img.muukal.com//img/home/frame/lens_index_4.jpg',
+		5: 'https://img.muukal.com//img/home/frame/lens_index_5.jpg'
+	};
+	var coatingImages = {
+		1: 'https://img.muukal.com//img/home/frame/coating_1.jpg',
+		2: 'https://img.muukal.com//img/home/frame/coating_2.jpg',
+		3: 'https://img.muukal.com//img/home/frame/coating_3.jpg'
+	};
 
 	function money(value) {
 		return '$' + Number(value || 0).toFixed(2);
@@ -16,6 +43,13 @@
 		return Math.max.apply(null, values.map(function (value) {
 			return Math.abs(Number(value || 0));
 		}));
+	}
+
+	function renderPhoto(url, fallback) {
+		if (url) {
+			return '<img class="mlr-photo-img" src="' + url + '" alt="">';
+		}
+		return '<div class="mlr-photo">' + fallback + '</div>';
 	}
 
 	function init(root) {
@@ -285,7 +319,13 @@
 			var lensIndex = schema.lens_indices[String(state.lensindex)] || schema.lens_indices[state.lensindex];
 			var coating = schema.coatings[String(state.coating)] || schema.coatings[state.coating];
 			root.querySelector('#step_1_cn').innerHTML = usage ? usage.short_label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
-			root.querySelector('#step_2_cn').innerHTML = state.usage === 20 ? 'Skipped' : 'Entered&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
+			if (state.usage === 20) {
+				root.querySelector('#step_2_cn').innerHTML = '';
+			} else if (state.usage === 2 && state.readers === 1 && Number(state.power || 0) > 0) {
+				root.querySelector('#step_2_cn').innerHTML = 'Readers (+' + state.power + ')&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
+			} else {
+				root.querySelector('#step_2_cn').innerHTML = state.form.rx_name + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
+			}
 			root.querySelector('#step_3_cn').innerHTML = lensType ? lensType.label + (lensColor ? ' / ' + lensColor.label : '') + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
 			root.querySelector('#step_4_cn').innerHTML = lensIndex ? lensIndex.label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
 			root.querySelector('#step_5_cn').innerHTML = coating ? coating.label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
@@ -300,7 +340,7 @@
 				var active = Number(state.usage) === Number(option.id);
 				li.innerHTML = '<div id="step1_li_' + option.id + '" class="panel panel-default lens_key' + (active ? ' lens_k_choose' : '') + '" step="1" val="' + option.id + '">' +
 					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.short_label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (option.id === 3 ? '<del>$18.75</del> <span class="mk-price">$15.99</span><span class="lensoff">15% OFF</span>' : option.id === 4 ? '$35.99' : option.id === 5 ? '<del>$59.99</del> <span class="mk-price">$38.99</span><span class="lensoff">35% OFF</span>' : 'FREE') + '</span></div></div></div></div></div>';
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(usageImages[option.id], option.short_label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (option.id === 3 ? '<del>$18.75</del> <span class="mk-price">$15.99</span><span class="lensoff">15% OFF</span>' : option.id === 4 ? '$35.99' : option.id === 5 ? '<del>$59.99</del> <span class="mk-price">$38.99</span><span class="lensoff">35% OFF</span>' : 'FREE') + '</span></div></div></div></div></div>';
 				li.querySelector('.lens_key').addEventListener('click', function () {
 					state.usage = Number(option.id);
 					state.readers = 0;
@@ -329,7 +369,7 @@
 				mount.innerHTML = '';
 				return;
 			}
-			mount.innerHTML = '<div class="poewr_t"><div class="mb-10 fs14 fw600">Select your readers\' lens power</div><div class="mb-10">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div></div><div class="mlr-power-values"></div><div class="text-center mt-20"><button id="power-sure" class="btn theme-btn-w fs16">Next</button></div>';
+			mount.innerHTML = "<div class=\"poewr_t\"><div class=\"mb-10 fs14 fw600\">Select your readers' lens power</div><div class=\"mb-10\">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div><div class=\"mb-10 mk-blue strength_btn\">What is my strength?</div><div id=\"strength_info\" class=\"mt-10\" style=\"display:none;\"><p class=\"mb5\">Ready-made readers provide equal magnification to both eyes.</p><p class=\"mb5\">Download the diopter chart, print at 100%, hold it 14 inches away, and read from top to bottom.</p></div></div><div class=\"mlr-power-values\"></div><div class=\"text-center mt-20\"><button id=\"power-sure\" class=\"btn theme-btn-w fs16\">Next</button></div>";
 			var values = mount.querySelector('.mlr-power-values');
 			schema.prescription_fields.power.options.forEach(function (option) {
 				var value = option.value.replace('+', '');
@@ -344,6 +384,10 @@
 			});
 			mount.querySelector('#power-sure').addEventListener('click', function () {
 				setOpenStep(3);
+			});
+			mount.querySelector('.strength_btn').addEventListener('click', function () {
+				var info = mount.querySelector('#strength_info');
+				info.style.display = info.style.display === 'none' ? 'block' : 'none';
 			});
 		}
 
@@ -438,7 +482,7 @@
 				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
 				li.innerHTML = '<div id="step3_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.lenstype) === Number(option.id) ? ' lens_k_choose' : '') + (allowed ? '' : ' disable_step_panel') + '" step="3" val="' + option.id + '">' +
 					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getLensTypePrice(option.id) ? money(getLensTypePrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(lensTypeImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getLensTypePrice(option.id) ? money(getLensTypePrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
 				var card = li.querySelector('.lens_key');
 				if (allowed) {
 					card.addEventListener('click', function () {
@@ -482,7 +526,7 @@
 				li.className = 'col-6 col-lg-6';
 				li.innerHTML = '<div id="step4_li_' + option.id + '" class="panel panel-default step4_panel lens_key' + (Number(state.lensindex) === Number(option.id) ? ' lens_k_choose' : '') + (disabled ? ' disable_step_panel' : '') + '" step="4" val="' + option.id + '">' +
 					'<div class="panel-heading">' + option.label + (recommended === Number(option.id) ? '<span class="recommended-icon">Recommended</span>' : '') + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>Available for the current prescription flow.</div><div class="mt-10"><span class="lens_k_price">' + money(getLensIndexPrice(option.id)) + '</span></div></div></div></div></div>';
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(lensIndexImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>Available for the current prescription flow.</div><div class="mt-10"><span class="lens_k_price">' + money(getLensIndexPrice(option.id)) + '</span></div></div></div></div></div>';
 				if (!disabled) {
 					li.querySelector('.lens_key').addEventListener('click', function () {
 						state.lensindex = Number(option.id);
@@ -503,7 +547,7 @@
 				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
 				li.innerHTML = '<div id="step5_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.coating) === Number(option.id) ? ' lens_k_choose' : '') + '" step="5" val="' + option.id + '">' +
 					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getCoatingPrice(option.id) ? money(getCoatingPrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(coatingImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getCoatingPrice(option.id) ? money(getCoatingPrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
 				li.querySelector('.lens_key').addEventListener('click', function () {
 					state.coating = Number(option.id);
 					render();
@@ -569,6 +613,9 @@
 		function closeOverlay() {
 			container.hidden = true;
 			document.body.classList.remove('mlr-open-body');
+			root.querySelector('#lensbox_left').style.display = '';
+			root.querySelector('#lensbox_right').classList.remove('col-full');
+			editAgain.style.display = '';
 		}
 
 		function maybeHandleProgressiveUpgrade() {
@@ -645,6 +692,9 @@
 			}
 			state.payload = result.data.payload;
 			renderPayload();
+			root.querySelector('#lensbox_left').style.display = 'none';
+			root.querySelector('#lensbox_right').classList.add('col-full');
+			editAgain.style.display = 'block';
 			setStatus('Simulated payload generated. No database writes were performed.');
 		}
 
@@ -672,6 +722,9 @@
 			});
 		});
 		editAgain.addEventListener('click', function () {
+			root.querySelector('#lensbox_left').style.display = '';
+			root.querySelector('#lensbox_right').classList.remove('col-full');
+			editAgain.style.display = '';
 			setOpenStep(1);
 			render();
 		});
