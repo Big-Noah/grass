@@ -1,6 +1,6 @@
 (function () {
 	function updateCard(card, button) {
-		var link = card.querySelector('.muukal-product-link');
+		var links = card.querySelectorAll('.muukal-product-link');
 		var primary = card.querySelector('.muukal-product-image-primary');
 		var secondary = card.querySelector('.muukal-product-image-secondary');
 		var price = card.querySelector('.g-price');
@@ -21,8 +21,10 @@
 
 		button.classList.add('is-active', 'choose-color');
 
-		if (link && linkHref) {
-			link.setAttribute('href', linkHref);
+		if (linkHref) {
+			links.forEach(function (link) {
+				link.setAttribute('href', linkHref);
+			});
 		}
 
 		if (primary && mainSrc) {

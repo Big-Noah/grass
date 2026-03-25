@@ -183,6 +183,43 @@ function muukal_loop_swatch_get_rows( $product_id ) {
 }
 
 /**
+ * Get lightweight attribute chips for the product card.
+ *
+ * @param WC_Product $product Product object.
+ * @return array<int, array<string, string>>
+ */
+function muukal_loop_swatch_get_attribute_chips( $product ) {
+	$attribute_map = array(
+		'pa_shape'    => __( 'Shape', 'astra' ),
+		'pa_material' => __( 'Material', 'astra' ),
+		'pa_feature'  => __( 'Feature', 'astra' ),
+	);
+
+	$chips = array();
+
+	foreach ( $attribute_map as $taxonomy => $label ) {
+		$terms = wc_get_product_terms(
+			$product->get_id(),
+			$taxonomy,
+			array(
+				'fields' => 'names',
+			)
+		);
+
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			continue;
+		}
+
+		$chips[] = array(
+			'label' => $label,
+			'value' => (string) $terms[0],
+		);
+	}
+
+	return array_slice( $chips, 0, 3 );
+}
+
+/**
  * Render one product card for Elementor Loop Item.
  *
  * @param array $args Shortcode args.
@@ -199,6 +236,7 @@ function muukal_render_product_loop_item( $args ) {
 	$product_name = $product->get_name();
 	$rows         = muukal_loop_swatch_get_rows( $product_id );
 	$fallback_row = muukal_loop_swatch_build_fallback_row( $product );
+	$chips        = muukal_loop_swatch_get_attribute_chips( $product );
 
 	if ( empty( $rows ) ) {
 		$rows = array( $fallback_row );
@@ -227,7 +265,33 @@ function muukal_render_product_loop_item( $args ) {
 					src="<?php echo esc_url( $default_state['secondary_image'] ); ?>"
 				>
 			</a>
+			<button type="button" class="muukal-card-wishlist" aria-label="<?php echo esc_attr__( 'Add to wishlist', 'astra' ); ?>">
+				<span class="muukal-card-wishlist-icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" focusable="false">
+						<path d="M12 21.35 10.55 20C5.4 15.24 2 12.09 2 8.25 2 5.41 4.24 3.25 7 3.25c1.56 0 3.06.73 4 1.88.94-1.15 2.44-1.88 4-1.88 2.76 0 5 2.16 5 5 0 3.84-3.4 6.99-8.55 11.76L12 21.35Z" />
+					</svg>
+				</span>
+			</button>
+			<div class="muukal-card-actions" aria-hidden="true">
+				<button type="button" class="muukal-card-action muukal-card-action-primary">TRY ON</button>
+				<a class="muukal-card-action muukal-card-action-secondary muukal-product-link" href="<?php echo esc_url( $default_state['link'] ); ?>">View Similar Frames</a>
+			</div>
 			<div class="product-content">
+				<div class="muukal-card-header">
+					<?php if ( ! empty( $chips ) ) : ?>
+						<div class="muukal-card-chips">
+							<?php foreach ( $chips as $chip ) : ?>
+								<span class="muukal-card-chip">
+									<span class="muukal-card-chip-label"><?php echo esc_html( $chip['label'] ); ?>:</span>
+									<span class="muukal-card-chip-value"><?php echo esc_html( $chip['value'] ); ?></span>
+								</span>
+							<?php endforeach; ?>
+						</div>
+					<?php endif; ?>
+					<h3 class="muukal-card-title">
+						<a class="muukal-product-link" href="<?php echo esc_url( $default_state['link'] ); ?>"><?php echo esc_html( $product_name ); ?></a>
+					</h3>
+				</div>
 				<div class="ip-colors">
 					<div class="ip-colors-box text-left">
 						<?php foreach ( $rows as $row_index => $row ) : ?>

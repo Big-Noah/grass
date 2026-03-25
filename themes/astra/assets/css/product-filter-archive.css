@@ -1,0 +1,272 @@
+.muukal-filter-archive {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.muukal-filter-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 18px 20px;
+	border: 1px solid #e7edf3;
+	background: #fff;
+}
+
+.muukal-filter-groups {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.muukal-filter-group {
+	position: relative;
+	min-width: 140px;
+}
+
+.muukal-filter-summary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	min-width: 140px;
+	padding: 10px 14px;
+	border: 1px solid #d9e2ee;
+	background: #fff;
+	color: #111827;
+	cursor: pointer;
+	list-style: none;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.muukal-filter-summary::-webkit-details-marker {
+	display: none;
+}
+
+.muukal-filter-summary::after {
+	content: "+";
+	margin-left: 12px;
+	color: #667085;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.muukal-filter-group[open] .muukal-filter-summary {
+	border-color: #ff979b;
+}
+
+.muukal-filter-group[open] .muukal-filter-summary::after {
+	content: "-";
+}
+
+.muukal-filter-panel {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	z-index: 15;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 220px;
+	max-height: 320px;
+	padding: 14px;
+	overflow: auto;
+	border: 1px solid #e7edf3;
+	background: #fff;
+	box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+}
+
+.muukal-filter-option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: #344054;
+	font-size: 14px;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.muukal-filter-option input {
+	margin: 0;
+}
+
+.muukal-filter-price-panel {
+	min-width: 240px;
+}
+
+.muukal-filter-price-panel label {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	font-size: 13px;
+	color: #475467;
+}
+
+.muukal-filter-price-panel input {
+	height: 38px;
+	padding: 0 10px;
+	border: 1px solid #d0d5dd;
+}
+
+.muukal-filter-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.muukal-filter-buttons {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.muukal-filter-submit,
+.muukal-filter-reset {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 40px;
+	padding: 0 16px;
+	border: 1px solid #111827;
+	background: #111827;
+	color: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-decoration: none;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.muukal-filter-reset {
+	border-color: #d0d5dd;
+	background: #fff;
+	color: #344054;
+}
+
+.muukal-filter-results-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.muukal-selected-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.muukal-selected-filters-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.muukal-selected-filter {
+	display: inline-flex;
+	align-items: center;
+	padding: 7px 10px;
+	background: #fff3f4;
+	color: #c93f53;
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+.muukal-filter-results-count {
+	margin: 0;
+	color: #344054;
+	font-size: 14px;
+}
+
+.muukal-filter-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 22px;
+}
+
+.muukal-filter-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: center;
+}
+
+.muukal-filter-page {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border: 1px solid #d0d5dd;
+	color: #344054;
+	text-decoration: none;
+}
+
+.muukal-filter-page.is-active {
+	border-color: #111827;
+	background: #111827;
+	color: #fff;
+}
+
+.muukal-filter-empty {
+	padding: 32px 20px;
+	border: 1px solid #e7edf3;
+	background: #fff;
+	text-align: center;
+}
+
+@media (max-width: 1024px) {
+	.muukal-filter-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 767px) {
+	.muukal-filter-toolbar {
+		flex-direction: column;
+		align-items: stretch;
+		padding: 14px;
+	}
+
+	.muukal-filter-groups {
+		width: 100%;
+	}
+
+	.muukal-filter-group,
+	.muukal-filter-summary {
+		width: 100%;
+	}
+
+	.muukal-filter-panel {
+		position: static;
+		min-width: 100%;
+		max-height: none;
+		margin-top: 8px;
+		box-shadow: none;
+	}
+
+	.muukal-filter-actions {
+		justify-content: stretch;
+	}
+
+	.muukal-filter-buttons,
+	.muukal-filter-submit,
+	.muukal-filter-reset {
+		width: 100%;
+	}
+
+	.muukal-selected-filters {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.muukal-filter-grid {
+		grid-template-columns: 1fr;
+	}
+}

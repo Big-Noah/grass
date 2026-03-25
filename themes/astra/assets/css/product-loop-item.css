@@ -9,36 +9,33 @@
 
 .muukal-loop-item .product-wrapper {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	width: 100%;
-	border: 1px solid #e6e6e6;
+	min-height: 100%;
+	overflow: hidden;
+	border: 1px solid #e7edf3;
 	background: #fff;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .muukal-loop-item .product-wrapper:hover {
 	border-color: #ff979b;
-	box-shadow: 0 4px 18px rgba(255, 151, 155, 0.12);
+	box-shadow: 0 10px 28px rgba(17, 24, 39, 0.08);
+	transform: translateY(-1px);
 }
 
 .muukal-loop-item .product-img {
 	position: relative;
 	display: block;
 	overflow: hidden;
-	background: transparent;
+	background:
+		radial-gradient(circle at top, rgba(244, 247, 251, 0.92), rgba(255, 255, 255, 0) 48%),
+		#fff;
 	aspect-ratio: 2 / 1;
 }
 
-.muukal-loop-item .muukal-product-image {
-	position: absolute;
-	inset: 0;
-	display: block;
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-	object-position: center;
-	transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
+.muukal-loop-item .muukal-product-image,
 .muukal-loop-item .fir_pimg,
 .muukal-loop-item .sec_pimg {
 	position: absolute;
@@ -51,61 +48,175 @@
 	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.muukal-loop-item .muukal-product-image-primary {
-	opacity: 1;
-	z-index: 1;
-}
-
+.muukal-loop-item .muukal-product-image-primary,
 .muukal-loop-item .fir_pimg {
-	opacity: 1;
 	z-index: 1;
+	opacity: 1;
 }
 
-.muukal-loop-item .muukal-product-image-secondary {
-	opacity: 0;
-	z-index: 2;
-}
-
+.muukal-loop-item .muukal-product-image-secondary,
 .muukal-loop-item .sec_pimg {
-	opacity: 0;
 	z-index: 2;
-}
-
-.muukal-loop-item .product-wrapper:hover .muukal-product-image-primary {
 	opacity: 0;
-	transform: scale(1.02);
 }
 
+.muukal-loop-item .product-wrapper:hover .muukal-product-image-primary,
 .muukal-loop-item .product-wrapper:hover .fir_pimg {
 	opacity: 0;
 	transform: scale(1.02);
 }
 
-.muukal-loop-item .product-wrapper:hover .muukal-product-image-secondary {
-	opacity: 1;
-	transform: scale(1.02);
-}
-
+.muukal-loop-item .product-wrapper:hover .muukal-product-image-secondary,
 .muukal-loop-item .product-wrapper:hover .sec_pimg {
 	opacity: 1;
 	transform: scale(1.02);
 }
 
+.muukal-loop-item .muukal-card-wishlist {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 5;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 1px solid rgba(17, 24, 39, 0.08);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.96);
+	cursor: pointer;
+	transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.muukal-loop-item .muukal-card-wishlist:hover {
+	border-color: #ff979b;
+	transform: scale(1.04);
+}
+
+.muukal-loop-item .muukal-card-wishlist-icon {
+	display: inline-flex;
+	width: 16px;
+	height: 16px;
+	color: #697386;
+}
+
+.muukal-loop-item .muukal-card-wishlist-icon svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	fill: currentcolor;
+}
+
+.muukal-loop-item .muukal-card-actions {
+	position: absolute;
+	right: 12px;
+	bottom: 12px;
+	left: 12px;
+	z-index: 4;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	pointer-events: none;
+	opacity: 0;
+	transform: translateY(10px);
+	transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.muukal-loop-item .product-wrapper:hover .muukal-card-actions {
+	pointer-events: auto;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.muukal-loop-item .muukal-card-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 38px;
+	padding: 0 14px;
+	border: 0;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.muukal-loop-item .muukal-card-action-primary {
+	background: rgba(17, 24, 39, 0.92);
+	color: #fff;
+}
+
+.muukal-loop-item .muukal-card-action-secondary {
+	background: rgba(255, 255, 255, 0.94);
+	color: #111827;
+}
+
 .muukal-loop-item .product-content {
-	padding-top: 10px;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px 14px 16px;
+}
+
+.muukal-loop-item .muukal-card-header {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.muukal-loop-item .muukal-card-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.muukal-loop-item .muukal-card-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: #f6f8fb;
+	color: #667085;
+	font-size: 11px;
+	line-height: 1.2;
+}
+
+.muukal-loop-item .muukal-card-chip-label {
+	font-weight: 600;
+	color: #4b5563;
+}
+
+.muukal-loop-item .muukal-card-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.35;
+	color: #111827;
+}
+
+.muukal-loop-item .muukal-card-title a,
+.muukal-loop-item .muukal-product-link {
+	color: inherit;
+	text-decoration: none;
 }
 
 .muukal-loop-item .ip-colors {
 	display: flex;
-	align-items: flex-start;
+	align-items: flex-end;
 	justify-content: space-between;
-	gap: 10px;
+	gap: 14px;
+	margin-top: auto;
 }
 
 .muukal-loop-item .ip-colors-box {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
+	gap: 7px;
 	align-items: center;
 }
 
@@ -150,36 +261,42 @@
 .muukal-loop-item .pro-price {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	justify-content: flex-end;
+	gap: 6px;
 	flex-wrap: wrap;
-	color: #111;
-	font-size: 16px;
+	color: #111827;
+	font-size: 17px;
 	line-height: 1.2;
 	text-align: right;
 	white-space: nowrap;
 }
 
 .muukal-loop-item .o_price {
-	color: #7a7a7a;
-	font-weight: 300;
+	order: -1;
+	color: #98a2b3;
+	font-size: 13px;
+	font-weight: 400;
+	text-decoration-thickness: 1px;
 }
 
 .muukal-loop-item .g-price {
-	color: #111;
-	font-weight: 400;
+	color: #111827;
+	font-weight: 500;
 }
 
 .muukal-loop-item .sale-flag-side {
 	position: absolute;
-	top: 10px;
-	right: 10px;
+	top: 12px;
+	left: 12px;
 	z-index: 4;
-	padding: 6px 10px;
-	border-radius: 999px;
-	background: rgba(17, 17, 17, 0.92);
+	padding: 7px 10px;
+	background: rgba(17, 24, 39, 0.92);
 	color: #fff;
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 600;
 	line-height: 1;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 .muukal-loop-item .sale-text {
@@ -187,13 +304,32 @@
 	white-space: nowrap;
 }
 
+.muukal-loop-item .clear {
+	display: none;
+}
+
 @media (max-width: 767px) {
+	.muukal-loop-item .product-content {
+		padding: 12px;
+	}
+
+	.muukal-loop-item .muukal-card-title {
+		font-size: 15px;
+	}
+
 	.muukal-loop-item .ip-colors {
 		flex-direction: column;
 		align-items: stretch;
 	}
 
 	.muukal-loop-item .pro-price {
+		justify-content: flex-start;
 		text-align: left;
+	}
+
+	.muukal-loop-item .muukal-card-actions {
+		right: 10px;
+		bottom: 10px;
+		left: 10px;
 	}
 }
