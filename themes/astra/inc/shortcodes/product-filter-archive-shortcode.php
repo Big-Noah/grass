@@ -22,6 +22,14 @@ function muukal_product_filter_archive_register_assets() {
 		array( 'muukal-product-loop-item' ),
 		ASTRA_THEME_VERSION
 	);
+
+	wp_register_script(
+		'muukal-product-filter-archive',
+		ASTRA_THEME_URI . 'assets/js/product-filter-archive.js',
+		array(),
+		ASTRA_THEME_VERSION,
+		true
+	);
 }
 add_action( 'wp_enqueue_scripts', 'muukal_product_filter_archive_register_assets' );
 
@@ -52,6 +60,7 @@ function muukal_product_filter_archive_shortcode( $atts = array() ) {
 	wp_enqueue_style( 'muukal-product-loop-item' );
 	wp_enqueue_style( 'muukal-product-filter-archive' );
 	wp_enqueue_script( 'muukal-product-loop-item' );
+	wp_enqueue_script( 'muukal-product-filter-archive' );
 
 	return muukal_render_product_filter_archive( $atts );
 }

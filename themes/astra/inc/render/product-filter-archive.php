@@ -118,15 +118,90 @@ function muukal_product_filter_archive_get_terms( $taxonomy ) {
 }
 
 /**
+ * Get sort options.
+ *
+ * @return array<string, string>
+ */
+function muukal_product_filter_archive_get_sort_options() {
+	return array(
+		'recommended' => __( 'Recommended', 'astra' ),
+		'newest'      => __( 'Newest Arrivals', 'astra' ),
+		'price_high'  => __( 'Price: High to Low', 'astra' ),
+		'price_low'   => __( 'Price: Low to High', 'astra' ),
+		'title'       => __( 'Title', 'astra' ),
+	);
+}
+
+/**
+ * Get default price bounds for the slider.
+ *
+ * @param array $atts Shortcode attributes.
+ * @return array<string, float>
+ */
+function muukal_product_filter_archive_get_price_bounds( $atts ) {
+	$min_price = 0.0;
+	$max_price = 300.0;
+
+	if ( function_exists( 'wc_get_products' ) ) {
+		$base_args = array(
+			'status' => 'publish',
+			'limit'  => 1,
+			'return' => 'objects',
+		);
+
+		if ( ! empty( $atts['category'] ) ) {
+			$base_args['category'] = array( sanitize_title( $atts['category'] ) );
+		}
+
+		$lowest = wc_get_products(
+			array_merge(
+				$base_args,
+				array(
+					'orderby' => 'price',
+					'order'   => 'ASC',
+				)
+			)
+		);
+
+		$highest = wc_get_products(
+			array_merge(
+				$base_args,
+				array(
+					'orderby' => 'price',
+					'order'   => 'DESC',
+				)
+			)
+		);
+
+		if ( ! empty( $lowest[0] ) && $lowest[0] instanceof WC_Product ) {
+			$min_price = (float) $lowest[0]->get_price();
+		}
+
+		if ( ! empty( $highest[0] ) && $highest[0] instanceof WC_Product ) {
+			$max_price = (float) $highest[0]->get_price();
+		}
+	}
+
+	$max_price = $max_price > $min_price ? $max_price : $min_price + 100;
+	$min_price = floor( $min_price );
+	$max_price = ceil( $max_price / 10 ) * 10;
+
+	return array(
+		'min' => max( 0, $min_price ),
+		'max' => max( 10, $max_price ),
+	);
+}
+
+/**
  * Build query args for filtered product archive.
  *
  * @param array $atts Shortcode attributes.
  * @return array
  */
 function muukal_product_filter_archive_build_query_args( $atts ) {
-	$filter_config = muukal_product_filter_archive_get_filter_config();
-	$tax_query     = array();
-	$meta_query    = array();
+	$filter_config  = muukal_product_filter_archive_get_filter_config();
+	$tax_query      = array();
+	$meta_query     = array();
 	$posts_per_page = isset( $atts['per_page'] ) ? max( 1, absint( $atts['per_page'] ) ) : 12;
 	$current_page   = isset( $_GET['mu_page'] ) ? max( 1, absint( $_GET['mu_page'] ) ) : 1;
 	$sort           = isset( $_GET['sort_by'] ) ? sanitize_key( wp_unslash( $_GET['sort_by'] ) ) : sanitize_key( $atts['sort_by'] );
@@ -160,7 +235,7 @@ function muukal_product_filter_archive_build_query_args( $atts ) {
 	}
 
 	if ( '' !== $min_price || '' !== $max_price ) {
-		$price_query = array(
+		$meta_query[] = array(
 			'key'     => '_price',
 			'type'    => 'DECIMAL',
 			'compare' => 'BETWEEN',
@@ -169,8 +244,6 @@ function muukal_product_filter_archive_build_query_args( $atts ) {
 				'' !== $max_price ? (float) $max_price : 999999,
 			),
 		);
-
-		$meta_query[] = $price_query;
 	}
 
 	$query_args = array(
@@ -238,8 +311,11 @@ function muukal_product_filter_archive_render_filter_group( $key, $config, $atts
 	}
 
 	?>
-	<details class="muukal-filter-group">
-		<summary class="muukal-filter-summary"><?php echo esc_html( $summary ); ?></summary>
+	<li class="dropdown muukal-filter-item">
+		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
+			<span><?php echo esc_html( $summary ); ?></span>
+			<span class="muukal-filter-arrow">&#9662;</span>
+		</button>
 		<div class="muukal-filter-panel">
 			<?php foreach ( $terms as $term ) : ?>
 				<label class="muukal-filter-option">
@@ -248,7 +324,51 @@ function muukal_product_filter_archive_render_filter_group( $key, $config, $atts
 				</label>
 			<?php endforeach; ?>
 		</div>
-	</details>
+	</li>
+	<?php
+}
+
+/**
+ * Render price slider group.
+ *
+ * @param array  $atts      Shortcode attributes.
+ * @param string $min_price Current minimum price.
+ * @param string $max_price Current maximum price.
+ * @return void
+ */
+function muukal_product_filter_archive_render_price_group( $atts, $min_price, $max_price ) {
+	$bounds     = muukal_product_filter_archive_get_price_bounds( $atts );
+	$slider_min = '' !== $min_price ? (float) $min_price : (float) $bounds['min'];
+	$slider_max = '' !== $max_price ? (float) $max_price : (float) $bounds['max'];
+	?>
+	<li class="dropdown muukal-filter-item muukal-filter-item-price">
+		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
+			<span><?php echo esc_html__( 'Price', 'astra' ); ?></span>
+			<span class="muukal-filter-arrow">&#9662;</span>
+		</button>
+		<div class="muukal-filter-panel muukal-filter-price-panel">
+			<div class="muukal-price-slider" data-min="<?php echo esc_attr( $bounds['min'] ); ?>" data-max="<?php echo esc_attr( $bounds['max'] ); ?>">
+				<div class="muukal-price-track"></div>
+				<div class="muukal-price-progress"></div>
+				<input class="muukal-price-range muukal-price-range-min" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_min ); ?>">
+				<input class="muukal-price-range muukal-price-range-max" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_max ); ?>">
+				<div class="muukal-price-values">
+					<span class="muukal-price-value-min"></span>
+					<span class="muukal-price-value-max"></span>
+				</div>
+				<div class="muukal-price-inputs">
+					<label>
+						<span><?php echo esc_html__( 'Min', 'astra' ); ?></span>
+						<input class="muukal-price-input muukal-price-input-min" type="number" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" name="min_price" value="<?php echo esc_attr( $slider_min ); ?>">
+					</label>
+					<label>
+						<span><?php echo esc_html__( 'Max', 'astra' ); ?></span>
+						<input class="muukal-price-input muukal-price-input-max" type="number" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" name="max_price" value="<?php echo esc_attr( $slider_max ); ?>">
+					</label>
+				</div>
+			</div>
+		</div>
+	</li>
 	<?php
 }
 
@@ -259,12 +379,14 @@ function muukal_product_filter_archive_render_filter_group( $key, $config, $atts
  * @return void
  */
 function muukal_product_filter_archive_render_sort_group( $sort_by ) {
-	$options = muukal_product_filter_archive_get_sort_options();
-
+	$options       = muukal_product_filter_archive_get_sort_options();
 	$current_label = isset( $options[ $sort_by ] ) ? $options[ $sort_by ] : $options['recommended'];
 	?>
-	<details class="muukal-filter-group muukal-filter-group-sort">
-		<summary class="muukal-filter-summary"><?php echo esc_html( sprintf( 'Sort By: %s', $current_label ) ); ?></summary>
+	<li class="dropdown muukal-filter-item muukal-filter-item-sort">
+		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
+			<span><?php echo esc_html( sprintf( 'Sort By: %s', $current_label ) ); ?></span>
+			<span class="muukal-filter-arrow">&#9662;</span>
+		</button>
 		<div class="muukal-filter-panel">
 			<?php foreach ( $options as $value => $label ) : ?>
 				<label class="muukal-filter-option">
@@ -273,29 +395,14 @@ function muukal_product_filter_archive_render_sort_group( $sort_by ) {
 				</label>
 			<?php endforeach; ?>
 		</div>
-	</details>
+	</li>
 	<?php
-}
-
-/**
- * Get sort options.
- *
- * @return array<string, string>
- */
-function muukal_product_filter_archive_get_sort_options() {
-	return array(
-		'recommended' => __( 'Recommended', 'astra' ),
-		'newest'      => __( 'Newest Arrivals', 'astra' ),
-		'price_high'  => __( 'Price: High to Low', 'astra' ),
-		'price_low'   => __( 'Price: Low to High', 'astra' ),
-		'title'       => __( 'Title', 'astra' ),
-	);
 }
 
 /**
  * Render selected filter chips.
  *
- * @param array  $atts   Shortcode attributes.
+ * @param array  $atts    Shortcode attributes.
  * @param string $sort_by Current sort key.
  * @return void
  */
@@ -410,25 +517,13 @@ function muukal_render_product_filter_archive( $atts ) {
 	?>
 	<div class="muukal-filter-archive">
 		<form class="muukal-filter-toolbar" method="get">
-			<div class="muukal-filter-groups">
+			<ul class="nav navbar-nav filter-nav muukal-filter-nav muukal-filter-groups">
 				<?php foreach ( muukal_product_filter_archive_get_filter_config() as $key => $config ) : ?>
 					<?php muukal_product_filter_archive_render_filter_group( $key, $config, $atts ); ?>
 				<?php endforeach; ?>
-				<details class="muukal-filter-group muukal-filter-group-price">
-					<summary class="muukal-filter-summary"><?php echo esc_html__( 'Price', 'astra' ); ?></summary>
-					<div class="muukal-filter-panel muukal-filter-price-panel">
-						<label>
-							<span><?php echo esc_html__( 'Min', 'astra' ); ?></span>
-							<input type="number" min="0" step="0.01" name="min_price" value="<?php echo esc_attr( $min_price ); ?>">
-						</label>
-						<label>
-							<span><?php echo esc_html__( 'Max', 'astra' ); ?></span>
-							<input type="number" min="0" step="0.01" name="max_price" value="<?php echo esc_attr( $max_price ); ?>">
-						</label>
-					</div>
-				</details>
+				<?php muukal_product_filter_archive_render_price_group( $atts, $min_price, $max_price ); ?>
 				<?php muukal_product_filter_archive_render_sort_group( $sort_by ); ?>
-			</div>
+			</ul>
 			<div class="muukal-filter-actions">
 				<div class="muukal-filter-buttons">
 					<button type="submit" class="muukal-filter-submit"><?php echo esc_html__( 'Apply Filters', 'astra' ); ?></button>
