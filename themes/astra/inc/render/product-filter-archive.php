@@ -193,6 +193,107 @@ function muukal_product_filter_archive_get_price_bounds( $atts ) {
 }
 
 /**
+ * Get filter reset URL.
+ *
+ * @return string
+ */
+function muukal_product_filter_archive_get_clear_url() {
+	return (string) remove_query_arg(
+		array( 'gender', 'shape', 'style', 'color', 'material', 'size', 'feature', 'min_price', 'max_price', 'sort_by', 'mu_page' )
+	);
+}
+
+/**
+ * Get archive landing URL for breadcrumbs.
+ *
+ * @return string
+ */
+function muukal_product_filter_archive_get_archive_url() {
+	$page_id = get_queried_object_id();
+
+	if ( $page_id ) {
+		$url = get_permalink( $page_id );
+
+		if ( $url ) {
+			return $url;
+		}
+	}
+
+	return home_url( '/' );
+}
+
+/**
+ * Get color image map keyed by slug.
+ *
+ * @return array<string, string>
+ */
+function muukal_product_filter_archive_get_color_image_map() {
+	if ( ! function_exists( 'muukal_swatch_default_palette' ) ) {
+		return array();
+	}
+
+	$map = array();
+
+	foreach ( muukal_swatch_default_palette() as $item ) {
+		if ( empty( $item['color_slug'] ) || empty( $item['dot_image'] ) ) {
+			continue;
+		}
+
+		$map[ sanitize_title( $item['color_slug'] ) ] = (string) $item['dot_image'];
+	}
+
+	return $map;
+}
+
+/**
+ * Get shape image map keyed by slug.
+ *
+ * @return array<string, string>
+ */
+function muukal_product_filter_archive_get_shape_image_map() {
+	return array(
+		'aviator'   => '//static.muukal.com/public/static/img/home/shape/shape_1.png',
+		'browline'  => '//static.muukal.com/public/static/img/home/shape/shape_2.png',
+		'cat-eye'   => '//static.muukal.com/public/static/img/home/shape/shape_3.png',
+		'geometric' => '//static.muukal.com/public/static/img/home/shape/shape_4.png',
+		'oval'      => '//static.muukal.com/public/static/img/home/shape/shape_5.png',
+		'rectangle' => '//static.muukal.com/public/static/img/home/shape/shape_6.png',
+		'round'     => '//static.muukal.com/public/static/img/home/shape/shape_7.png',
+		'square'    => '//static.muukal.com/public/static/img/home/shape/shape_8.png',
+		'butterfly' => '//static.muukal.com/public/static/img/home/shape/shape_9.png',
+		'horn'      => '//static.muukal.com/public/static/img/home/shape/shape_10.png',
+	);
+}
+
+/**
+ * Build a URL with one selected value removed.
+ *
+ * @param string $key   Filter key.
+ * @param string $value Selected value.
+ * @param array  $atts  Shortcode attributes.
+ * @return string
+ */
+function muukal_product_filter_archive_get_remove_value_url( $key, $value, $atts ) {
+	$selected = muukal_product_filter_archive_get_effective_selected_terms( $key, $atts );
+	$selected = array_values(
+		array_filter(
+			$selected,
+			static function( $item ) use ( $value ) {
+				return $item !== $value;
+			}
+		)
+	);
+
+	$url = remove_query_arg( 'mu_page' );
+
+	if ( empty( $selected ) ) {
+		return (string) remove_query_arg( $key, $url );
+	}
+
+	return (string) add_query_arg( $key, implode( ',', $selected ), $url );
+}
+
+/**
  * Build query args for filtered product archive.
  *
  * @param array $atts Shortcode attributes.
@@ -302,26 +403,52 @@ function muukal_product_filter_archive_build_query_args( $atts ) {
  * @return void
  */
 function muukal_product_filter_archive_render_filter_group( $key, $config, $atts ) {
-	$selected = muukal_product_filter_archive_get_effective_selected_terms( $key, $atts );
-	$terms    = muukal_product_filter_archive_get_terms( $config['taxonomy'] );
-	$summary  = $config['label'];
+	$selected  = muukal_product_filter_archive_get_effective_selected_terms( $key, $atts );
+	$terms     = muukal_product_filter_archive_get_terms( $config['taxonomy'] );
+	$color_map = 'color' === $key ? muukal_product_filter_archive_get_color_image_map() : array();
+	$shape_map = 'shape' === $key ? muukal_product_filter_archive_get_shape_image_map() : array();
+	$panel_cls = 'filter-opt-box';
 
-	if ( ! empty( $selected ) ) {
-		$summary .= ': ' . count( $selected );
+	if ( 'shape' === $key ) {
+		$panel_cls .= ' filter-shape-box';
+	} elseif ( 'style' === $key ) {
+		$panel_cls .= ' filter-style-box';
+	} elseif ( 'material' === $key ) {
+		$panel_cls .= ' filter-material-box';
+	} elseif ( 'feature' === $key ) {
+		$panel_cls .= ' filter-feature-box';
+	} elseif ( 'color' === $key ) {
+		$panel_cls .= ' filter-color-box';
 	}
-
 	?>
 	<li class="dropdown muukal-filter-item">
-		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
-			<span><?php echo esc_html( $summary ); ?></span>
+		<a class="dropdown-toggle<?php echo ! empty( $selected ) ? ' filter-nav-choose' : ''; ?>" href="#" role="button" aria-expanded="false">
+			<span><?php echo esc_html( $config['label'] ); ?></span>
 			<span class="muukal-filter-arrow">&#9662;</span>
-		</button>
-		<div class="muukal-filter-panel">
+		</a>
+		<div class="dropdown-menu <?php echo esc_attr( $panel_cls ); ?>">
 			<?php foreach ( $terms as $term ) : ?>
-				<label class="muukal-filter-option">
-					<input type="checkbox" name="<?php echo esc_attr( $key ); ?>[]" value="<?php echo esc_attr( $term->slug ); ?>"<?php checked( in_array( $term->slug, $selected, true ) ); ?>>
-					<span><?php echo esc_html( $term->name ); ?></span>
-				</label>
+				<?php $is_selected = in_array( $term->slug, $selected, true ); ?>
+				<div fv="<?php echo esc_attr( $key ); ?>" val="<?php echo esc_attr( $term->slug ); ?>" class="filter-icon muukal-filter-option<?php echo $is_selected ? ' filter-icon-choose' : ''; ?>">
+					<span class="muukal-filter-check" aria-hidden="true"></span>
+					<?php if ( 'color' === $key ) : ?>
+						<span class="color-icon-border">
+							<?php if ( ! empty( $color_map[ $term->slug ] ) ) : ?>
+								<img class="color-icon-image" src="<?php echo esc_url( $color_map[ $term->slug ] ); ?>" alt="<?php echo esc_attr( $term->name ); ?>">
+							<?php else : ?>
+								<span class="color-icon color-<?php echo esc_attr( $term->slug ); ?>"></span>
+							<?php endif; ?>
+						</span>
+						<span class="color-name">&nbsp;<?php echo esc_html( $term->name ); ?></span>
+					<?php elseif ( 'shape' === $key ) : ?>
+						<?php if ( ! empty( $shape_map[ $term->slug ] ) ) : ?>
+							<span class="shape_icon"><img src="<?php echo esc_url( $shape_map[ $term->slug ] ); ?>" alt="<?php echo esc_attr( $term->name ); ?>"></span>
+						<?php endif; ?>
+						<span>&nbsp;<?php echo esc_html( $term->name ); ?></span>
+					<?php else : ?>
+						<span>&nbsp;<?php echo esc_html( $term->name ); ?></span>
+					<?php endif; ?>
+				</div>
 			<?php endforeach; ?>
 		</div>
 	</li>
@@ -342,29 +469,23 @@ function muukal_product_filter_archive_render_price_group( $atts, $min_price, $m
 	$slider_max = '' !== $max_price ? (float) $max_price : (float) $bounds['max'];
 	?>
 	<li class="dropdown muukal-filter-item muukal-filter-item-price">
-		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
+		<a class="dropdown-toggle<?php echo ( '' !== $min_price || '' !== $max_price ) ? ' filter-nav-choose' : ''; ?>" href="#" role="button" aria-expanded="false">
 			<span><?php echo esc_html__( 'Price', 'astra' ); ?></span>
 			<span class="muukal-filter-arrow">&#9662;</span>
-		</button>
-		<div class="muukal-filter-panel muukal-filter-price-panel">
-			<div class="muukal-price-slider" data-min="<?php echo esc_attr( $bounds['min'] ); ?>" data-max="<?php echo esc_attr( $bounds['max'] ); ?>">
-				<div class="muukal-price-track"></div>
-				<div class="muukal-price-progress"></div>
-				<input class="muukal-price-range muukal-price-range-min" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_min ); ?>">
-				<input class="muukal-price-range muukal-price-range-max" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_max ); ?>">
-				<div class="muukal-price-values">
-					<span class="muukal-price-value-min"></span>
-					<span class="muukal-price-value-max"></span>
+		</a>
+		<div class="dropdown-menu filter-opt-box muukal-filter-price-panel">
+			<div class="price-filter">
+				<div class="muukal-price-slider" data-min="<?php echo esc_attr( $bounds['min'] ); ?>" data-max="<?php echo esc_attr( $bounds['max'] ); ?>">
+					<div class="muukal-price-track"></div>
+					<div class="muukal-price-progress"></div>
+					<input class="muukal-price-range muukal-price-range-min" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_min ); ?>">
+					<input class="muukal-price-range muukal-price-range-max" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_max ); ?>">
 				</div>
-				<div class="muukal-price-inputs">
-					<label>
-						<span><?php echo esc_html__( 'Min', 'astra' ); ?></span>
-						<input class="muukal-price-input muukal-price-input-min" type="number" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" name="min_price" value="<?php echo esc_attr( $slider_min ); ?>">
-					</label>
-					<label>
-						<span><?php echo esc_html__( 'Max', 'astra' ); ?></span>
-						<input class="muukal-price-input muukal-price-input-max" type="number" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" name="max_price" value="<?php echo esc_attr( $slider_max ); ?>">
-					</label>
+				<div class="muukal-price-actions">
+					<input class="muukal-price-amount" type="text" readonly value="">
+					<button class="btn muukal-price-submit" type="button"><?php echo esc_html__( 'DONE', 'astra' ); ?></button>
+					<input class="muukal-price-input muukal-price-input-min" type="hidden" name="min_price" value="<?php echo esc_attr( $slider_min ); ?>">
+					<input class="muukal-price-input muukal-price-input-max" type="hidden" name="max_price" value="<?php echo esc_attr( $slider_max ); ?>">
 				</div>
 			</div>
 		</div>
@@ -383,16 +504,16 @@ function muukal_product_filter_archive_render_sort_group( $sort_by ) {
 	$current_label = isset( $options[ $sort_by ] ) ? $options[ $sort_by ] : $options['recommended'];
 	?>
 	<li class="dropdown muukal-filter-item muukal-filter-item-sort">
-		<button class="muukal-filter-toggle" type="button" aria-expanded="false">
+		<a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
 			<span><?php echo esc_html( sprintf( 'Sort By: %s', $current_label ) ); ?></span>
 			<span class="muukal-filter-arrow">&#9662;</span>
-		</button>
-		<div class="muukal-filter-panel">
+		</a>
+		<div class="dropdown-menu filter-opt-box">
 			<?php foreach ( $options as $value => $label ) : ?>
-				<label class="muukal-filter-option">
-					<input type="radio" name="sort_by" value="<?php echo esc_attr( $value ); ?>"<?php checked( $sort_by, $value ); ?>>
-					<span><?php echo esc_html( $label ); ?></span>
-				</label>
+				<div fv="sort_by" val="<?php echo esc_attr( $value ); ?>" class="filter-icon muukal-filter-option<?php echo $sort_by === $value ? ' filter-icon-choose' : ''; ?>">
+					<span class="muukal-filter-check" aria-hidden="true"></span>
+					<span>&nbsp;<?php echo esc_html( $label ); ?></span>
+				</div>
 			<?php endforeach; ?>
 		</div>
 	</li>
@@ -400,72 +521,57 @@ function muukal_product_filter_archive_render_sort_group( $sort_by ) {
 }
 
 /**
- * Render selected filter chips.
+ * Render selected filter breadcrumb.
  *
- * @param array  $atts    Shortcode attributes.
- * @param string $sort_by Current sort key.
+ * @param array  $atts        Shortcode attributes.
+ * @param string $sort_by     Current sort key.
+ * @param int    $found_posts Query result count.
  * @return void
  */
-function muukal_product_filter_archive_render_selected_filters( $atts, $sort_by ) {
+function muukal_product_filter_archive_render_selected_filters( $atts, $sort_by, $found_posts ) {
 	$filter_config = muukal_product_filter_archive_get_filter_config();
 	$sort_options  = muukal_product_filter_archive_get_sort_options();
-	$has_filters   = false;
-
-	ob_start();
-
-	foreach ( $filter_config as $key => $config ) {
-		$selected = muukal_product_filter_archive_get_effective_selected_terms( $key, $atts );
-
-		foreach ( $selected as $slug ) {
-			$term = get_term_by( 'slug', $slug, $config['taxonomy'] );
-
-			if ( ! $term || is_wp_error( $term ) ) {
-				continue;
-			}
-
-			$has_filters = true;
-			?>
-			<span class="muukal-selected-filter"><?php echo esc_html( $config['label'] . ': ' . $term->name ); ?></span>
-			<?php
-		}
-	}
-
-	if ( ! empty( $_GET['min_price'] ) || ! empty( $_GET['max_price'] ) ) {
-		$has_filters = true;
-		?>
-		<span class="muukal-selected-filter">
-			<?php
-			echo esc_html(
-				sprintf(
-					'Price: %s - %s',
-					'' !== wp_unslash( $_GET['min_price'] ) ? wp_unslash( $_GET['min_price'] ) : '0',
-					'' !== wp_unslash( $_GET['max_price'] ) ? wp_unslash( $_GET['max_price'] ) : 'Any'
-				)
-			);
-			?>
-		</span>
-		<?php
-	}
-
-	if ( $sort_by && 'recommended' !== $sort_by ) {
-		$has_filters = true;
-		?>
-		<span class="muukal-selected-filter"><?php echo esc_html( sprintf( 'Sort: %s', isset( $sort_options[ $sort_by ] ) ? $sort_options[ $sort_by ] : $sort_by ) ); ?></span>
-		<?php
-	}
-
-	$content = trim( ob_get_clean() );
-
-	if ( ! $has_filters || '' === $content ) {
-		return;
-	}
 	?>
-	<div class="muukal-selected-filters">
-		<div class="muukal-selected-filters-list">
-			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
-		<a class="muukal-filter-reset" href="<?php echo esc_url( remove_query_arg( array( 'gender', 'shape', 'style', 'color', 'material', 'size', 'feature', 'min_price', 'max_price', 'sort_by', 'mu_page' ) ) ); ?>"><?php echo esc_html__( 'Clear filter', 'astra' ); ?></a>
-	</div>
+	<ol class="breadcrumb muukal-filter-breadcrumb">
+		<li class="breadcrumb-item"><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html__( 'Home', 'astra' ); ?></a></li>
+		<li class="breadcrumb-item"><a href="<?php echo esc_url( muukal_product_filter_archive_get_archive_url() ); ?>"><?php echo esc_html__( 'All Glasses', 'astra' ); ?></a></li>
+		<li class="breadcrumb-count"><?php echo esc_html( sprintf( _n( '%d result', '%d results', $found_posts, 'astra' ), $found_posts ) ); ?></li>
+		<?php foreach ( $filter_config as $key => $config ) : ?>
+			<?php foreach ( muukal_product_filter_archive_get_effective_selected_terms( $key, $atts ) as $slug ) : ?>
+				<?php $term = get_term_by( 'slug', $slug, $config['taxonomy'] ); ?>
+				<?php if ( ! $term || is_wp_error( $term ) ) : ?>
+					<?php continue; ?>
+				<?php endif; ?>
+				<li class="breadcrumb-filder-item">
+					<span class="filder-item-span"><?php echo esc_html( strtolower( $config['label'] ) . ': ' . $term->name ); ?></span>
+					<span fv="<?php echo esc_attr( $key ); ?>" val="<?php echo esc_attr( $slug ); ?>" class="filder-item-cross" aria-label="<?php echo esc_attr__( 'Remove filter', 'astra' ); ?>">&times;</span>
+				</li>
+			<?php endforeach; ?>
+		<?php endforeach; ?>
+		<?php if ( ! empty( $_GET['min_price'] ) || ! empty( $_GET['max_price'] ) ) : ?>
+			<li class="breadcrumb-filder-item">
+				<span class="filder-item-span">
+					<?php
+					echo esc_html(
+						sprintf(
+							'price: %s - %s',
+							! empty( $_GET['min_price'] ) ? wp_unslash( $_GET['min_price'] ) : '0',
+							! empty( $_GET['max_price'] ) ? wp_unslash( $_GET['max_price'] ) : 'Any'
+						)
+					);
+					?>
+				</span>
+				<span fv="price" class="filder-item-cross" aria-label="<?php echo esc_attr__( 'Remove filter', 'astra' ); ?>">&times;</span>
+			</li>
+		<?php endif; ?>
+		<?php if ( $sort_by && 'recommended' !== $sort_by ) : ?>
+			<li class="breadcrumb-filder-item">
+				<span class="filder-item-span"><?php echo esc_html( 'sort: ' . ( isset( $sort_options[ $sort_by ] ) ? $sort_options[ $sort_by ] : $sort_by ) ); ?></span>
+				<span fv="sort_by" val="<?php echo esc_attr( $sort_by ); ?>" class="filder-item-cross" aria-label="<?php echo esc_attr__( 'Remove filter', 'astra' ); ?>">&times;</span>
+			</li>
+		<?php endif; ?>
+		<li class="breadcrumb-clear"><a href="<?php echo esc_url( muukal_product_filter_archive_get_clear_url() ); ?>"><?php echo esc_html__( 'Clear filter', 'astra' ); ?></a></li>
+	</ol>
 	<?php
 }
 
@@ -515,24 +621,19 @@ function muukal_render_product_filter_archive( $atts ) {
 
 	ob_start();
 	?>
-	<div class="muukal-filter-archive">
-		<form class="muukal-filter-toolbar" method="get">
-			<ul class="nav navbar-nav filter-nav muukal-filter-nav muukal-filter-groups">
-				<?php foreach ( muukal_product_filter_archive_get_filter_config() as $key => $config ) : ?>
-					<?php muukal_product_filter_archive_render_filter_group( $key, $config, $atts ); ?>
-				<?php endforeach; ?>
-				<?php muukal_product_filter_archive_render_price_group( $atts, $min_price, $max_price ); ?>
-				<?php muukal_product_filter_archive_render_sort_group( $sort_by ); ?>
-			</ul>
-			<div class="muukal-filter-actions">
-				<div class="muukal-filter-buttons">
-					<button type="submit" class="muukal-filter-submit"><?php echo esc_html__( 'Apply Filters', 'astra' ); ?></button>
-					<a class="muukal-filter-reset" href="<?php echo esc_url( remove_query_arg( array( 'gender', 'shape', 'style', 'color', 'material', 'size', 'feature', 'min_price', 'max_price', 'sort_by', 'mu_page' ) ) ); ?>"><?php echo esc_html__( 'Reset', 'astra' ); ?></a>
-				</div>
+	<div class="muukal-filter-archive product-area pl-55 pr-55">
+		<div class="container-fluid muukal-filter-shell">
+			<?php muukal_product_filter_archive_render_selected_filters( $atts, $sort_by, (int) $query->found_posts ); ?>
+			<div class="muukal-filter-toolbar">
+				<ul class="nav navbar-nav filter-nav muukal-filter-nav muukal-filter-groups">
+					<?php foreach ( muukal_product_filter_archive_get_filter_config() as $key => $config ) : ?>
+						<?php muukal_product_filter_archive_render_filter_group( $key, $config, $atts ); ?>
+					<?php endforeach; ?>
+					<?php muukal_product_filter_archive_render_price_group( $atts, $min_price, $max_price ); ?>
+					<?php muukal_product_filter_archive_render_sort_group( $sort_by ); ?>
+				</ul>
 			</div>
-		</form>
-
-		<?php muukal_product_filter_archive_render_selected_filters( $atts, $sort_by ); ?>
+		</div>
 
 		<div class="muukal-filter-results-bar">
 			<p class="muukal-filter-results-count">

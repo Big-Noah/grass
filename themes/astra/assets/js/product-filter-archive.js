@@ -1,15 +1,43 @@
 ( function () {
-	function formatPrice( value ) {
-		return '$' + Math.round( Number( value ) || 0 );
+	function formatPriceRange( min, max ) {
+		return '$' + Math.round( min ) + ' - $' + Math.round( max );
 	}
 
-	function updateSlider( slider ) {
+	function getValues( params, key ) {
+		const value = params.get( key );
+
+		if ( ! value ) {
+			return [];
+		}
+
+		return value.split( ',' ).filter( Boolean );
+	}
+
+	function setValues( params, key, values ) {
+		params.delete( key );
+
+		if ( values.length ) {
+			params.set( key, values.join( ',' ) );
+		}
+	}
+
+	function navigateWithParams( root, mutate ) {
+		const url = new URL( window.location.href );
+		const params = url.searchParams;
+
+		mutate( params );
+		params.delete( 'mu_page' );
+
+		url.search = params.toString();
+		window.location.href = url.toString();
+	}
+
+	function updatePriceSlider( slider ) {
 		const minRange = slider.querySelector( '.muukal-price-range-min' );
 		const maxRange = slider.querySelector( '.muukal-price-range-max' );
-		const minInput = slider.querySelector( '.muukal-price-input-min' );
-		const maxInput = slider.querySelector( '.muukal-price-input-max' );
-		const minValue = slider.querySelector( '.muukal-price-value-min' );
-		const maxValue = slider.querySelector( '.muukal-price-value-max' );
+		const minInput = slider.parentElement.querySelector( '.muukal-price-input-min' );
+		const maxInput = slider.parentElement.querySelector( '.muukal-price-input-max' );
+		const amount = slider.parentElement.querySelector( '.muukal-price-amount' );
 		const progress = slider.querySelector( '.muukal-price-progress' );
 		const minBound = Number( slider.dataset.min || 0 );
 		const maxBound = Number( slider.dataset.max || 0 );
@@ -17,7 +45,7 @@
 		let max = Number( maxRange.value || maxBound );
 
 		if ( min > max ) {
-			if ( document.activeElement === minRange || document.activeElement === minInput ) {
+			if ( document.activeElement === minRange ) {
 				max = min;
 				maxRange.value = String( max );
 			} else {
@@ -28,8 +56,7 @@
 
 		minInput.value = String( min );
 		maxInput.value = String( max );
-		minValue.textContent = formatPrice( min );
-		maxValue.textContent = formatPrice( max );
+		amount.value = formatPriceRange( min, max );
 
 		if ( maxBound > minBound ) {
 			const left = ( ( min - minBound ) / ( maxBound - minBound ) ) * 100;
@@ -39,92 +66,138 @@
 		}
 	}
 
-	function bindSlider( root ) {
+	function bindPriceSliders( root ) {
 		root.querySelectorAll( '.muukal-price-slider' ).forEach( function ( slider ) {
-			const minRange = slider.querySelector( '.muukal-price-range-min' );
-			const maxRange = slider.querySelector( '.muukal-price-range-max' );
-			const minInput = slider.querySelector( '.muukal-price-input-min' );
-			const maxInput = slider.querySelector( '.muukal-price-input-max' );
-			const minBound = Number( slider.dataset.min || 0 );
-			const maxBound = Number( slider.dataset.max || 0 );
-
-			[ minRange, maxRange ].forEach( function ( input ) {
+			slider.querySelectorAll( '.muukal-price-range' ).forEach( function ( input ) {
 				input.addEventListener( 'input', function () {
-					updateSlider( slider );
+					updatePriceSlider( slider );
 				} );
 			} );
 
-			[ minInput, maxInput ].forEach( function ( input ) {
-				input.addEventListener( 'input', function () {
-					let next = Number( input.value || 0 );
+			updatePriceSlider( slider );
+		} );
+	}
 
-					if ( Number.isNaN( next ) ) {
-						next = input === minInput ? minBound : maxBound;
-					}
+	function closeAllMenus( root ) {
+		root.querySelectorAll( '.muukal-filter-item.is-open' ).forEach( function ( item ) {
+			item.classList.remove( 'is-open' );
+			const toggle = item.querySelector( '.dropdown-toggle' );
 
-					next = Math.max( minBound, Math.min( maxBound, next ) );
-
-					if ( input === minInput ) {
-						minRange.value = String( next );
-					} else {
-						maxRange.value = String( next );
-					}
-
-					updateSlider( slider );
-				} );
-			} );
-
-			updateSlider( slider );
+			if ( toggle ) {
+				toggle.setAttribute( 'aria-expanded', 'false' );
+			}
 		} );
 	}
 
 	function bindDropdowns( root ) {
-		const items = root.querySelectorAll( '.muukal-filter-item' );
+		root.querySelectorAll( '.muukal-filter-item > .dropdown-toggle' ).forEach( function ( toggle ) {
+			toggle.addEventListener( 'click', function ( event ) {
+				event.preventDefault();
 
-		items.forEach( function ( item ) {
-			const toggle = item.querySelector( '.muukal-filter-toggle' );
-
-			if ( ! toggle ) {
-				return;
-			}
-
-			toggle.addEventListener( 'click', function () {
+				const item = toggle.closest( '.muukal-filter-item' );
 				const nextState = ! item.classList.contains( 'is-open' );
 
-				items.forEach( function ( other ) {
-					other.classList.remove( 'is-open' );
-					const otherToggle = other.querySelector( '.muukal-filter-toggle' );
-
-					if ( otherToggle ) {
-						otherToggle.setAttribute( 'aria-expanded', 'false' );
-					}
-				} );
-
+				closeAllMenus( root );
 				item.classList.toggle( 'is-open', nextState );
 				toggle.setAttribute( 'aria-expanded', nextState ? 'true' : 'false' );
 			} );
 		} );
 
 		document.addEventListener( 'click', function ( event ) {
-			if ( event.target.closest( '.muukal-filter-toolbar' ) ) {
+			if ( event.target.closest( '.muukal-filter-archive' ) ) {
 				return;
 			}
 
-			items.forEach( function ( item ) {
-				item.classList.remove( 'is-open' );
-				const toggle = item.querySelector( '.muukal-filter-toggle' );
+			closeAllMenus( root );
+		} );
+	}
 
-				if ( toggle ) {
-					toggle.setAttribute( 'aria-expanded', 'false' );
-				}
+	function bindFilterOptions( root ) {
+		root.querySelectorAll( '.filter-icon[fv][val]' ).forEach( function ( option ) {
+			option.addEventListener( 'click', function () {
+				const key = option.getAttribute( 'fv' );
+				const value = option.getAttribute( 'val' );
+
+				navigateWithParams( root, function ( params ) {
+					if ( key === 'sort_by' ) {
+						if ( params.get( key ) === value ) {
+							params.delete( key );
+						} else {
+							params.set( key, value );
+						}
+
+						return;
+					}
+
+					const values = getValues( params, key );
+					const nextValues = values.includes( value )
+						? values.filter( function ( item ) {
+							return item !== value;
+						} )
+						: values.concat( value );
+
+					setValues( params, key, nextValues );
+				} );
+			} );
+		} );
+
+		root.querySelectorAll( '.filder-item-cross[fv]' ).forEach( function ( button ) {
+			button.addEventListener( 'click', function () {
+				const key = button.getAttribute( 'fv' );
+				const value = button.getAttribute( 'val' );
+
+				navigateWithParams( root, function ( params ) {
+					if ( key === 'price' ) {
+						params.delete( 'min_price' );
+						params.delete( 'max_price' );
+						return;
+					}
+
+					if ( key === 'sort_by' ) {
+						params.delete( 'sort_by' );
+						return;
+					}
+
+					const values = getValues( params, key ).filter( function ( item ) {
+						return item !== value;
+					} );
+
+					setValues( params, key, values );
+				} );
+			} );
+		} );
+	}
+
+	function bindPriceSubmit( root ) {
+		root.querySelectorAll( '.muukal-price-submit' ).forEach( function ( button ) {
+			button.addEventListener( 'click', function () {
+				const panel = button.closest( '.price-filter' );
+				const min = panel.querySelector( '.muukal-price-input-min' ).value;
+				const max = panel.querySelector( '.muukal-price-input-max' ).value;
+
+				navigateWithParams( root, function ( params ) {
+					if ( min ) {
+						params.set( 'min_price', min );
+					} else {
+						params.delete( 'min_price' );
+					}
+
+					if ( max ) {
+						params.set( 'max_price', max );
+					} else {
+						params.delete( 'max_price' );
+					}
+				} );
 			} );
 		} );
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		document.querySelectorAll( '.muukal-filter-archive' ).forEach( function ( root ) {
-			bindSlider( root );
 			bindDropdowns( root );
+			bindPriceSliders( root );
+			bindFilterOptions( root );
+			bindPriceSubmit( root );
 		} );
 	} );
-} )();
+}() );
