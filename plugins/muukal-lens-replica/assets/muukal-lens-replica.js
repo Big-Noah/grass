@@ -334,7 +334,7 @@
 			schema.prescription_fields.power.options.forEach(function (option) {
 				var value = option.value.replace('+', '');
 				var button = document.createElement('span');
-				button.className = 'power_v' + (state.power === value ? ' active' : '');
+				button.className = 'power_v' + (state.power === value ? ' power_v_choose' : '');
 				button.textContent = option.label;
 				button.addEventListener('click', function () {
 					state.power = value;
@@ -538,7 +538,7 @@
 			root.querySelector('#data_attr_5').style.display = coating ? 'block' : 'none';
 			root.querySelector('#lens_price').textContent = getLensTotal().toFixed(2);
 			root.querySelector('#total').textContent = getGrandTotal().toFixed(2);
-			blueButton.classList.toggle('is-active', state.bluelight);
+			blueButton.classList.toggle('bluelight-check', state.bluelight);
 			blueButton.classList.toggle('is-disabled', bluelightLocked());
 			blueButton.querySelector('.lock_tips').style.display = bluelightLocked() ? 'block' : 'none';
 		}
