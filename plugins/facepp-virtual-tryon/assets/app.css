@@ -180,6 +180,26 @@
 	gap: 10px;
 }
 
+.facepp-tryon-model-wrap {
+	margin: 4px 0 14px;
+}
+
+.facepp-tryon-model-wrap h4,
+.facepp-tryon-panel h4 {
+	margin: 0 0 8px;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--f-muted);
+}
+
+.facepp-tryon-models {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(94px, 1fr));
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
 .facepp-tryon-frame-item {
 	display: grid;
 	gap: 6px;
@@ -222,4 +242,3 @@
 		min-height: 420px;
 	}
 }
-

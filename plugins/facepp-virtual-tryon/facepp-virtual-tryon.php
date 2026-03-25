@@ -34,6 +34,14 @@ function facepp_tryon_defaults() {
 		'frame_3_url'  => '',
 		'frame_3_wf'   => '2.15',
 		'frame_3_yo'   => '0.02',
+		'model_1_name' => 'Model 1',
+		'model_1_url'  => '',
+		'model_2_name' => 'Model 2',
+		'model_2_url'  => '',
+		'model_3_name' => 'Model 3',
+		'model_3_url'  => '',
+		'model_4_name' => 'Model 4',
+		'model_4_url'  => '',
 	);
 }
 
@@ -60,6 +68,25 @@ function facepp_tryon_get_frames() {
 	}
 
 	return $frames;
+}
+
+function facepp_tryon_get_models() {
+	$settings = facepp_tryon_get_settings();
+	$models   = array();
+
+	for ( $i = 1; $i <= 4; $i++ ) {
+		$url = isset( $settings[ 'model_' . $i . '_url' ] ) ? trim( (string) $settings[ 'model_' . $i . '_url' ] ) : '';
+		if ( '' === $url ) {
+			continue;
+		}
+
+		$models[] = array(
+			'name' => isset( $settings[ 'model_' . $i . '_name' ] ) ? sanitize_text_field( (string) $settings[ 'model_' . $i . '_name' ] ) : 'Model ' . $i,
+			'url'  => esc_url_raw( $url ),
+		);
+	}
+
+	return $models;
 }
 
 function facepp_tryon_sanitize_settings( $input ) {
@@ -109,6 +136,15 @@ function facepp_tryon_admin_menu() {
 		'dashicons-visibility',
 		59
 	);
+
+	add_submenu_page(
+		'facepp-tryon',
+		'Face++ Try On Preview',
+		'Preview',
+		'manage_options',
+		'facepp-tryon-preview',
+		'facepp_tryon_render_preview_page'
+	);
 }
 add_action( 'admin_menu', 'facepp_tryon_admin_menu' );
 
@@ -118,6 +154,10 @@ function facepp_tryon_admin_assets( $hook ) {
 	}
 	wp_enqueue_media();
 	wp_enqueue_script( 'facepp-tryon-admin', FACEPP_TRYON_URL . 'assets/admin.js', array( 'jquery' ), FACEPP_TRYON_VERSION, true );
+
+	if ( false !== strpos( $hook, 'facepp-tryon-preview' ) ) {
+		facepp_tryon_enqueue_assets();
+	}
 }
 add_action( 'admin_enqueue_scripts', 'facepp_tryon_admin_assets' );
 
@@ -133,6 +173,7 @@ function facepp_tryon_enqueue_assets() {
 		'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 		'ajaxNonce'  => wp_create_nonce( 'facepp_tryon_detect' ),
 		'frames'     => facepp_tryon_get_frames(),
+		'testModels' => facepp_tryon_get_models(),
 		'modalTitle' => $settings['modal_title'],
 		'i18n'       => array(
 			'noPhoto'        => 'Upload a photo first.',
@@ -143,6 +184,8 @@ function facepp_tryon_enqueue_assets() {
 			'noFace'         => 'No face detected. Please use a clearer front-facing portrait.',
 			'missingCreds'   => 'Face++ key/secret is missing in plugin settings.',
 			'photoReady'     => 'Photo loaded. Choose frame and click Auto Align.',
+			'modelReady'     => 'Model loaded. Choose frame and click Auto Align.',
+			'encodeFailed'   => 'This image cannot be sent to Face++ (cross-origin blocked). Use local upload or WordPress Media image.',
 			'frameSelected'  => 'Frame selected.',
 			'manualReset'    => 'Manual adjustments reset.',
 		),
@@ -317,6 +360,11 @@ function facepp_tryon_shortcode() {
 							<label><span>Scale</span><input data-control="scale" type="range" min="0.5" max="2.4" step="0.01" value="1"></label>
 							<label><span>Rotate</span><input data-control="rotate" type="range" min="-35" max="35" step="0.1" value="0"></label>
 						</div>
+						<div class="facepp-tryon-model-wrap">
+							<h4>Test Models</h4>
+							<div class="facepp-tryon-models"></div>
+						</div>
+						<h4>Frames</h4>
 						<div class="facepp-tryon-frames"></div>
 					</div>
 				</div>
@@ -349,6 +397,7 @@ function facepp_tryon_render_settings_page() {
 	<div class="wrap">
 		<h1>Face++ Virtual Try On</h1>
 		<p>Use shortcode <code>[facepp_virtual_tryon]</code> on any page or product description.</p>
+		<p><a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=facepp-tryon-preview' ) ); ?>">Open Admin Preview</a></p>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'facepp_tryon_settings_group' ); ?>
 			<table class="form-table">
@@ -364,6 +413,10 @@ function facepp_tryon_render_settings_page() {
 						<?php facepp_tryon_field( 'frame_' . $i . '_wf', 'Frame ' . $i . ' Width Factor', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_yo', 'Frame ' . $i . ' Y Offset', 'number' ); ?>
 					<?php endfor; ?>
+					<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
+						<?php facepp_tryon_field( 'model_' . $i . '_name', 'Test Model ' . $i . ' Name' ); ?>
+						<?php facepp_tryon_field( 'model_' . $i . '_url', 'Test Model ' . $i . ' Image URL', 'url', true ); ?>
+					<?php endfor; ?>
 				</tbody>
 			</table>
 			<?php submit_button(); ?>
@@ -372,3 +425,12 @@ function facepp_tryon_render_settings_page() {
 	<?php
 }
 
+function facepp_tryon_render_preview_page() {
+	?>
+	<div class="wrap">
+		<h1>Face++ Try On Preview</h1>
+		<p>Use this page to upload or choose model photos and test alignment before adding the shortcode to front-end pages.</p>
+		<?php echo do_shortcode( '[facepp_virtual_tryon]' ); ?>
+	</div>
+	<?php
+}

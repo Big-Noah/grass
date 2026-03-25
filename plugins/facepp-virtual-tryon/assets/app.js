@@ -24,12 +24,14 @@
 		var autoBtn = root.querySelector('.facepp-tryon-auto');
 		var resetBtn = root.querySelector('.facepp-tryon-reset');
 		var framesBox = root.querySelector('.facepp-tryon-frames');
+		var modelsBox = root.querySelector('.facepp-tryon-models');
 		var sliders = root.querySelectorAll('[data-control]');
 
 		var state = {
 			photoLoaded: false,
 			frameLoaded: false,
 			photoSrc: '',
+			photoDataUrl: '',
 			drag: null,
 			selectedFrame: null,
 			auto: { x: 0, y: 0, rotate: 0, width: 0 },
@@ -138,11 +140,70 @@
 			});
 		}
 
+		function loadPhoto(src, dataUrl, readyMessage) {
+			state.photoSrc = src;
+			state.photoDataUrl = dataUrl || '';
+			photo.onload = function () {
+				state.photoLoaded = true;
+				autoCenter();
+				setStatus(readyMessage || config.i18n.photoReady);
+			};
+			photo.src = src;
+		}
+
+		function buildModelButtons() {
+			if (!modelsBox) {
+				return;
+			}
+			modelsBox.innerHTML = '';
+			(config.testModels || []).forEach(function (item) {
+				var btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'facepp-tryon-frame-item';
+				btn.innerHTML = '<img alt="" src="' + item.url + '"><span>' + item.name + '</span>';
+				btn.addEventListener('click', function () {
+					loadPhoto(item.url, '', config.i18n.modelReady || config.i18n.photoReady);
+				});
+				modelsBox.appendChild(btn);
+			});
+		}
+
+		function getPhotoPayload() {
+			if (state.photoDataUrl && state.photoDataUrl.indexOf('data:image/') === 0) {
+				return state.photoDataUrl;
+			}
+			if (!state.photoLoaded) {
+				return '';
+			}
+			var width = photo.naturalWidth || photo.clientWidth || 0;
+			var height = photo.naturalHeight || photo.clientHeight || 0;
+			if (!width || !height) {
+				return '';
+			}
+			var canvas = document.createElement('canvas');
+			var ctx = canvas.getContext('2d');
+			canvas.width = width;
+			canvas.height = height;
+			try {
+				ctx.drawImage(photo, 0, 0, width, height);
+				return canvas.toDataURL('image/jpeg', 0.92);
+			} catch (e) {
+				return '';
+			}
+		}
+
 		async function detectFace() {
+			var imagePayload = getPhotoPayload();
+			if (!imagePayload) {
+				var encodeError = new Error('Image encode failed');
+				encodeError.code = 'encode_failed';
+				throw encodeError;
+			}
+
 			var formData = new window.FormData();
 			formData.append('action', 'facepp_tryon_detect');
 			formData.append('nonce', config.ajaxNonce);
-			formData.append('image', photo.src);
+			formData.append('image', imagePayload);
 
 			var res = await window.fetch(config.ajaxUrl, {
 				method: 'POST',
@@ -184,6 +245,8 @@
 					setStatus(config.i18n.missingCreds);
 				} else if (e && (e.code === 'no_face' || e.code === 'no_eye_landmark')) {
 					setStatus(config.i18n.noFace);
+				} else if (e && e.code === 'encode_failed') {
+					setStatus(config.i18n.encodeFailed || config.i18n.detectFailed);
 				} else {
 					setStatus(config.i18n.detectFailed);
 				}
@@ -249,13 +312,16 @@
 			if (!file) {
 				return;
 			}
-			state.photoSrc = URL.createObjectURL(file);
-			photo.onload = function () {
-				state.photoLoaded = true;
-				autoCenter();
-				setStatus(config.i18n.photoReady);
+			var reader = new window.FileReader();
+			reader.onload = function (ev) {
+				var dataUrl = ev && ev.target ? ev.target.result : '';
+				if (typeof dataUrl !== 'string' || dataUrl.indexOf('data:image/') !== 0) {
+					setStatus(config.i18n.detectFailed);
+					return;
+				}
+				loadPhoto(dataUrl, dataUrl, config.i18n.photoReady);
 			};
-			photo.src = state.photoSrc;
+			reader.readAsDataURL(file);
 		});
 
 		autoBtn.addEventListener('click', runAutoAlign);
@@ -278,10 +344,10 @@
 		window.addEventListener('resize', render);
 
 		buildFrameButtons();
+		buildModelButtons();
 	}
 
 	document.addEventListener('DOMContentLoaded', function () {
 		document.querySelectorAll('.facepp-tryon-app').forEach(initApp);
 	});
 })();
-
