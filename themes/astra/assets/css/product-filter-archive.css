@@ -103,6 +103,11 @@
 	letter-spacing: 0;
 }
 
+.muukal-filter-item > .dropdown-toggle:hover,
+.muukal-filter-item > .dropdown-toggle:focus {
+	color: #ff565c;
+}
+
 .muukal-filter-item > .dropdown-toggle.filter-nav-choose {
 	color: #111;
 	font-weight: 500;
@@ -119,13 +124,11 @@
 }
 
 .muukal-filter-arrow::before {
-	content: "";
+	content: "\2335";
 	display: block;
-	width: 6px;
-	height: 6px;
-	border-right: 1.5px solid currentColor;
-	border-bottom: 1.5px solid currentColor;
-	transform: rotate(45deg) translateY(-1px);
+	font-size: 12px;
+	line-height: 1;
+	transform: translateY(-1px);
 }
 
 .muukal-filter-item.is-open .dropdown-menu {
