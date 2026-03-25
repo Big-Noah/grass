@@ -424,7 +424,7 @@ function muukal_product_filter_archive_render_filter_group( $key, $config, $atts
 	<li class="dropdown muukal-filter-item">
 		<a class="dropdown-toggle<?php echo ! empty( $selected ) ? ' filter-nav-choose' : ''; ?>" href="#" role="button" aria-expanded="false">
 			<span><?php echo esc_html( $config['label'] ); ?></span>
-			<span class="muukal-filter-arrow">&#9662;</span>
+			<span class="muukal-filter-arrow"></span>
 		</a>
 		<div class="dropdown-menu <?php echo esc_attr( $panel_cls ); ?>">
 			<?php foreach ( $terms as $term ) : ?>
@@ -471,7 +471,7 @@ function muukal_product_filter_archive_render_price_group( $atts, $min_price, $m
 	<li class="dropdown muukal-filter-item muukal-filter-item-price">
 		<a class="dropdown-toggle<?php echo ( '' !== $min_price || '' !== $max_price ) ? ' filter-nav-choose' : ''; ?>" href="#" role="button" aria-expanded="false">
 			<span><?php echo esc_html__( 'Price', 'astra' ); ?></span>
-			<span class="muukal-filter-arrow">&#9662;</span>
+			<span class="muukal-filter-arrow"></span>
 		</a>
 		<div class="dropdown-menu filter-opt-box muukal-filter-price-panel">
 			<div class="price-filter">
@@ -506,7 +506,7 @@ function muukal_product_filter_archive_render_sort_group( $sort_by ) {
 	<li class="dropdown muukal-filter-item muukal-filter-item-sort">
 		<a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
 			<span><?php echo esc_html( sprintf( 'Sort By: %s', $current_label ) ); ?></span>
-			<span class="muukal-filter-arrow">&#9662;</span>
+			<span class="muukal-filter-arrow"></span>
 		</a>
 		<div class="dropdown-menu filter-opt-box">
 			<?php foreach ( $options as $value => $label ) : ?>
