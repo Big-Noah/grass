@@ -52,64 +52,158 @@ function muukal_lens_replica_shortcode() {
 	ob_start();
 	?>
 	<div class="mlr-app" data-product-id="<?php echo esc_attr( $product['id'] ); ?>">
-		<button type="button" class="mlr-open"><?php echo esc_html( $config['ui']['open_button_label'] ); ?></button>
-		<div class="mlr-overlay" hidden>
-			<div class="mlr-backdrop" data-close="1"></div>
-			<div class="mlr-drawer" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $config['ui']['drawer_title'] ); ?>">
-				<div class="mlr-drawer-head">
-					<div>
-						<p class="mlr-kicker"><?php echo esc_html( $config['ui']['drawer_kicker'] ); ?></p>
-						<h2><?php echo esc_html( $config['ui']['drawer_title'] ); ?></h2>
-					</div>
-					<button type="button" class="mlr-close" data-close="1" aria-label="Close">&times;</button>
-				</div>
-				<div class="mlr-drawer-body">
-					<div class="mlr-stage">
-						<div class="mlr-product-card">
-							<div class="mlr-product-meta">
-								<p class="mlr-product-brand"><?php echo esc_html( $product['describe'] ); ?></p>
-								<h3><?php echo esc_html( $product['name'] ); ?></h3>
-								<p class="mlr-product-copy"><?php echo esc_html( $config['ui']['product_copy'] ); ?></p>
+		<button type="button" id="hadStock" class="btn theme-btn-b f-right go-select-lenses">
+			SELECT LENSES
+			<div class="fs14 mt5">or Non-prescription</div>
+		</button>
+		<section id="lens_container" class="container-fluid" hidden>
+			<div id="lens_mask" data-close="1"></div>
+			<div id="lens_box" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $config['ui']['drawer_title'] ); ?>">
+				<div id="lens_left_close" data-close="1" aria-label="Close">&times;</div>
+				<div class="container pb-60 ncpd1200_max_w">
+					<div class="row">
+						<div id="lensbox_left" class="col-12 col-xl-9">
+							<div id="lens_step_box" class="mt-20">
+								<div class="accordion" id="accordionExample">
+									<div id="step_1_card" class="card">
+										<div class="card-header">
+											<div class="mlr-step-toggle" data-step="1">
+												Step 1. &nbsp;WHAT DO YOU USE YOUR GLASSES FOR?
+												<span id="step_1_cn" class="f-right mr-50 step_cn"></span>
+											</div>
+										</div>
+										<div id="step1_div_box" class="collapse show">
+											<div class="card-body">
+												<ul class="row mlr-step-options" data-step-list="1"></ul>
+											</div>
+										</div>
+									</div>
+									<div id="step_2_card" class="card mt-10">
+										<div class="card-header">
+											<div class="mlr-step-toggle" data-step="2">
+												Step 2. &nbsp;ENTER YOUR PRESCRIPTION
+												<span id="step_2_cn" class="f-right mr-50 step_cn"></span>
+											</div>
+										</div>
+										<div id="step2_div_box" class="collapse">
+											<div class="card-body" id="power_box" style="display:none;"></div>
+											<div class="card-body" id="prescription_box"></div>
+										</div>
+									</div>
+									<div id="step_3_card" class="card mt-10">
+										<div class="card-header">
+											<div class="mlr-step-toggle" data-step="3">
+												Step 3. &nbsp;LENS TYPE - CHOOSE ONE OPTION
+												<span id="step_3_cn" class="f-right mr-50 step_cn"></span>
+											</div>
+										</div>
+										<div id="step3_div_box" class="collapse">
+											<div class="card-body">
+												<ul class="row mlr-step-options" data-step-list="3"></ul>
+											</div>
+										</div>
+									</div>
+									<div id="step_4_card" class="card mt-10">
+										<div class="card-header">
+											<div class="mlr-step-toggle" data-step="4">
+												Step 4. &nbsp;SELECT LENSES THICKNESS
+												<span id="step_4_cn" class="f-right mr-50 step_cn"></span>
+											</div>
+										</div>
+										<div id="step4_div_box" class="collapse">
+											<div class="card-body">
+												<ul class="row mlr-step-options" data-step-list="4"></ul>
+											</div>
+										</div>
+									</div>
+									<div id="step_5_card" class="card mt-10">
+										<div class="card-header">
+											<div class="mlr-step-toggle" data-step="5">
+												Step 5. &nbsp;SELECT LENSES COATING
+												<span id="step_5_cn" class="f-right mr-50 step_cn"></span>
+											</div>
+										</div>
+										<div id="step5_div_box" class="collapse">
+											<div class="card-body">
+												<ul class="row mlr-step-options" data-step-list="5"></ul>
+											</div>
+										</div>
+									</div>
+								</div>
+								<p class="mlr-status" aria-live="polite"></p>
 							</div>
-							<ul class="mlr-product-facts">
-								<li><span>Frame Code</span><strong><?php echo esc_html( $product['code'] ); ?></strong></li>
-								<li><span>Color</span><strong><?php echo esc_html( $product['color_label'] ); ?></strong></li>
-								<li><span>Size</span><strong><?php echo esc_html( $product['size'] . ' / ' . $product['measurements'] ); ?></strong></li>
-							</ul>
 						</div>
-						<div class="mlr-steps"></div>
-					</div>
-					<aside class="mlr-summary">
-						<div class="mlr-summary-card">
-							<h3>Selection Summary</h3>
-							<div class="mlr-summary-lines"></div>
-							<div class="mlr-addon"></div>
-							<div class="mlr-totals"></div>
-							<div class="mlr-actions"><button type="button" class="mlr-submit">Simulate Add To Cart</button></div>
-							<p class="mlr-status" aria-live="polite"></p>
-						</div>
-						<div class="mlr-payload-card">
-							<div class="mlr-payload-head">
-								<h3>Payload Preview</h3>
-								<button type="button" class="mlr-copy-payload">Copy</button>
+						<div id="lensbox_right" class="col-12 col-xl-3 animated">
+							<div id="lens_goods_box" class="mt-20 borderd7">
+								<div class="lens_goods_info">
+									<div id="lens_img_v_box">
+										<div id="lens_img_v" aria-hidden="true"><?php echo esc_html( substr( $product['describe'], 0, 1 ) ); ?></div>
+									</div>
+									<div class="mlr-divider"></div>
+									<div class="mt-10 pb-10 ml-10 mr-10">
+										<div class="bluelight-btn bluelight-btn-full">
+											<div class="inline-left ml10">
+												<div class="inline-left mt5 mlr-badge-icon">B</div>
+												<div class="inline-left ml15 fs18">
+													<div>
+														Add Blue Light Blocking
+														<span class="mlr-help">?</span>
+													</div>
+													<div class="lens_k_price fs14"><del>$23.95</del>&nbsp;&nbsp;<span class="fs18">+$9.75</span></div>
+													<div class="bluelight_tips">Shield your eyes from harmful blue light.</div>
+													<div class="lock_tips" style="display:none;">This option is not available</div>
+												</div>
+												<div class="inline-left fs18"><div class="bluelight-add">ADD</div></div>
+											</div>
+											<div class="clear"></div>
+										</div>
+										<div id="lens-add-cart" class="btn theme-btn-b">ADD TO CART</div>
+										<div class="mt-10 text-center mk-blue fs16" id="edit-again">Back to Edit Lenses</div>
+										<div class="mlr-payload-card">
+											<div class="mlr-payload-head">
+												<strong>Payload Preview</strong>
+												<button type="button" class="mlr-copy-payload">Copy</button>
+											</div>
+											<pre class="mlr-payload-preview">Waiting for simulation...</pre>
+										</div>
+									</div>
+									<div class="mt-10 ml-20 lens-line borderb-d7">
+										<div class="lens_goods_title"><?php echo esc_html( $product['describe'] ); ?></div>
+									</div>
+									<div class="ml-20 mt-10 lens-line"><span class="lens_lab">Frame Size:</span> <span><?php echo esc_html( $product['size'] ); ?></span>&nbsp;&nbsp;<?php echo esc_html( $product['measurements'] ); ?></div>
+									<div class="ml-20 lens-line"><span class="lens_lab">Frame Color:</span> <span id="lens_color_v"><?php echo esc_html( $product['color_label'] ); ?></span></div>
+									<div class="ml-20 lens-line mr-20"><span class="lens_lab">Frame Price:</span> <span class="mk-price f-right">$<span id="frame_price"><?php echo esc_html( number_format( (float) $product['frame_price'], 2, '.', '' ) ); ?></span></span></div>
+									<div class="ml-20 pb-10 borderb-d7"></div>
+								</div>
+								<div class="mt-20 ml-20 mr-20">
+									<div id="lens_deta_info" class="mt-20">
+										<div class="lens-line" id="data_attr_1"><span class="lens_lab">Usage:</span><span id="deta_usage"></span><span class="f-right" id="deta_usage_p"></span></div>
+										<div class="lens-line" id="data_attr_2" style="display:none;"><span class="lens_lab">Lens Prism:</span><span id="deta_lenst_prism">NONE</span><span class="f-right" id="deta_lenst_prism_p"></span></div>
+										<div class="lens-line" id="data_attr_3" style="display:none;"><span class="lens_lab">Lens Type:</span><span id="deta_lenst_type"></span><span class="f-right" id="deta_lenst_type_p"></span></div>
+										<div class="lens-line" id="data_attr_4" style="display:none;"><span class="lens_lab">Lens Index:</span><span id="deta_lenst_index"></span><span class="f-right" id="deta_lenst_index_p"></span></div>
+										<div class="lens-line" id="data_attr_5" style="display:none;"><span class="lens_lab">Lens Coating:</span><span id="deta_lenst_coatinc"></span><span class="f-right" id="deta_lenst_coatinc_p"></span></div>
+										<div class="lens-line" id="data_attr_6"><span class="lens_lab" style="width:135px;">Blue-light Blocking:</span><span id="deta_lenst_bluelight">NO</span><span class="f-right" id="deta_lenst_bluelight_p"></span></div>
+									</div>
+									<div class="lens-line"><span class="lens_lab">Lens Price:</span><span class="mk-price f-right">$<span id="lens_price">0.00</span></span></div>
+									<div class="fs16 lens-line"><span class="lens_lab">TOTAL:</span><span class="mk-price fs22 f-right">$<span id="total"><?php echo esc_html( number_format( (float) $product['frame_price'], 2, '.', '' ) ); ?></span></span></div>
+								</div>
 							</div>
-							<pre class="mlr-payload-preview">Waiting for simulation...</pre>
-						</div>
-					</aside>
-				</div>
-				<div class="mlr-upgrade-modal" hidden>
-					<div class="mlr-upgrade-backdrop"></div>
-					<div class="mlr-upgrade-dialog">
-						<h3>Upgrade to Premium Progressive?</h3>
-						<p class="mlr-upgrade-copy"></p>
-						<div class="mlr-upgrade-actions">
-							<button type="button" class="mlr-upgrade-skip">Keep Standard Progressive</button>
-							<button type="button" class="mlr-upgrade-accept">Upgrade</button>
+							<div class="mlr-upgrade-modal" hidden>
+								<div class="mlr-upgrade-backdrop"></div>
+								<div class="mlr-upgrade-dialog">
+									<h3>Upgrade to Premium Progressive?</h3>
+									<p class="mlr-upgrade-copy"></p>
+									<div class="mlr-upgrade-actions">
+										<button type="button" class="mlr-upgrade-skip">Keep Standard Progressive</button>
+										<button type="button" class="mlr-upgrade-accept">Upgrade</button>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	</div>
 	<?php
 

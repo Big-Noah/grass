@@ -8,50 +8,80 @@
 		return '$' + Number(value || 0).toFixed(2);
 	}
 
+	function createOption(option, selected) {
+		return '<option value="' + option.value + '"' + (String(option.value) === String(selected) ? ' selected' : '') + '>' + option.label + '</option>';
+	}
+
 	function absMax(values) {
 		return Math.max.apply(null, values.map(function (value) {
 			return Math.abs(Number(value || 0));
 		}));
 	}
 
-	function createOption(value, label) {
-		var option = document.createElement('option');
-		option.value = value;
-		option.textContent = label;
-		return option;
-	}
-
 	function init(root) {
-		var openButton = root.querySelector('.mlr-open');
-		var overlay = root.querySelector('.mlr-overlay');
+		var openButton = root.querySelector('#hadStock');
+		var container = root.querySelector('#lens_container');
 		var closeButtons = root.querySelectorAll('[data-close]');
-		var stepsMount = root.querySelector('.mlr-steps');
-		var summaryLines = root.querySelector('.mlr-summary-lines');
-		var addonBox = root.querySelector('.mlr-addon');
-		var totalsBox = root.querySelector('.mlr-totals');
-		var status = root.querySelector('.mlr-status');
 		var payloadPreview = root.querySelector('.mlr-payload-preview');
 		var copyButton = root.querySelector('.mlr-copy-payload');
-		var submitButton = root.querySelector('.mlr-submit');
+		var submitButton = root.querySelector('#lens-add-cart');
+		var editAgain = root.querySelector('#edit-again');
+		var status = root.querySelector('.mlr-status');
 		var upgradeModal = root.querySelector('.mlr-upgrade-modal');
 		var upgradeCopy = root.querySelector('.mlr-upgrade-copy');
 		var upgradeAccept = root.querySelector('.mlr-upgrade-accept');
 		var upgradeSkip = root.querySelector('.mlr-upgrade-skip');
-		var defaultForm = {
-			od_sph: '-1.25', os_sph: '-1.00', od_cyl: '-0.50', os_cyl: '-0.25', od_axis: '90', os_axis: '80',
-			od_add: '0', os_add: '0', pd: '63', od_pd: '0', os_pd: '0', npd: '0', birth_year: '0',
-			od_prismnum_v: '0', os_prismnum_v: '0', od_prismdir_v: '0', os_prismdir_v: '0',
-			od_prismnum_h: '0', os_prismnum_h: '0', od_prismdir_h: '0', os_prismdir_h: '0',
-			lens_comment: '', rx_name: 'Replica Test Rx'
-		};
+
 		var state = {
-			usage: 1, readers: 0, power: '0', lenstype: 0, lenstype_color: 0, lensindex: 0, coating: 0,
-			pdkey: 1, nearpd: 0, prism: 0, bluelight: false, form: Object.assign({}, defaultForm), payload: null,
-			upgradePrompted: false
+			openStep: 1,
+			usage: 1,
+			readers: 0,
+			power: '0',
+			lenstype: 0,
+			lenstype_color: 0,
+			lensindex: 0,
+			coating: 0,
+			pdkey: 1,
+			nearpd: 0,
+			prism: 0,
+			bluelight: false,
+			payload: null,
+			upgradePrompted: false,
+			form: {
+				od_sph: '0.00',
+				os_sph: '0.00',
+				od_cyl: '0.00',
+				os_cyl: '0.00',
+				od_axis: '',
+				os_axis: '',
+				od_add: '0',
+				os_add: '0',
+				pd: '63',
+				od_pd: '0',
+				os_pd: '0',
+				npd: '0',
+				birth_year: '0',
+				od_prismnum_v: '0',
+				os_prismnum_v: '0',
+				od_prismdir_v: '0',
+				os_prismdir_v: '0',
+				od_prismnum_h: '0',
+				os_prismnum_h: '0',
+				od_prismdir_h: '0',
+				os_prismdir_h: '0',
+				lens_comment: '',
+				rx_name: 'prescription March 2026'
+			}
 		};
 
 		function setStatus(message) {
 			status.textContent = message || '';
+		}
+
+		function getUsage() {
+			return schema.usage_options.find(function (item) {
+				return Number(item.id) === Number(state.usage);
+			});
 		}
 
 		function getUsagePriceTable() {
@@ -65,22 +95,6 @@
 		function getAllowedLensTypes() {
 			var rules = schema.dependency_rules.step3_enabled_by_usage;
 			return rules[String(state.usage)] || rules[state.usage] || [];
-		}
-
-		function getLensColorOptions(lenstypeId) {
-			return (schema.lens_type_color_map[String(lenstypeId)] || schema.lens_type_color_map[lenstypeId] || []).map(function (colorId) {
-				return schema.lens_colors[String(colorId)] || schema.lens_colors[colorId];
-			});
-		}
-
-		function bluelightLocked() {
-			return state.usage === 3 || state.lenstype === 7 || Number(state.lenstype_color) === 52;
-		}
-
-		function syncBluelightLock() {
-			if (bluelightLocked()) {
-				state.bluelight = false;
-			}
 		}
 
 		function getAllowedLensIndices() {
@@ -114,56 +128,31 @@
 			return { allowed: allowed, disabled: disabled };
 		}
 
-		function getRecommendedIndex() {
-			var odSph = Math.abs(Number(state.form.od_sph || 0));
-			var osSph = Math.abs(Number(state.form.os_sph || 0));
-			var odCyl = Math.abs(Number(state.form.od_cyl || 0));
-			var osCyl = Math.abs(Number(state.form.os_cyl || 0));
-			var odAdd = Math.abs(Number(state.form.od_sph || 0) + Number(state.form.od_add || 0));
-			var osAdd = Math.abs(Number(state.form.os_sph || 0) + Number(state.form.os_add || 0));
-			var maxBase = Math.max(odSph, osSph, odCyl, osCyl);
-			var maxAdd = Math.max(odAdd, osAdd);
-
-			if (state.usage === 1 || (state.usage === 2 && state.readers !== 1)) {
-				if (maxBase > 8) { return 5; }
-				if (maxBase > 6) { return 4; }
-				if (maxBase > 2.25) { return 3; }
-			}
-			if (state.usage === 2 && state.readers === 1) {
-				var power = Number(state.power || 0);
-				if (power > 6.25) { return 5; }
-				if (power > 3.5) { return 4; }
-				if (power > 2) { return 3; }
-			}
-			if (state.usage === 3 || state.usage === 4) {
-				if (Math.max(maxBase, maxAdd) > 5.75) { return 4; }
-				if (Math.max(maxBase, maxAdd) > 2.25) { return 3; }
-			}
-			if (state.usage === 5) {
-				if (Math.max(maxBase, maxAdd) > 7.25) { return 5; }
-				if (Math.max(maxBase, maxAdd) > 5.25) { return 4; }
-				if (Math.max(maxBase, maxAdd) > 2.25) { return 3; }
-			}
-			return 0;
+		function getLensColorOptions(lenstypeId) {
+			return (schema.lens_type_color_map[String(lenstypeId)] || schema.lens_type_color_map[lenstypeId] || []).map(function (colorId) {
+				return schema.lens_colors[String(colorId)] || schema.lens_colors[colorId];
+			});
 		}
 
-		function getLensTypePrice(lenstypeId) {
-			var row = getUsagePriceTable()[String(lenstypeId)] || getUsagePriceTable()[lenstypeId];
+		function getLensTypePrice(id) {
+			var row = getUsagePriceTable()[String(id)] || getUsagePriceTable()[id];
 			return row ? Number(row[4]) : 0;
 		}
 
-		function getLensIndexPrice(indexId) {
-			var row = getIndexPriceTable()[String(indexId)] || getIndexPriceTable()[indexId];
+		function getLensIndexPrice(id) {
+			var row = getIndexPriceTable()[String(id)] || getIndexPriceTable()[id];
 			return row ? Number(row[1]) : 0;
 		}
 
-		function getCoatingPrice(coatingId) {
-			var row = schema.pricing.coating_price[String(coatingId)] || schema.pricing.coating_price[coatingId];
+		function getCoatingPrice(id) {
+			var row = schema.pricing.coating_price[String(id)] || schema.pricing.coating_price[id];
 			return row ? Number(row[1]) : 0;
 		}
 
 		function getPrismPrice() {
-			if (!state.prism) { return 0; }
+			if (!state.prism) {
+				return 0;
+			}
 			var row = schema.pricing.prex_price['1'] || schema.pricing.prex_price[1];
 			return row ? Number(row[1]) : 0;
 		}
@@ -180,6 +169,16 @@
 			return Number(schema.product.frame_price) + getLensTotal();
 		}
 
+		function bluelightLocked() {
+			return state.usage === 3 || state.lenstype === 7 || Number(state.lenstype_color) === 52;
+		}
+
+		function syncBluelightLock() {
+			if (bluelightLocked()) {
+				state.bluelight = false;
+			}
+		}
+
 		function ensureValidSelections() {
 			if (getAllowedLensTypes().indexOf(Number(state.lenstype)) === -1) {
 				state.lenstype = 0;
@@ -192,197 +191,356 @@
 			syncBluelightLock();
 		}
 
+		function getRecommendedIndex() {
+			var maxBase = Math.max(Math.abs(Number(state.form.od_sph || 0)), Math.abs(Number(state.form.os_sph || 0)), Math.abs(Number(state.form.od_cyl || 0)), Math.abs(Number(state.form.os_cyl || 0)));
+			if (state.readers === 1 && state.usage === 2) {
+				var power = Number(state.power || 0);
+				if (power > 6.25) {
+					return 5;
+				}
+				if (power > 3.5) {
+					return 4;
+				}
+				if (power > 2) {
+					return 3;
+				}
+				return 2;
+			}
+			if (maxBase > 8) {
+				return 5;
+			}
+			if (maxBase > 6) {
+				return 4;
+			}
+			if (maxBase > 2.25) {
+				return 3;
+			}
+			return 2;
+		}
+
 		function validateStep2() {
-			if (state.usage === 20) { return true; }
-			if (state.usage === 2 && state.readers === 1) { return Number(state.power || 0) > 0; }
+			if (state.usage === 20) {
+				return true;
+			}
+			if (state.usage === 2 && state.readers === 1) {
+				return Number(state.power || 0) > 0;
+			}
 			var hasRx = Number(state.form.od_sph || 0) !== 0 || Number(state.form.os_sph || 0) !== 0 || Number(state.form.od_cyl || 0) !== 0 || Number(state.form.os_cyl || 0) !== 0 || Number(state.form.od_add || 0) !== 0 || Number(state.form.os_add || 0) !== 0;
-			if (!hasRx) { setStatus('Prescription has no value. Use non-prescription if you do not need Rx lenses.'); return false; }
+			if (!hasRx) {
+				setStatus('Prescription has no value. Use non-prescription if you do not need Rx lenses.');
+				return false;
+			}
 			if ((Number(state.form.od_cyl || 0) !== 0 && !Number(state.form.od_axis || 0)) || (Number(state.form.os_cyl || 0) !== 0 && !Number(state.form.os_axis || 0))) {
-				setStatus('CYL requires AXIS for the same eye.'); return false;
+				setStatus('CYL requires AXIS for the same eye.');
+				return false;
 			}
 			if (state.pdkey === 2 && (!Number(state.form.od_pd || 0) || !Number(state.form.os_pd || 0))) {
-				setStatus('Two-PD mode requires right and left PD.'); return false;
+				setStatus('Two-PD mode requires right and left PD.');
+				return false;
 			}
 			if ([3, 4, 5].indexOf(state.usage) >= 0 && (!Number(state.form.od_add || 0) || !Number(state.form.os_add || 0))) {
-				setStatus('Bifocal and progressive flows require ADD values.'); return false;
+				setStatus('Bifocal and progressive flows require ADD values.');
+				return false;
 			}
-			if (state.prism) {
-				var hasPrismNumber = Number(state.form.od_prismnum_v || 0) || Number(state.form.os_prismnum_v || 0) || Number(state.form.od_prismnum_h || 0) || Number(state.form.os_prismnum_h || 0);
-				var hasPrismDirection = state.form.od_prismdir_v !== '0' || state.form.os_prismdir_v !== '0' || state.form.od_prismdir_h !== '0' || state.form.os_prismdir_h !== '0';
-				if (!hasPrismNumber || !hasPrismDirection) { setStatus('Prism mode requires number and direction fields.'); return false; }
-			}
-			if ((state.form.lens_comment || '').length > 200) { setStatus('Comment length must stay within 200 characters.'); return false; }
 			return true;
 		}
 
 		function validateBeforeSubmit() {
-			if (!state.usage) { setStatus('Choose a usage first.'); return false; }
-			if (!validateStep2()) { return false; }
-			if (!state.lenstype) { setStatus('Choose a lens type.'); return false; }
-			if ((schema.lens_types[String(state.lenstype)] || {}).requires_color && !state.lenstype_color) { setStatus('This lens type requires a color selection.'); return false; }
-			if (!state.lensindex) { setStatus('Choose a lens thickness.'); return false; }
-			if (!state.coating) { setStatus('Choose a coating.'); return false; }
+			if (!validateStep2()) {
+				return false;
+			}
+			if (!state.lenstype) {
+				setStatus('Choose a lens type.');
+				return false;
+			}
+			if ((schema.lens_types[String(state.lenstype)] || {}).requires_color && !state.lenstype_color) {
+				setStatus('This lens type requires a color selection.');
+				return false;
+			}
+			if (!state.lensindex) {
+				setStatus('Choose a lens thickness.');
+				return false;
+			}
+			if (!state.coating) {
+				setStatus('Choose a coating.');
+				return false;
+			}
 			return true;
 		}
 
-		function renderSummary() {
-			var usage = schema.usage_options.find(function (item) { return Number(item.id) === Number(state.usage); });
+		function setOpenStep(step) {
+			state.openStep = step;
+			[1, 2, 3, 4, 5].forEach(function (number) {
+				var body = root.querySelector('#step' + number + '_div_box');
+				if (body) {
+					body.classList.toggle('show', number === step);
+				}
+			});
+		}
+
+		function updateStepSummaries() {
+			var usage = getUsage();
 			var lensType = schema.lens_types[String(state.lenstype)] || schema.lens_types[state.lenstype];
 			var lensColor = schema.lens_colors[String(state.lenstype_color)] || schema.lens_colors[state.lenstype_color];
 			var lensIndex = schema.lens_indices[String(state.lensindex)] || schema.lens_indices[state.lensindex];
 			var coating = schema.coatings[String(state.coating)] || schema.coatings[state.coating];
-			var lines = [];
-			lines.push('<div class=\"mlr-line\"><span>Usage</span><strong>' + (usage ? usage.short_label : 'Not selected') + '</strong></div>');
-			lines.push('<div class=\"mlr-line\"><span>Lens Type</span><strong>' + (lensType ? lensType.label : 'Not selected') + '</strong></div>');
-			if (lensColor) { lines.push('<div class=\"mlr-line\"><span>Lens Color</span><strong>' + lensColor.label + '</strong></div>'); }
-			lines.push('<div class=\"mlr-line\"><span>Thickness</span><strong>' + (lensIndex ? lensIndex.label : 'Not selected') + '</strong></div>');
-			lines.push('<div class=\"mlr-line\"><span>Coating</span><strong>' + (coating ? coating.label : 'Not selected') + '</strong></div>');
-			if (state.readers === 1 && state.usage === 2) { lines.push('<div class=\"mlr-line\"><span>Reader Power</span><strong>+' + state.power + '</strong></div>'); }
-			summaryLines.innerHTML = lines.join('');
-			addonBox.innerHTML = '<div class=\"mlr-addon-row\"><span>Blue Light Add-on</span><strong>' + (state.bluelight ? money(getBlueLightPrice()) : 'No') + '</strong></div><div class=\"mlr-addon-row\"><span>Prism</span><strong>' + (state.prism ? money(getPrismPrice()) : 'No') + '</strong></div>';
-			totalsBox.innerHTML = '<div class=\"mlr-total-row\"><span>Frame</span><strong>' + money(schema.product.frame_price) + '</strong></div><div class=\"mlr-total-row\"><span>Lens</span><strong>' + money(getLensTotal()) + '</strong></div><div class=\"mlr-total-row is-grand\"><span>Total</span><strong>' + money(getGrandTotal()) + '</strong></div>';
-		}
-
-		function buildSelect(id, options, value) {
-			var select = document.createElement('select');
-			options.forEach(function (option) { select.appendChild(createOption(option.value, option.label)); });
-			select.value = value;
-			select.addEventListener('change', function () {
-				state.form[id] = select.value;
-				if (id === 'od_cyl' && Number(select.value) === 0) { state.form.od_axis = ''; }
-				if (id === 'os_cyl' && Number(select.value) === 0) { state.form.os_axis = ''; }
-				ensureValidSelections();
-				render();
-			});
-			return select;
+			root.querySelector('#step_1_cn').innerHTML = usage ? usage.short_label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
+			root.querySelector('#step_2_cn').innerHTML = state.usage === 20 ? 'Skipped' : 'Entered&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
+			root.querySelector('#step_3_cn').innerHTML = lensType ? lensType.label + (lensColor ? ' / ' + lensColor.label : '') + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
+			root.querySelector('#step_4_cn').innerHTML = lensIndex ? lensIndex.label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
+			root.querySelector('#step_5_cn').innerHTML = coating ? coating.label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
 		}
 
 		function renderUsageStep() {
-			var card = document.createElement('section');
-			card.className = 'mlr-step is-open';
-			card.innerHTML = '<header><p>Step 1</p><h3>What do you use your glasses for?</h3></header>';
-			var options = document.createElement('div');
-			options.className = 'mlr-option-grid';
+			var mount = root.querySelector('[data-step-list="1"]');
+			mount.innerHTML = '';
 			schema.usage_options.forEach(function (option) {
-				var button = document.createElement('button');
-				button.type = 'button';
-				button.className = 'mlr-option-card' + (Number(state.usage) === Number(option.id) ? ' is-active' : '');
-				button.innerHTML = '<strong>' + option.label + '</strong><span>' + option.description + '</span>';
+				var li = document.createElement('li');
+				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
+				var active = Number(state.usage) === Number(option.id);
+				li.innerHTML = '<div id="step1_li_' + option.id + '" class="panel panel-default lens_key' + (active ? ' lens_k_choose' : '') + '" step="1" val="' + option.id + '">' +
+					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.short_label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (option.id === 3 ? '<del>$18.75</del> <span class="mk-price">$15.99</span><span class="lensoff">15% OFF</span>' : option.id === 4 ? '$35.99' : option.id === 5 ? '<del>$59.99</del> <span class="mk-price">$38.99</span><span class="lensoff">35% OFF</span>' : 'FREE') + '</span></div></div></div></div></div>';
+				li.querySelector('.lens_key').addEventListener('click', function () {
+					state.usage = Number(option.id);
+					state.readers = 0;
+					state.power = '0';
+					state.lenstype = 0;
+					state.lenstype_color = 0;
+					state.lensindex = 0;
+					state.coating = 0;
+					state.pdkey = 1;
+					state.nearpd = 0;
+					state.prism = 0;
+					state.upgradePrompted = false;
+					ensureValidSelections();
+					setOpenStep(2);
+					render();
+				});
+				mount.appendChild(li);
+			});
+		}
+
+		function renderPowerBox() {
+			var mount = root.querySelector('#power_box');
+			var visible = state.usage === 2 && state.readers === 1;
+			mount.style.display = visible ? '' : 'none';
+			if (!visible) {
+				mount.innerHTML = '';
+				return;
+			}
+			mount.innerHTML = '<div class="poewr_t"><div class="mb-10 fs14 fw600">Select your readers\' lens power</div><div class="mb-10">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div></div><div class="mlr-power-values"></div><div class="text-center mt-20"><button id="power-sure" class="btn theme-btn-w fs16">Next</button></div>';
+			var values = mount.querySelector('.mlr-power-values');
+			schema.prescription_fields.power.options.forEach(function (option) {
+				var value = option.value.replace('+', '');
+				var button = document.createElement('span');
+				button.className = 'power_v' + (state.power === value ? ' active' : '');
+				button.textContent = option.label;
 				button.addEventListener('click', function () {
-					state.usage = Number(option.id); state.readers = 0; state.power = '0'; state.lenstype = 0; state.lenstype_color = 0; state.lensindex = 0; state.coating = 0; state.pdkey = 1; state.nearpd = 0; state.prism = 0; state.upgradePrompted = false; ensureValidSelections(); render();
+					state.power = value;
+					render();
 				});
-				options.appendChild(button);
+				values.appendChild(button);
 			});
-			card.appendChild(options);
-			return card;
+			mount.querySelector('#power-sure').addEventListener('click', function () {
+				setOpenStep(3);
+			});
 		}
 
-		function renderPrescriptionControls() {
-			var wrap = document.createElement('div');
-			wrap.className = 'mlr-form';
-			if (state.usage === 2) {
-				var choice = document.createElement('div');
-				choice.className = 'mlr-choice-row';
-				choice.innerHTML = '<label><input type=\"radio\" name=\"rx_mode\" value=\"rx\"' + (state.readers === 0 ? ' checked' : '') + '> Enter your prescription</label><label><input type=\"radio\" name=\"rx_mode\" value=\"readers\"' + (state.readers === 1 ? ' checked' : '') + '> For Readers: just select a lens power</label>';
-				choice.addEventListener('change', function (event) { state.readers = event.target.value === 'readers' ? 1 : 0; if (state.readers === 0) { state.power = '0'; } ensureValidSelections(); render(); });
-				wrap.appendChild(choice);
+		function renderPrescriptionBox() {
+			var mount = root.querySelector('#prescription_box');
+			if (state.usage === 20) {
+				mount.innerHTML = '<div class="mlr-empty-prescription">Non-prescription selected. This step is skipped.</div>';
+				return;
 			}
-			if (state.usage === 2 && state.readers === 1) {
-				var powers = document.createElement('div');
-				powers.className = 'mlr-power-grid';
-				schema.prescription_fields.power.options.forEach(function (option) {
-					var button = document.createElement('button');
-					button.type = 'button';
-					button.className = 'mlr-chip' + (state.power === option.value.replace('+', '') ? ' is-active' : '');
-					button.textContent = option.label;
-					button.addEventListener('click', function () { state.power = option.value.replace('+', ''); ensureValidSelections(); render(); });
-					powers.appendChild(button);
+			var addDisabled = [1, 20].indexOf(state.usage) >= 0;
+			var axisOdDisabled = Number(state.form.od_cyl || 0) === 0;
+			var axisOsDisabled = Number(state.form.os_cyl || 0) === 0;
+			var pdHtml = state.pdkey === 1
+				? '<div class="mlr-pd-single"><label>PD</label><select data-field="pd">' + schema.prescription_fields.pd.options.map(function (option) { return createOption(option, state.form.pd); }).join('') + '</select></div>'
+				: '<div class="mlr-pd-double"><label>Right PD</label><select data-field="od_pd">' + schema.prescription_fields.od_pd.options.map(function (option) { return createOption(option, state.form.od_pd); }).join('') + '</select><label>Left PD</label><select data-field="os_pd">' + schema.prescription_fields.os_pd.options.map(function (option) { return createOption(option, state.form.os_pd); }).join('') + '</select></div>';
+			var nearPdHtml = state.nearpd ? '<div class="mlr-pd-single"><label>Near PD</label><select data-field="npd">' + schema.prescription_fields.npd.options.map(function (option) { return createOption(option, state.form.npd === '0' ? '46' : state.form.npd); }).join('') + '</select></div>' : '';
+			var prismHtml = state.prism ? '<div class="mlr-prism-grid">' +
+				['od_prismnum_v', 'os_prismnum_v', 'od_prismdir_v', 'os_prismdir_v', 'od_prismnum_h', 'os_prismnum_h', 'od_prismdir_h', 'os_prismdir_h'].map(function (field) {
+					return '<label>' + field.replace(/_/g, ' ').toUpperCase() + '<select data-field="' + field + '">' + schema.prescription_fields[field].options.map(function (option) { return createOption(option, state.form[field]); }).join('') + '</select></label>';
+				}).join('') + '</div>' : '';
+			mount.innerHTML = '<div class="mlr-rx-mode"><label><input type="radio" name="rx_mode" value="rx"' + (state.readers === 0 ? ' checked' : '') + '> Enter your prescription</label>' +
+				(state.usage === 2 ? '<label><input type="radio" name="rx_mode" value="readers"' + (state.readers === 1 ? ' checked' : '') + '> For Readers: just select a lens power</label>' : '') + '</div>' +
+				'<div class="pres_sr_box"><ul><li class="sr-title"><div>OD<span>(Right eye)</span></div><div>OS<span>(Left eye)</span></div></li></ul></div>' +
+				'<div class="mlr-rx-table">' +
+				buildPairSelect('Sphere(SPH)', 'od_sph', 'os_sph', false, false) +
+				buildPairSelect('Cylinder(CYL)', 'od_cyl', 'os_cyl', false, false) +
+				buildPairSelect('Axis', 'od_axis', 'os_axis', axisOdDisabled, axisOsDisabled) +
+				buildPairSelect('ADD(Near Addition)', 'od_add', 'os_add', addDisabled, addDisabled) +
+				'</div>' +
+				'<div class="mlr-upload-copy">If you are not sure how to enter the prescription, you can upload the picture of the prescription, and we will complete the prescription information for you.</div>' +
+				'<div class="mlr-pd-box">' + pdHtml + nearPdHtml + '</div>' +
+				'<div class="mlr-toggle-line"><label><input type="checkbox" data-toggle="pd"' + (state.pdkey === 2 ? ' checked' : '') + '> Two PD numbers</label><label><input type="checkbox" data-toggle="nearpd"' + (state.nearpd === 1 ? ' checked' : '') + '> Near PD</label><label><input type="checkbox" data-toggle="prism"' + (state.prism === 1 ? ' checked' : '') + '> Add Prism +$9.95</label></div>' +
+				prismHtml +
+				'<h6>Comments:</h6><textarea data-field="lens_comment">' + (state.form.lens_comment || '') + '</textarea>' +
+				'<div class="mlr-rx-name">Save prescription As:<input type="text" data-field="rx_name" value="' + state.form.rx_name + '"></div>' +
+				'<div class="text-center mt-20"><button class="btn theme-btn-w fs16" data-next-step="3">SUBMIT PRESCRIPTION</button></div>';
+
+			mount.querySelectorAll('select[data-field], textarea[data-field], input[type="text"][data-field]').forEach(function (input) {
+				input.addEventListener('change', function () {
+					state.form[input.getAttribute('data-field')] = input.value;
+					ensureValidSelections();
+					render();
 				});
-				wrap.appendChild(powers);
-				return wrap;
-			}
-			var formGrid = document.createElement('div');
-			formGrid.className = 'mlr-rx-grid';
-			[
-				{ label: 'OD SPH', id: 'od_sph' }, { label: 'OS SPH', id: 'os_sph' }, { label: 'OD CYL', id: 'od_cyl' }, { label: 'OS CYL', id: 'os_cyl' },
-				{ label: 'OD AXIS', id: 'od_axis' }, { label: 'OS AXIS', id: 'os_axis' }, { label: 'OD ADD', id: 'od_add' }, { label: 'OS ADD', id: 'os_add' }
-			].forEach(function (field) {
-				var label = document.createElement('label'); label.className = 'mlr-field'; label.innerHTML = '<span>' + field.label + '</span>';
-				var select = buildSelect(field.id, schema.prescription_fields[field.id].options, state.form[field.id]);
-				if ((field.id === 'od_axis' && Number(state.form.od_cyl || 0) === 0) || (field.id === 'os_axis' && Number(state.form.os_cyl || 0) === 0)) { select.disabled = true; }
-				if ((field.id === 'od_add' || field.id === 'os_add') && [1, 20].indexOf(state.usage) >= 0) { select.disabled = true; select.value = '0'; }
-				label.appendChild(select); formGrid.appendChild(label);
 			});
-			wrap.appendChild(formGrid);
-			var toggles = document.createElement('div');
-			toggles.className = 'mlr-toggle-row';
-			toggles.innerHTML = '<label><input type=\"checkbox\" ' + (state.pdkey === 2 ? 'checked' : '') + '> Two PD values</label><label><input type=\"checkbox\" data-nearpd=\"1\" ' + (state.nearpd === 1 ? 'checked' : '') + '> Near PD</label><label><input type=\"checkbox\" data-prism=\"1\" ' + (state.prism === 1 ? 'checked' : '') + '> Prism</label>';
-			var toggleInputs = toggles.querySelectorAll('input');
-			toggleInputs[0].addEventListener('change', function () { state.pdkey = toggleInputs[0].checked ? 2 : 1; render(); });
-			toggleInputs[1].addEventListener('change', function () { state.nearpd = toggleInputs[1].checked ? 1 : 0; render(); });
-			toggleInputs[2].addEventListener('change', function () { state.prism = toggleInputs[2].checked ? 1 : 0; render(); });
-			wrap.appendChild(toggles);
-			var pdGrid = document.createElement('div');
-			pdGrid.className = 'mlr-pd-grid';
-			if (state.pdkey === 1) {
-				var pdLabel = document.createElement('label'); pdLabel.className = 'mlr-field'; pdLabel.innerHTML = '<span>PD</span>'; pdLabel.appendChild(buildSelect('pd', schema.prescription_fields.pd.options, state.form.pd)); pdGrid.appendChild(pdLabel);
-			} else {
-				['od_pd', 'os_pd'].forEach(function (fieldId) { var pdField = document.createElement('label'); pdField.className = 'mlr-field'; pdField.innerHTML = '<span>' + (fieldId === 'od_pd' ? 'Right PD' : 'Left PD') + '</span>'; pdField.appendChild(buildSelect(fieldId, schema.prescription_fields[fieldId].options, state.form[fieldId])); pdGrid.appendChild(pdField); });
-			}
-			if (state.nearpd === 1) { var npdField = document.createElement('label'); npdField.className = 'mlr-field'; npdField.innerHTML = '<span>Near PD</span>'; npdField.appendChild(buildSelect('npd', schema.prescription_fields.npd.options, state.form.npd === '0' ? '46' : state.form.npd)); pdGrid.appendChild(npdField); }
-			wrap.appendChild(pdGrid);
-			if (state.prism === 1) {
-				var prismGrid = document.createElement('div'); prismGrid.className = 'mlr-rx-grid';
-				[{ label: 'OD Prism V', id: 'od_prismnum_v' }, { label: 'OS Prism V', id: 'os_prismnum_v' }, { label: 'OD Base V', id: 'od_prismdir_v' }, { label: 'OS Base V', id: 'os_prismdir_v' }, { label: 'OD Prism H', id: 'od_prismnum_h' }, { label: 'OS Prism H', id: 'os_prismnum_h' }, { label: 'OD Base H', id: 'od_prismdir_h' }, { label: 'OS Base H', id: 'os_prismdir_h' }].forEach(function (field) { var prismField = document.createElement('label'); prismField.className = 'mlr-field'; prismField.innerHTML = '<span>' + field.label + '</span>'; prismField.appendChild(buildSelect(field.id, schema.prescription_fields[field.id].options, state.form[field.id])); prismGrid.appendChild(prismField); });
-				wrap.appendChild(prismGrid);
-			}
-			return wrap;
+			mount.querySelectorAll('input[name="rx_mode"]').forEach(function (input) {
+				input.addEventListener('change', function () {
+					state.readers = input.value === 'readers' ? 1 : 0;
+					if (state.readers === 0) {
+						state.power = '0';
+					}
+					render();
+				});
+			});
+			mount.querySelectorAll('input[data-toggle]').forEach(function (input) {
+				input.addEventListener('change', function () {
+					var type = input.getAttribute('data-toggle');
+					if (type === 'pd') {
+						state.pdkey = input.checked ? 2 : 1;
+					}
+					if (type === 'nearpd') {
+						state.nearpd = input.checked ? 1 : 0;
+					}
+					if (type === 'prism') {
+						state.prism = input.checked ? 1 : 0;
+					}
+					render();
+				});
+			});
+			mount.querySelector('[data-next-step="3"]').addEventListener('click', function () {
+				if (validateStep2()) {
+					setOpenStep(3);
+				}
+			});
 		}
 
-		function renderPrescriptionStep() {
-			var card = document.createElement('section'); card.className = 'mlr-step is-open'; card.innerHTML = '<header><p>Step 2</p><h3>Enter your prescription</h3></header>'; card.appendChild(renderPrescriptionControls()); return card;
+		function buildPairSelect(label, odField, osField, odDisabled, osDisabled) {
+			return '<div class="mlr-rx-row"><div class="sr-name-title"><span>' + label + '</span></div>' +
+				'<label><select data-field="' + odField + '"' + (odDisabled ? ' disabled' : '') + '>' + schema.prescription_fields[odField].options.map(function (option) { return createOption(option, state.form[odField]); }).join('') + '</select></label>' +
+				'<label><select data-field="' + osField + '"' + (osDisabled ? ' disabled' : '') + '>' + schema.prescription_fields[osField].options.map(function (option) { return createOption(option, state.form[osField]); }).join('') + '</select></label></div>';
 		}
 
 		function renderLensTypeStep() {
-			var card = document.createElement('section'); card.className = 'mlr-step is-open'; card.innerHTML = '<header><p>Step 3</p><h3>Lens type</h3></header>';
-			var wrap = document.createElement('div'); wrap.className = 'mlr-option-grid';
+			var mount = root.querySelector('[data-step-list="3"]');
+			mount.innerHTML = '';
 			Object.keys(schema.lens_types).forEach(function (key) {
-				var option = schema.lens_types[key]; var allowed = getAllowedLensTypes().indexOf(Number(option.id)) >= 0;
-				if (option.dom_hidden) { return; }
-				var button = document.createElement('button'); button.type = 'button'; button.className = 'mlr-option-card' + (Number(state.lenstype) === Number(option.id) ? ' is-active' : '') + (!allowed ? ' is-disabled' : ''); button.disabled = !allowed;
-				button.innerHTML = '<strong>' + option.label + '</strong><span>' + option.description + '</span><em>' + money(getLensTypePrice(option.id)) + '</em>';
-				button.addEventListener('click', function () { state.lenstype = Number(option.id); state.lenstype_color = 0; syncBluelightLock(); ensureValidSelections(); render(); });
-				wrap.appendChild(button);
+				var option = schema.lens_types[key];
+				if (option.dom_hidden) {
+					return;
+				}
+				var allowed = getAllowedLensTypes().indexOf(Number(option.id)) >= 0;
+				var li = document.createElement('li');
+				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
+				li.innerHTML = '<div id="step3_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.lenstype) === Number(option.id) ? ' lens_k_choose' : '') + (allowed ? '' : ' disable_step_panel') + '" step="3" val="' + option.id + '">' +
+					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getLensTypePrice(option.id) ? money(getLensTypePrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+				var card = li.querySelector('.lens_key');
+				if (allowed) {
+					card.addEventListener('click', function () {
+						state.lenstype = Number(option.id);
+						state.lenstype_color = 0;
+						ensureValidSelections();
+						setOpenStep(4);
+						render();
+					});
+				}
+				mount.appendChild(li);
 				if (Number(state.lenstype) === Number(option.id) && option.requires_color) {
-					var colors = document.createElement('div'); colors.className = 'mlr-color-grid';
-					getLensColorOptions(option.id).forEach(function (color) { var chip = document.createElement('button'); chip.type = 'button'; chip.className = 'mlr-color-chip' + (Number(state.lenstype_color) === Number(color.id) ? ' is-active' : ''); chip.textContent = color.label; chip.addEventListener('click', function () { state.lenstype_color = Number(color.id); syncBluelightLock(); ensureValidSelections(); render(); }); colors.appendChild(chip); });
-					wrap.appendChild(colors);
+					var colorLi = document.createElement('li');
+					colorLi.className = 'col-12';
+					var colors = getLensColorOptions(option.id).map(function (color) {
+						return '<button type="button" class="mlr-color-choice' + (Number(state.lenstype_color) === Number(color.id) ? ' active' : '') + '" data-color="' + color.id + '">' + color.label + '</button>';
+					}).join('');
+					colorLi.innerHTML = '<div class="mlr-color-wrap">' + colors + '</div>';
+					mount.appendChild(colorLi);
+					colorLi.querySelectorAll('[data-color]').forEach(function (button) {
+						button.addEventListener('click', function () {
+							state.lenstype_color = Number(button.getAttribute('data-color'));
+							ensureValidSelections();
+							render();
+						});
+					});
 				}
 			});
-			card.appendChild(wrap); return card;
 		}
 
 		function renderLensIndexStep() {
-			var rule = getAllowedLensIndices(); var recommended = getRecommendedIndex();
-			var card = document.createElement('section'); card.className = 'mlr-step is-open'; card.innerHTML = '<header><p>Step 4</p><h3>Select lens thickness</h3></header>';
-			var wrap = document.createElement('div'); wrap.className = 'mlr-option-grid';
+			var mount = root.querySelector('[data-step-list="4"]');
+			var rule = getAllowedLensIndices();
+			var recommended = getRecommendedIndex();
+			mount.innerHTML = '';
 			Object.keys(schema.lens_indices).forEach(function (key) {
-				var option = schema.lens_indices[key]; var allowed = rule.allowed.indexOf(Number(option.id)) >= 0; var disabled = !allowed || rule.disabled.indexOf(Number(option.id)) >= 0;
-				var button = document.createElement('button'); button.type = 'button'; button.className = 'mlr-option-card' + (Number(state.lensindex) === Number(option.id) ? ' is-active' : '') + (disabled ? ' is-disabled' : ''); button.disabled = disabled;
-				button.innerHTML = '<strong>' + option.label + '</strong><span>' + (recommended === Number(option.id) ? 'Recommended for current Rx.' : 'Available for current flow.') + '</span><em>' + money(getLensIndexPrice(option.id)) + '</em>';
-				button.addEventListener('click', function () { state.lensindex = Number(option.id); render(); }); wrap.appendChild(button);
+				var option = schema.lens_indices[key];
+				var allowed = rule.allowed.indexOf(Number(option.id)) >= 0;
+				var disabled = !allowed || rule.disabled.indexOf(Number(option.id)) >= 0;
+				var li = document.createElement('li');
+				li.className = 'col-6 col-lg-6';
+				li.innerHTML = '<div id="step4_li_' + option.id + '" class="panel panel-default step4_panel lens_key' + (Number(state.lensindex) === Number(option.id) ? ' lens_k_choose' : '') + (disabled ? ' disable_step_panel' : '') + '" step="4" val="' + option.id + '">' +
+					'<div class="panel-heading">' + option.label + (recommended === Number(option.id) ? '<span class="recommended-icon">Recommended</span>' : '') + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>Available for the current prescription flow.</div><div class="mt-10"><span class="lens_k_price">' + money(getLensIndexPrice(option.id)) + '</span></div></div></div></div></div>';
+				if (!disabled) {
+					li.querySelector('.lens_key').addEventListener('click', function () {
+						state.lensindex = Number(option.id);
+						setOpenStep(5);
+						render();
+					});
+				}
+				mount.appendChild(li);
 			});
-			card.appendChild(wrap); return card;
 		}
 
 		function renderCoatingStep() {
-			var card = document.createElement('section'); card.className = 'mlr-step is-open'; card.innerHTML = '<header><p>Step 5</p><h3>Select lens coating</h3></header>';
-			var wrap = document.createElement('div'); wrap.className = 'mlr-option-grid';
-			Object.keys(schema.coatings).forEach(function (key) { var option = schema.coatings[key]; var button = document.createElement('button'); button.type = 'button'; button.className = 'mlr-option-card' + (Number(state.coating) === Number(option.id) ? ' is-active' : ''); button.innerHTML = '<strong>' + option.label + '</strong><span>' + option.description + '</span><em>' + money(getCoatingPrice(option.id)) + '</em>'; button.addEventListener('click', function () { state.coating = Number(option.id); render(); }); wrap.appendChild(button); });
-			card.appendChild(wrap);
-			var addon = document.createElement('div'); addon.className = 'mlr-addon-toggle' + (bluelightLocked() ? ' is-locked' : '') + (state.bluelight ? ' is-active' : ''); addon.innerHTML = '<div><strong>' + schema.bluelight.label + '</strong><span>' + schema.bluelight.description + '</span></div><em>' + money(schema.bluelight.price[1]) + '</em>';
-			addon.addEventListener('click', function () { if (bluelightLocked()) { setStatus('Blue light add-on is locked for this combination.'); return; } state.bluelight = !state.bluelight; render(); });
-			card.appendChild(addon); return card;
+			var mount = root.querySelector('[data-step-list="5"]');
+			mount.innerHTML = '';
+			Object.keys(schema.coatings).forEach(function (key) {
+				var option = schema.coatings[key];
+				var li = document.createElement('li');
+				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
+				li.innerHTML = '<div id="step5_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.coating) === Number(option.id) ? ' lens_k_choose' : '') + '" step="5" val="' + option.id + '">' +
+					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
+					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4"><div class="mlr-photo">' + option.label.charAt(0) + '</div></div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getCoatingPrice(option.id) ? money(getCoatingPrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+				li.querySelector('.lens_key').addEventListener('click', function () {
+					state.coating = Number(option.id);
+					render();
+				});
+				mount.appendChild(li);
+			});
+		}
+
+		function renderSummary() {
+			var usage = getUsage();
+			var lensType = schema.lens_types[String(state.lenstype)] || schema.lens_types[state.lenstype];
+			var lensColor = schema.lens_colors[String(state.lenstype_color)] || schema.lens_colors[state.lenstype_color];
+			var lensIndex = schema.lens_indices[String(state.lensindex)] || schema.lens_indices[state.lensindex];
+			var coating = schema.coatings[String(state.coating)] || schema.coatings[state.coating];
+			var blueButton = root.querySelector('.bluelight-btn');
+			var blueButtonLabel = root.querySelector('#deta_lenst_bluelight');
+			root.querySelector('#deta_usage').textContent = usage ? usage.short_label : '';
+			root.querySelector('#deta_usage_p').textContent = '';
+			root.querySelector('#deta_lenst_prism').textContent = state.prism ? 'YES' : 'NONE';
+			root.querySelector('#deta_lenst_prism_p').textContent = state.prism ? money(getPrismPrice()) : '';
+			root.querySelector('#deta_lenst_type').textContent = lensType ? lensType.label + (lensColor ? ' / ' + lensColor.label : '') : '';
+			root.querySelector('#deta_lenst_type_p').textContent = lensType ? money(getLensTypePrice(state.lenstype)) : '';
+			root.querySelector('#deta_lenst_index').textContent = lensIndex ? lensIndex.label : '';
+			root.querySelector('#deta_lenst_index_p').textContent = lensIndex ? money(getLensIndexPrice(state.lensindex)) : '';
+			root.querySelector('#deta_lenst_coatinc').textContent = coating ? coating.label : '';
+			root.querySelector('#deta_lenst_coatinc_p').textContent = coating ? (getCoatingPrice(state.coating) ? money(getCoatingPrice(state.coating)) : 'FREE') : '';
+			blueButtonLabel.textContent = state.bluelight ? 'YES' : 'NO';
+			root.querySelector('#deta_lenst_bluelight_p').textContent = state.bluelight ? money(getBlueLightPrice()) : '';
+			root.querySelector('#data_attr_2').style.display = state.prism ? 'block' : 'none';
+			root.querySelector('#data_attr_3').style.display = lensType ? 'block' : 'none';
+			root.querySelector('#data_attr_4').style.display = lensIndex ? 'block' : 'none';
+			root.querySelector('#data_attr_5').style.display = coating ? 'block' : 'none';
+			root.querySelector('#lens_price').textContent = getLensTotal().toFixed(2);
+			root.querySelector('#total').textContent = getGrandTotal().toFixed(2);
+			blueButton.classList.toggle('is-active', state.bluelight);
+			blueButton.classList.toggle('is-disabled', bluelightLocked());
+			blueButton.querySelector('.lock_tips').style.display = bluelightLocked() ? 'block' : 'none';
 		}
 
 		function renderPayload() {
@@ -390,49 +548,144 @@
 		}
 
 		function render() {
-			ensureValidSelections(); stepsMount.innerHTML = ''; stepsMount.appendChild(renderUsageStep()); stepsMount.appendChild(renderPrescriptionStep()); stepsMount.appendChild(renderLensTypeStep()); stepsMount.appendChild(renderLensIndexStep()); stepsMount.appendChild(renderCoatingStep()); renderSummary(); renderPayload();
+			ensureValidSelections();
+			renderUsageStep();
+			renderPowerBox();
+			renderPrescriptionBox();
+			renderLensTypeStep();
+			renderLensIndexStep();
+			renderCoatingStep();
+			updateStepSummaries();
+			renderSummary();
+			renderPayload();
+			setOpenStep(state.openStep);
 		}
 
-		function openDrawer() { overlay.hidden = false; document.body.classList.add('mlr-open-body'); requestAnimationFrame(function () { overlay.classList.add('is-visible'); }); }
-		function closeDrawer() { overlay.classList.remove('is-visible'); window.setTimeout(function () { overlay.hidden = true; document.body.classList.remove('mlr-open-body'); }, 240); }
+		function openOverlay() {
+			container.hidden = false;
+			document.body.classList.add('mlr-open-body');
+		}
+
+		function closeOverlay() {
+			container.hidden = true;
+			document.body.classList.remove('mlr-open-body');
+		}
 
 		function maybeHandleProgressiveUpgrade() {
-			if (state.usage !== 4 || state.upgradePrompted) { return Promise.resolve(); }
-			var currentLensType = getLensTypePrice(state.lenstype);
+			if (state.usage !== 4 || state.upgradePrompted) {
+				return Promise.resolve();
+			}
 			var premiumLensTypeTable = schema.pricing.lenstype_price['5'] || schema.pricing.lenstype_price[5];
 			var premiumIndexTable = schema.pricing.lensindex_price['5'] || schema.pricing.lensindex_price[5];
 			var premiumLensType = premiumLensTypeTable[String(state.lenstype)] || premiumLensTypeTable[state.lenstype];
 			var premiumIndex = premiumIndexTable[String(state.lensindex)] || premiumIndexTable[state.lensindex];
-			var upgradeDelta = (premiumLensType ? Number(premiumLensType[4]) : currentLensType) - currentLensType + (premiumIndex ? Number(premiumIndex[1]) : getLensIndexPrice(state.lensindex)) - getLensIndexPrice(state.lensindex);
-			upgradeCopy.textContent = 'Observed script prompts to upgrade from standard progressive to premium progressive before add-to-cart. Extra lens cost: ' + money(upgradeDelta) + '.';
+			var upgradeDelta = (premiumLensType ? Number(premiumLensType[4]) : getLensTypePrice(state.lenstype)) - getLensTypePrice(state.lenstype) + (premiumIndex ? Number(premiumIndex[1]) : getLensIndexPrice(state.lensindex)) - getLensIndexPrice(state.lensindex);
+			upgradeCopy.textContent = 'Extra lens cost: ' + money(upgradeDelta) + '.';
 			upgradeModal.hidden = false;
 			return new Promise(function (resolve) {
-				function cleanup() { upgradeAccept.removeEventListener('click', accept); upgradeSkip.removeEventListener('click', skip); upgradeModal.hidden = true; }
-				function accept() { state.usage = 5; state.upgradePrompted = true; cleanup(); render(); resolve(); }
-				function skip() { state.upgradePrompted = true; cleanup(); resolve(); }
-				upgradeAccept.addEventListener('click', accept); upgradeSkip.addEventListener('click', skip);
+				function cleanup() {
+					upgradeModal.hidden = true;
+					upgradeAccept.removeEventListener('click', accept);
+					upgradeSkip.removeEventListener('click', skip);
+				}
+				function accept() {
+					state.usage = 5;
+					state.upgradePrompted = true;
+					cleanup();
+					render();
+					resolve();
+				}
+				function skip() {
+					state.upgradePrompted = true;
+					cleanup();
+					resolve();
+				}
+				upgradeAccept.addEventListener('click', accept);
+				upgradeSkip.addEventListener('click', skip);
 			});
 		}
 
 		async function simulateSubmit() {
-			if (!validateBeforeSubmit()) { return; }
+			if (!validateBeforeSubmit()) {
+				return;
+			}
 			await maybeHandleProgressiveUpgrade();
-			if (!validateBeforeSubmit()) { return; }
+			if (!validateBeforeSubmit()) {
+				return;
+			}
 			setStatus('Generating simulated add-to-cart payload...');
-			var requestState = { usage: state.usage, lenstype: state.lenstype, lenstype_color: state.lenstype_color, lensindex: state.lensindex, coating: state.coating, pdkey: state.pdkey, nearpd: state.nearpd, prism: state.prism, bluelight: state.bluelight, readers: state.readers, power: state.power, total: getGrandTotal(), form: state.form };
-			var body = new window.URLSearchParams(); body.append('action', 'muukal_lens_replica_build_payload'); body.append('nonce', config.nonce); body.append('state', JSON.stringify(requestState));
-			var response = await window.fetch(config.ajaxUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }, body: body.toString(), credentials: 'same-origin' });
+			var body = new window.URLSearchParams();
+			body.append('action', 'muukal_lens_replica_build_payload');
+			body.append('nonce', config.nonce);
+			body.append('state', JSON.stringify({
+				usage: state.usage,
+				lenstype: state.lenstype,
+				lenstype_color: state.lenstype_color,
+				lensindex: state.lensindex,
+				coating: state.coating,
+				pdkey: state.pdkey,
+				nearpd: state.nearpd,
+				prism: state.prism,
+				bluelight: state.bluelight,
+				readers: state.readers,
+				power: state.power,
+				total: getGrandTotal(),
+				form: state.form
+			}));
+			var response = await window.fetch(config.ajaxUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+				body: body.toString(),
+				credentials: 'same-origin'
+			});
 			var result = await response.json();
-			if (!response.ok || !result.success) { setStatus('Payload generation failed.'); return; }
-			state.payload = result.data.payload; renderPayload(); setStatus('Simulated payload generated. No database writes were performed.');
+			if (!response.ok || !result.success) {
+				setStatus('Payload generation failed.');
+				return;
+			}
+			state.payload = result.data.payload;
+			renderPayload();
+			setStatus('Simulated payload generated. No database writes were performed.');
 		}
 
-		openButton.addEventListener('click', openDrawer);
-		closeButtons.forEach(function (button) { button.addEventListener('click', closeDrawer); });
-		copyButton.addEventListener('click', function () { if (!state.payload) { return; } window.navigator.clipboard.writeText(JSON.stringify(state.payload, null, 2)); setStatus('Payload copied to clipboard.'); });
-		submitButton.addEventListener('click', function () { simulateSubmit().catch(function () { setStatus('Unexpected error while building payload.'); }); });
+		openButton.addEventListener('click', openOverlay);
+		closeButtons.forEach(function (button) {
+			button.addEventListener('click', closeOverlay);
+		});
+		root.querySelectorAll('.mlr-step-toggle').forEach(function (toggle) {
+			toggle.addEventListener('click', function () {
+				setOpenStep(Number(toggle.getAttribute('data-step')));
+				render();
+			});
+		});
+		root.querySelector('.bluelight-btn').addEventListener('click', function () {
+			if (bluelightLocked()) {
+				setStatus('Blue light add-on is locked for this combination.');
+				return;
+			}
+			state.bluelight = !state.bluelight;
+			render();
+		});
+		submitButton.addEventListener('click', function () {
+			simulateSubmit().catch(function () {
+				setStatus('Unexpected error while building payload.');
+			});
+		});
+		editAgain.addEventListener('click', function () {
+			setOpenStep(1);
+			render();
+		});
+		copyButton.addEventListener('click', function () {
+			if (!state.payload) {
+				return;
+			}
+			window.navigator.clipboard.writeText(JSON.stringify(state.payload, null, 2));
+			setStatus('Payload copied to clipboard.');
+		});
 		render();
 	}
 
-	document.addEventListener('DOMContentLoaded', function () { document.querySelectorAll('.mlr-app').forEach(init); });
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.mlr-app').forEach(init);
+	});
 })();

@@ -413,11 +413,12 @@ add_shortcode( 'facepp_virtual_tryon', 'facepp_tryon_shortcode' );
 function facepp_tryon_field( $key, $label, $type = 'text', $media = false ) {
 	$s = facepp_tryon_get_settings();
 	$v = isset( $s[ $key ] ) ? $s[ $key ] : '';
+	$step = 'number' === $type ? ' step="any"' : '';
 	?>
 	<tr>
 		<th scope="row"><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label></th>
 		<td>
-			<input id="<?php echo esc_attr( $key ); ?>" name="facepp_tryon_settings[<?php echo esc_attr( $key ); ?>]" type="<?php echo esc_attr( $type ); ?>" class="regular-text" value="<?php echo esc_attr( $v ); ?>" />
+			<input id="<?php echo esc_attr( $key ); ?>" name="facepp_tryon_settings[<?php echo esc_attr( $key ); ?>]" type="<?php echo esc_attr( $type ); ?>" class="regular-text" value="<?php echo esc_attr( $v ); ?>"<?php echo $step; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 			<?php if ( $media ) : ?>
 				<button type="button" class="button facepp-tryon-pick" data-target="#<?php echo esc_attr( $key ); ?>">Choose image</button>
 			<?php endif; ?>
