@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Muukal Try On Prototype
- * Description: Standalone virtual try-on prototype with modal UI, upload-crop-align flow, preset models, manual eye points, and browser-side face landmark auto-alignment.
+ * Description: Standalone virtual try-on prototype with modal UI, upload-crop-align flow, preset models, manual eye points, and Face++ auto-alignment.
  * Version: 0.1.0
  * Author: Codex
  */
@@ -18,6 +18,8 @@ define( 'MUUKAL_TRY_ON_URL', plugin_dir_url( __FILE__ ) );
 function muukal_try_on_default_settings() {
 	return array(
 		'overlay_image'       => '',
+		'facepp_api_key'      => '',
+		'facepp_api_secret'   => '',
 		'open_label'          => 'Open Try On Demo',
 		'modal_title'         => 'Try On',
 		'helper_text'         => 'Upload a portrait, crop it into a face-first frame, then auto align the glasses. If automatic eye detection misses, drag the two eye markers directly onto the pupils.',
@@ -68,6 +70,11 @@ function muukal_try_on_sanitize_settings( $input ) {
 
 		if ( false !== strpos( $key, '_image' ) || 'overlay_image' === $key ) {
 			$output[ $key ] = esc_url_raw( trim( (string) $raw ) );
+			continue;
+		}
+
+		if ( in_array( $key, array( 'facepp_api_key', 'facepp_api_secret' ), true ) ) {
+			$output[ $key ] = sanitize_text_field( (string) $raw );
 			continue;
 		}
 
@@ -139,8 +146,7 @@ add_action( 'admin_enqueue_scripts', 'muukal_try_on_admin_assets' );
 
 function muukal_try_on_register_assets() {
 	wp_register_style( 'muukal-try-on-style', MUUKAL_TRY_ON_URL . 'assets/try-on.css', array(), MUUKAL_TRY_ON_VERSION );
-	wp_register_script( 'muukal-try-on-vision', 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js', array(), null, true );
-	wp_register_script( 'muukal-try-on-script', MUUKAL_TRY_ON_URL . 'assets/try-on.js', array( 'muukal-try-on-vision' ), MUUKAL_TRY_ON_VERSION, true );
+	wp_register_script( 'muukal-try-on-script', MUUKAL_TRY_ON_URL . 'assets/try-on.js', array(), MUUKAL_TRY_ON_VERSION, true );
 }
 add_action( 'init', 'muukal_try_on_register_assets' );
 
@@ -149,18 +155,18 @@ function muukal_try_on_enqueue_frontend_assets() {
 	$config   = array(
 		'models'           => muukal_try_on_get_models(),
 		'overlayImage'     => esc_url_raw( $settings['overlay_image'] ),
+		'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+		'ajaxNonce'        => wp_create_nonce( 'muukal_try_on_face_detect' ),
 		'modalTitle'       => $settings['modal_title'],
 		'helperText'       => $settings['helper_text'],
 		'autoWidthFactor'  => (float) $settings['auto_width_factor'],
 		'autoYOffset'      => (float) $settings['auto_y_offset'],
-		'wasmBase'         => 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm',
-		'modelAssetPath'   => 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
 		'i18n'             => array(
-			'loading'         => 'Loading face landmarks...',
 			'ready'           => 'Ready for auto alignment.',
 			'detecting'       => 'Detecting face and aligning glasses...',
 			'noFace'          => 'No face detected. Try a clearer front-facing photo or adjust manually.',
-			'alignFailed'     => 'Auto alignment is unavailable right now. Manual controls still work.',
+			'alignFailed'     => 'Face detection is unavailable right now. Manual controls still work.',
+			'faceppMissing'   => 'Set your Face++ API key and secret in Try On Settings first.',
 			'overlayMissing'  => 'Set a transparent glasses image in Try On Settings first.',
 			'imageReady'      => 'Image loaded. Run auto align or fine-tune manually.',
 			'modelSelected'   => 'Preset model selected.',
@@ -174,10 +180,117 @@ function muukal_try_on_enqueue_frontend_assets() {
 	);
 
 	wp_enqueue_style( 'muukal-try-on-style' );
-	wp_enqueue_script( 'muukal-try-on-vision' );
 	wp_enqueue_script( 'muukal-try-on-script' );
 	wp_localize_script( 'muukal-try-on-script', 'muukalTryOnConfig', $config );
 }
+
+function muukal_try_on_detect_face() {
+	check_ajax_referer( 'muukal_try_on_face_detect', 'nonce' );
+
+	$settings   = muukal_try_on_get_settings();
+	$api_key    = isset( $settings['facepp_api_key'] ) ? trim( (string) $settings['facepp_api_key'] ) : '';
+	$api_secret = isset( $settings['facepp_api_secret'] ) ? trim( (string) $settings['facepp_api_secret'] ) : '';
+	$image_data = isset( $_POST['image'] ) ? (string) wp_unslash( $_POST['image'] ) : '';
+
+	if ( '' === $api_key || '' === $api_secret ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Missing Face++ credentials.',
+				'code'    => 'missing_credentials',
+			),
+			400
+		);
+	}
+
+	if ( ! preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Invalid image payload.',
+				'code'    => 'invalid_image',
+			),
+			400
+		);
+	}
+
+	$payload = array(
+		'api_key'           => $api_key,
+		'api_secret'        => $api_secret,
+		'image_base64'      => preg_replace( '/^data:image\/(?:png|jpe?g|webp);base64,/', '', $image_data ),
+		'return_landmark'   => '1',
+		'return_attributes' => 'eyestatus,eyegaze',
+	);
+
+	$response = wp_remote_post(
+		'https://api-us.faceplusplus.com/facepp/v3/detect',
+		array(
+			'timeout' => 20,
+			'body'    => $payload,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		wp_send_json_error(
+			array(
+				'message' => $response->get_error_message(),
+				'code'    => 'http_error',
+			),
+			502
+		);
+	}
+
+	$status_code = wp_remote_retrieve_response_code( $response );
+	$body        = wp_remote_retrieve_body( $response );
+	$data        = json_decode( $body, true );
+
+	if ( 200 !== $status_code || ! is_array( $data ) ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Invalid Face++ response.',
+				'code'    => 'invalid_response',
+				'body'    => $body,
+			),
+			502
+		);
+	}
+
+	if ( ! empty( $data['error_message'] ) ) {
+		wp_send_json_error(
+			array(
+				'message' => $data['error_message'],
+				'code'    => 'facepp_error',
+			),
+			400
+		);
+	}
+
+	if ( empty( $data['faces'][0]['landmark']['left_eye_pupil'] ) || empty( $data['faces'][0]['landmark']['right_eye_pupil'] ) ) {
+		wp_send_json_error(
+			array(
+				'message' => 'No pupil landmarks detected.',
+				'code'    => 'no_face',
+				'data'    => $data,
+			),
+			404
+		);
+	}
+
+	$face = $data['faces'][0];
+
+	wp_send_json_success(
+		array(
+			'left_eye'     => array(
+				'x' => (float) $face['landmark']['left_eye_pupil']['x'],
+				'y' => (float) $face['landmark']['left_eye_pupil']['y'],
+			),
+			'right_eye'    => array(
+				'x' => (float) $face['landmark']['right_eye_pupil']['x'],
+				'y' => (float) $face['landmark']['right_eye_pupil']['y'],
+			),
+		)
+	);
+}
+add_action( 'wp_ajax_muukal_try_on_detect_face', 'muukal_try_on_detect_face' );
+add_action( 'wp_ajax_nopriv_muukal_try_on_detect_face', 'muukal_try_on_detect_face' );
 
 function muukal_try_on_shortcode( $atts = array() ) {
 	muukal_try_on_enqueue_frontend_assets();
@@ -345,6 +458,8 @@ function muukal_try_on_render_settings_page() {
 			<table class="form-table" role="presentation">
 				<tbody>
 					<?php muukal_try_on_settings_field( 'overlay_image', 'Glasses overlay image URL', 'url', true ); ?>
+					<?php muukal_try_on_settings_field( 'facepp_api_key', 'Face++ API Key' ); ?>
+					<?php muukal_try_on_settings_field( 'facepp_api_secret', 'Face++ API Secret', 'password' ); ?>
 					<?php muukal_try_on_settings_field( 'open_label', 'Open button label' ); ?>
 					<?php muukal_try_on_settings_field( 'modal_title', 'Modal title' ); ?>
 					<?php muukal_try_on_settings_field( 'helper_text', 'Helper text', 'textarea' ); ?>

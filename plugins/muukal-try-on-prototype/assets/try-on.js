@@ -3,24 +3,6 @@
 
 	var config = window.muukalTryOnConfig || {};
 
-	function averagePoints(landmarks, indices) {
-		var total = indices.reduce(function (acc, index) {
-			var point = landmarks[index];
-			if (!point) {
-				return acc;
-			}
-			acc.x += point.x;
-			acc.y += point.y;
-			acc.count += 1;
-			return acc;
-		}, { x: 0, y: 0, count: 0 });
-
-		return {
-			x: total.count ? total.x / total.count : 0,
-			y: total.count ? total.y / total.count : 0
-		};
-	}
-
 	function distance(a, b) {
 		var dx = b.x - a.x;
 		var dy = b.y - a.y;
@@ -69,8 +51,7 @@
 			eyes: {
 				left: { x: 0, y: 0 },
 				right: { x: 0, y: 0 }
-			},
-			faceLandmarker: null
+			}
 		};
 
 		if (resizeObserver) {
@@ -271,28 +252,33 @@
 			overlay.src = config.overlayImage;
 		}
 
-		async function ensureLandmarker() {
-			if (state.faceLandmarker) {
-				return state.faceLandmarker;
+		async function detectFaceWithApi() {
+			if (!config.ajaxUrl || !config.ajaxNonce) {
+				throw new Error('missing ajax config');
 			}
 
-			if (!window.vision || !window.vision.FaceLandmarker || !window.vision.FilesetResolver) {
-				throw new Error('vision bundle unavailable');
-			}
+			var formData = new window.FormData();
+			formData.append('action', 'muukal_try_on_detect_face');
+			formData.append('nonce', config.ajaxNonce);
+			formData.append('image', baseImage.src);
 
-			setStatus(config.i18n.loading);
-
-			var vision = await window.vision.FilesetResolver.forVisionTasks(config.wasmBase);
-			state.faceLandmarker = await window.vision.FaceLandmarker.createFromOptions(vision, {
-				baseOptions: {
-					modelAssetPath: config.modelAssetPath
-				},
-				outputFaceBlendshapes: false,
-				outputFacialTransformationMatrixes: false,
-				numFaces: 1
+			var response = await window.fetch(config.ajaxUrl, {
+				method: 'POST',
+				body: formData,
+				credentials: 'same-origin'
 			});
 
-			return state.faceLandmarker;
+			var result = await response.json();
+
+			if (!response.ok || !result || !result.success || !result.data) {
+				var message = result && result.data && result.data.message ? result.data.message : 'Face detection failed';
+				var code = result && result.data && result.data.code ? result.data.code : 'unknown';
+				var error = new Error(message);
+				error.code = code;
+				throw error;
+			}
+
+			return result.data;
 		}
 
 		async function runAutoAlign() {
@@ -307,37 +293,27 @@
 			}
 
 			try {
-				var landmarker = await ensureLandmarker();
 				setStatus(config.i18n.detecting);
-				var result = landmarker.detect(baseImage);
-				var face = result && result.faceLandmarks && result.faceLandmarks[0];
-
-				if (!face) {
-					state.manualEyesEnabled = true;
-					positionEyeMarkers();
-					setStatus(config.i18n.noFace);
-					return;
-				}
-
-				var leftEye = averagePoints(face, [468, 469, 470, 471, 472]);
-				var rightEye = averagePoints(face, [473, 474, 475, 476, 477]);
-
-				if (!leftEye.x || !rightEye.x) {
-					leftEye = averagePoints(face, [33, 133, 159, 145, 158, 153, 173]);
-					rightEye = averagePoints(face, [362, 263, 386, 374, 385, 380, 398]);
-				}
-
+				var result = await detectFaceWithApi();
 				var metrics = getStageMetrics();
+				var naturalWidth = baseImage.naturalWidth || metrics.width;
+				var naturalHeight = baseImage.naturalHeight || metrics.height;
 				applyEyes(
-					{ x: leftEye.x * metrics.width, y: leftEye.y * metrics.height },
-					{ x: rightEye.x * metrics.width, y: rightEye.y * metrics.height },
+					{
+						x: (result.left_eye.x / naturalWidth) * metrics.width,
+						y: (result.left_eye.y / naturalHeight) * metrics.height
+					},
+					{
+						x: (result.right_eye.x / naturalWidth) * metrics.width,
+						y: (result.right_eye.y / naturalHeight) * metrics.height
+					},
 					config.i18n.ready
 				);
 			} catch (error) {
 				console.error(error);
 				state.manualEyesEnabled = true;
 				positionEyeMarkers();
-				setStatus(config.i18n.alignFailed);
+				setStatus(error && error.code === 'missing_credentials' ? config.i18n.faceppMissing : (error && error.code === 'no_face' ? config.i18n.noFace : config.i18n.alignFailed));
 			}
 		}
 
