@@ -24,7 +24,9 @@
   display: block;
   margin: 0 8px;
   padding: 12px 23px;
-  border-bottom: 1px solid #d7d7d7;
+  border: 1px solid #d7d7d7;
+  border-radius: 50px;
+  background: transparent;
   color: #10111e;
   font-size: 14px;
   font-weight: 500;
@@ -35,13 +37,13 @@
 }
 
 .muukal-featured-collection-nav .nav-link.recommend {
-  border-bottom-color: #000;
+  border-color: #000;
   background: #000;
   color: #fff;
 }
 
 .muukal-featured-collection-nav .nav-link.is-active:not(.recommend) {
-  border-bottom-color: #10111e;
+  border-color: #10111e;
 }
 
 @media (max-width: 767px) {
