@@ -1,0 +1,56 @@
+.muukal-featured-collection-nav {
+  margin: 0 0 25px;
+}
+
+.muukal-featured-collection-nav .product-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.muukal-featured-collection-nav .nav-item {
+  margin: 0 0 5px;
+  padding-right: 15px;
+}
+
+.muukal-featured-collection-nav .nav-item:last-child {
+  padding-right: 0;
+}
+
+.muukal-featured-collection-nav .nav-link {
+  display: block;
+  margin: 0 8px;
+  padding: 12px 23px;
+  border-bottom: 1px solid #d7d7d7;
+  color: #10111e;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  line-height: 14px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.muukal-featured-collection-nav .nav-link.recommend {
+  border-bottom-color: #000;
+  background: #000;
+  color: #fff;
+}
+
+.muukal-featured-collection-nav .nav-link.is-active:not(.recommend) {
+  border-bottom-color: #10111e;
+}
+
+@media (max-width: 767px) {
+  .muukal-featured-collection-nav .nav-item {
+    padding-right: 0;
+  }
+
+  .muukal-featured-collection-nav .nav-link {
+    margin: 0 3px;
+    padding: 8px 15px;
+  }
+}
