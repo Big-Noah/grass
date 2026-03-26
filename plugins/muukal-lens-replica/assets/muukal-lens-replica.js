@@ -213,6 +213,45 @@
 		var upgradeAccept = root.querySelector('.mlr-upgrade-accept');
 		var upgradeSkip = root.querySelector('.mlr-upgrade-skip');
 		var closeTimer = null;
+		var fixedHost = findFixedContainingBlock(root);
+
+		function findFixedContainingBlock(node) {
+			var current = node ? node.parentElement : null;
+
+			while (current && current !== document.body) {
+				var styles = window.getComputedStyle(current);
+				var containValue = styles.contain || '';
+
+				if (
+					styles.transform !== 'none' ||
+					styles.perspective !== 'none' ||
+					styles.filter !== 'none' ||
+					styles.backdropFilter !== 'none' ||
+					containValue.indexOf('paint') !== -1
+				) {
+					return current;
+				}
+
+				current = current.parentElement;
+			}
+
+			return null;
+		}
+
+		function syncOverlayViewport() {
+			if (!container) {
+				return;
+			}
+
+			var hostRect = fixedHost ? fixedHost.getBoundingClientRect() : { left: 0, top: 0 };
+
+			container.style.left = String(-hostRect.left) + 'px';
+			container.style.top = String(-hostRect.top) + 'px';
+			container.style.right = 'auto';
+			container.style.bottom = 'auto';
+			container.style.width = String(window.innerWidth) + 'px';
+			container.style.height = String(window.innerHeight) + 'px';
+		}
 
 		var state = {
 			openStep: 1,
@@ -461,13 +500,22 @@
 		}
 
 		function setOpenStep(step) {
-			state.openStep = step;
+			state.openStep = Number(step) || 0;
 			[1, 2, 3, 4, 5].forEach(function (number) {
 				var body = root.querySelector('#step' + number + '_div_box');
 				if (body) {
-					body.classList.toggle('show', number === step);
+					body.classList.toggle('show', number === state.openStep);
 				}
 			});
+		}
+
+		function toggleOpenStep(step) {
+			if (Number(state.openStep) === Number(step)) {
+				setOpenStep(0);
+				return;
+			}
+
+			setOpenStep(step);
 		}
 
 		function updateStepSummaries() {
@@ -869,12 +917,15 @@
 				window.clearTimeout(closeTimer);
 				closeTimer = null;
 			}
+			syncOverlayViewport();
 			container.hidden = false;
 			document.body.classList.add('mlr-open-body');
-			window.requestAnimationFrame(function () {
-				container.classList.add('is-open');
-			});
 			render();
+			window.requestAnimationFrame(function () {
+				syncOverlayViewport();
+				container.classList.add('is-open');
+				root.querySelector('#lens_box').scrollTop = 0;
+			});
 		}
 
 		function closeOverlay() {
@@ -976,9 +1027,14 @@
 		});
 		root.querySelectorAll('.mlr-step-toggle').forEach(function (toggle) {
 			toggle.addEventListener('click', function () {
-				setOpenStep(Number(toggle.getAttribute('data-step')));
+				toggleOpenStep(Number(toggle.getAttribute('data-step')));
 				render();
 			});
+		});
+		window.addEventListener('resize', function () {
+			if (!container.hidden || container.classList.contains('is-open')) {
+				syncOverlayViewport();
+			}
 		});
 		root.querySelector('.bluelight-btn').addEventListener('click', function () {
 			if (bluelightLocked()) {
