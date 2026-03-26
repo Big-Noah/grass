@@ -55,6 +55,42 @@
 			return;
 		}
 
+		var fixedHost = findFixedContainingBlock(root);
+
+		function findFixedContainingBlock(node) {
+			var current = node ? node.parentElement : null;
+
+			while (current && current !== document.body) {
+				var styles = window.getComputedStyle(current);
+				var containValue = styles.contain || '';
+
+				if (
+					styles.transform !== 'none' ||
+					styles.perspective !== 'none' ||
+					styles.filter !== 'none' ||
+					styles.backdropFilter !== 'none' ||
+					containValue.indexOf('paint') !== -1
+				) {
+					return current;
+				}
+
+				current = current.parentElement;
+			}
+
+			return null;
+		}
+
+		function syncModalViewport() {
+			var hostRect = fixedHost ? fixedHost.getBoundingClientRect() : { left: 0, top: 0 };
+
+			modal.style.left = String(-hostRect.left) + 'px';
+			modal.style.top = String(-hostRect.top) + 'px';
+			modal.style.right = 'auto';
+			modal.style.bottom = 'auto';
+			modal.style.width = String(window.innerWidth) + 'px';
+			modal.style.height = String(window.innerHeight) + 'px';
+		}
+
 		var state = {
 			productId: String(config.productId || root.getAttribute('data-product-id') || ''),
 			photoLoaded: false,
@@ -648,8 +684,10 @@
 		}
 
 		openBtn.addEventListener('click', function () {
+			syncModalViewport();
 			modal.hidden = false;
 			document.body.style.overflow = 'hidden';
+			modal.scrollTop = 0;
 
 			if (!state.photoLoaded) {
 				var activeModel = modelsBox.querySelector('.facepp-tryon-model-item.is-active') || modelsBox.querySelector('.facepp-tryon-model-item');
@@ -659,6 +697,7 @@
 				}
 			}
 
+			window.requestAnimationFrame(syncModalViewport);
 			render();
 		});
 
@@ -671,6 +710,13 @@
 		document.addEventListener('keydown', function (event) {
 			if (event.key === 'Escape' && !modal.hidden) {
 				closeModal();
+			}
+		});
+
+		window.addEventListener('resize', function () {
+			if (!modal.hidden) {
+				syncModalViewport();
+				render();
 			}
 		});
 
