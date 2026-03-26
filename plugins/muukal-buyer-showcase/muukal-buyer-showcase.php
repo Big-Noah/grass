@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Buyer Showcase
  * Description: Buyer showcase grid with editable default images, modal quick look, and product links via shortcode.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: Codex
  */
 
@@ -10,10 +10,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_BUYER_SHOWCASE_VERSION', '0.1.0' );
+define( 'MUUKAL_BUYER_SHOWCASE_VERSION', '0.1.1' );
 define( 'MUUKAL_BUYER_SHOWCASE_FILE', __FILE__ );
 define( 'MUUKAL_BUYER_SHOWCASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_BUYER_SHOWCASE_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Return a cache-busting asset version.
+ *
+ * @param string $relative_path Path relative to the plugin root.
+ * @return string
+ */
+function muukal_buyer_showcase_asset_version( $relative_path ) {
+	$absolute_path = MUUKAL_BUYER_SHOWCASE_DIR . ltrim( $relative_path, '/\\' );
+
+	if ( file_exists( $absolute_path ) ) {
+		$modified = filemtime( $absolute_path );
+
+		if ( false !== $modified ) {
+			return (string) $modified;
+		}
+	}
+
+	return MUUKAL_BUYER_SHOWCASE_VERSION;
+}
 
 /**
  * Build the seeded buyershow rows.
@@ -195,8 +215,8 @@ function muukal_buyer_showcase_admin_assets( $hook ) {
 	}
 
 	wp_enqueue_media();
-	wp_enqueue_style( 'muukal-buyer-showcase-style', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.css', array(), MUUKAL_BUYER_SHOWCASE_VERSION );
-	wp_enqueue_script( 'muukal-buyer-showcase-admin', MUUKAL_BUYER_SHOWCASE_URL . 'assets/admin.js', array( 'jquery' ), MUUKAL_BUYER_SHOWCASE_VERSION, true );
+	wp_enqueue_style( 'muukal-buyer-showcase-style', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.css', array(), muukal_buyer_showcase_asset_version( 'assets/buyer-showcase.css' ) );
+	wp_enqueue_script( 'muukal-buyer-showcase-admin', MUUKAL_BUYER_SHOWCASE_URL . 'assets/admin.js', array( 'jquery' ), muukal_buyer_showcase_asset_version( 'assets/admin.js' ), true );
 }
 add_action( 'admin_enqueue_scripts', 'muukal_buyer_showcase_admin_assets' );
 
@@ -204,8 +224,8 @@ add_action( 'admin_enqueue_scripts', 'muukal_buyer_showcase_admin_assets' );
  * Register front-end assets.
  */
 function muukal_buyer_showcase_register_assets() {
-	wp_register_style( 'muukal-buyer-showcase-style', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.css', array(), MUUKAL_BUYER_SHOWCASE_VERSION );
-	wp_register_script( 'muukal-buyer-showcase-script', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.js', array(), MUUKAL_BUYER_SHOWCASE_VERSION, true );
+	wp_register_style( 'muukal-buyer-showcase-style', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.css', array(), muukal_buyer_showcase_asset_version( 'assets/buyer-showcase.css' ) );
+	wp_register_script( 'muukal-buyer-showcase-script', MUUKAL_BUYER_SHOWCASE_URL . 'assets/buyer-showcase.js', array(), muukal_buyer_showcase_asset_version( 'assets/buyer-showcase.js' ), true );
 }
 add_action( 'init', 'muukal_buyer_showcase_register_assets' );
 
