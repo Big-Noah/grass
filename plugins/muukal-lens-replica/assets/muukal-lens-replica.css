@@ -839,6 +839,14 @@ select:disabled {
 }
 
 @media (min-width: 1200px) {
+	.mlr-app #lensbox_left.col-xl-9 {
+		width: 75%;
+	}
+
+	.mlr-app #lensbox_right.col-xl-3 {
+		width: 25%;
+	}
+
 	.col-xl-9 {
 		width: 75%;
 	}
