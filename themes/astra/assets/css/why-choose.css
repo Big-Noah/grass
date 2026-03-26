@@ -1,5 +1,6 @@
 .muukal-why-choose {
   padding-top: var(--muukal-why-choose-pt, 75px);
+  background-color: #fff5f8;
 }
 
 .muukal-why-choose * {
