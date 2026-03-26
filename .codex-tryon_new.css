@@ -1,0 +1,78 @@
+#tryon_mine{width: 890px; height: 500px; margin:0; position: relative;}
+#tryon_block,#tryon_do_block{width: 890px; z-index: 99;}
+.eye_icon{display:inline-block; position: absolute; width: 65px; height: 65px; background: url('//img.muukal.com/img/eye-icon.png') 50% no-repeat; cursor: move; overflow: hidden; display: none;}
+#left_pupil{left: 93px; top: 170px;}
+#right_pupil{left: 193px; top: 170px;}
+#tryon_glass{ position: absolute; width: 172px; top: 121px; left: 85px; cursor: move; transform: rotate(0deg);}
+.try_step_1{ position: absolute; bottom: 0; }
+.try_step_1 label{
+      width: 350px;
+      height: 35px;
+      background: #ff979b;
+      border: 1px solid #ff979b;
+      color: #ffffff;
+      border-radius: 0;
+      font-size: 18px;
+      margin-bottom: 0;
+          line-height: 8px;
+}
+.try_step_2,.try_step_3,.try_step_4,.try_step_9{ display: none; }
+.try_step_2 .btn{ margin-right: 10px;}
+#try_pic_box{}
+.try_u_pic,.try_sys_pic{ width: 60px; margin: 8px 10px 0px 0px; cursor: pointer;}
+#tryon_img{border: 1px solid #d7d7d7;}
+.btn-new{background: #ff979b; border: 1px solid #ff979b; color: #ffffff;} 
+.btn-default:hover,.btn-default:active,.btn-default:active:hover{background: #ffffff; border: 1px solid #ff979b; color: #ff979b;}
+.cv-btn {
+    width: 78px;
+    float: left;
+    margin: 5px 8px 0px 0;
+    cursor: pointer;
+}
+.cv-btn img {
+    width: 78px;
+}
+.tyyon_right_lb{
+  width: 520px; height: 415px; float: right; position: relative;overflow-y: auto;
+}
+
+#preloader {
+    background: #ffffff url(../../assets/img/preloader.gif) no-repeat scroll center center;
+    height: 100%;
+    left: 0;
+    overflow: visible;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9999999;
+    background-size: 120px 90px;
+}
+#chooseImg{display: none !important;}
+
+#tryon_dobox{ position: absolute; bottom: 35px; height: 100px; width: 350px;}
+#tryon_dobox i{ font-size: 24px; }
+.tdo_btn{ width:35px; height: 35px; line-height: 35px; position: absolute; border-radius: 50%; text-align: center; background: #00000070; color: #ffffff; }
+#size_b{left: 40px; top: 0;}
+#size_s{left: 40px; top: 60px;}
+#rotate_l{left: 5px; top: 30px;}
+#rotate_r{left: 75px; top: 30px;}
+
+#move_t{right: 40px; top: 0;}
+#move_r{right: 5px; top: 30px;}
+#move_b{right: 40px; top: 60px;}
+#move_l{right: 75px; top: 30px;}
+
+.tyron_img_box{ display: inline-block; position: relative; }
+.del_tryon {
+    position: absolute;
+    right: 6px;
+    top: 0px;
+    width: 20px;
+    height: 20px;
+    z-index: 9;
+    line-height: 20px;
+    font-weight: 900;
+    color: #ff565c;
+    font-size: 26px;
+    cursor: pointer;
+}

@@ -1,0 +1,75 @@
+.muukal-home-banner-grid {
+  padding-top: var(--muukal-home-banner-grid-pt, 75px);
+}
+
+.muukal-home-banner-grid * {
+  box-sizing: border-box;
+}
+
+.muukal-home-banner-grid .container-fluid {
+  width: min(100%, 1900px);
+  margin: 0 auto;
+  padding-left: 55px;
+  padding-right: 55px;
+}
+
+.muukal-home-banner-grid__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+}
+
+.muukal-home-banner-grid__col {
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+}
+
+.muukal-home-banner-grid__card {
+  display: block;
+  overflow: hidden;
+  background: #f4eee8;
+  text-decoration: none;
+}
+
+.muukal-home-banner-grid__card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.muukal-home-banner-grid__card:hover img,
+.muukal-home-banner-grid__card:focus-visible img {
+  transform: scale(1.03);
+}
+
+.muukal-home-banner-grid__card:focus-visible {
+  outline: 2px solid #1f5147;
+  outline-offset: 4px;
+}
+
+@media (max-width: 1199px) {
+  .muukal-home-banner-grid .container-fluid {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .muukal-home-banner-grid__row {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .muukal-home-banner-grid .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .muukal-home-banner-grid__row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

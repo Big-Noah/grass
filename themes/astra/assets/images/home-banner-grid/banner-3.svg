@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Trending frame styles</title>
+  <desc id="desc">Editorial banner with clay and cream palette and bold cat-eye silhouette.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ead8cf"/>
+      <stop offset="100%" stop-color="#d5b0a0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <path d="M0 842C182 766 348 744 546 786C760 832 920 934 1188 918C1342 910 1478 870 1600 808V1000H0Z" fill="#f8f0ea"/>
+  <circle cx="242" cy="246" r="134" fill="#fff7f3" opacity="0.68"/>
+  <circle cx="1316" cy="220" r="114" fill="#b97f6b" opacity="0.3"/>
+  <text x="108" y="196" fill="#3d2722" font-family="Georgia, serif" font-size="68" letter-spacing="8">TRENDS</text>
+  <text x="108" y="300" fill="#3d2722" font-family="Georgia, serif" font-size="126">Bold Shapes</text>
+  <text x="108" y="378" fill="#735149" font-family="Trebuchet MS, Arial, sans-serif" font-size="42" letter-spacing="3">FRESH SILHOUETTES FOR DAILY WEAR</text>
+  <g transform="translate(874 300)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 140C22 58 116 8 228 8H354C454 8 538 58 568 140L612 258C628 300 594 340 550 340H384C292 340 230 310 186 254L140 196L94 254C50 310 -12 340 -104 340H-270C-314 340 -348 300 -332 258Z" fill="#fff5ef" stroke="#3d2722" stroke-width="24"/>
+    <path d="M560 152L700 106" stroke="#3d2722" stroke-width="18"/>
+    <path d="M-280 152L-420 106" stroke="#3d2722" stroke-width="18"/>
+    <path d="M92 134L214 98" stroke="#b77461" stroke-width="10"/>
+    <path d="M260 104L380 134" stroke="#b77461" stroke-width="10"/>
+  </g>
+</svg>
