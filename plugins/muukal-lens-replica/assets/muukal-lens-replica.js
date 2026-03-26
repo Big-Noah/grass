@@ -849,10 +849,10 @@
 			var left = root.querySelector('#lensbox_left');
 			var right = root.querySelector('#lensbox_right');
 			left.style.display = 'none';
-			right.classList.remove('bounceInRight');
+			right.classList.remove('bounceInRight', 'mlr-summary-enter');
 			right.classList.add('col-full');
 			void right.offsetWidth;
-			right.classList.add('bounceInRight');
+			right.classList.add('bounceInRight', 'mlr-summary-enter');
 			editAgain.style.display = 'block';
 		}
 
@@ -860,7 +860,7 @@
 			var left = root.querySelector('#lensbox_left');
 			var right = root.querySelector('#lensbox_right');
 			left.style.display = '';
-			right.classList.remove('col-full', 'bounceInRight');
+			right.classList.remove('col-full', 'bounceInRight', 'mlr-summary-enter');
 			editAgain.style.display = 'none';
 		}
 
