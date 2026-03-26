@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.2.0' );
+define( 'FACEPP_TRYON_VERSION', '1.2.1' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -27,7 +27,7 @@ function facepp_tryon_defaults() {
 		'frame_1_url'  => '',
 		'frame_1_wf'   => '2.15',
 		'frame_1_yo'   => '0.02',
-		'frame_1_fs'   => '0.88',
+		'frame_1_fs'   => '0.78',
 		'frame_1_lx'   => '0.32',
 		'frame_1_ly'   => '0.43',
 		'frame_1_rx'   => '0.68',
@@ -36,7 +36,7 @@ function facepp_tryon_defaults() {
 		'frame_2_url'  => '',
 		'frame_2_wf'   => '2.15',
 		'frame_2_yo'   => '0.02',
-		'frame_2_fs'   => '0.88',
+		'frame_2_fs'   => '0.78',
 		'frame_2_lx'   => '0.32',
 		'frame_2_ly'   => '0.43',
 		'frame_2_rx'   => '0.68',
@@ -45,7 +45,7 @@ function facepp_tryon_defaults() {
 		'frame_3_url'  => '',
 		'frame_3_wf'   => '2.15',
 		'frame_3_yo'   => '0.02',
-		'frame_3_fs'   => '0.88',
+		'frame_3_fs'   => '0.78',
 		'frame_3_lx'   => '0.32',
 		'frame_3_ly'   => '0.43',
 		'frame_3_rx'   => '0.68',
@@ -191,7 +191,7 @@ function facepp_tryon_build_product_frames( $product_id ) {
 			'thumbnail'   => ! empty( $row['main_image'] ) ? esc_url_raw( (string) $row['main_image'] ) : $image_url,
 			'widthFactor' => 2.15,
 			'yOffset'     => 0.02,
-			'fitScale'    => 0.88,
+			'fitScale'    => 0.78,
 			'leftEyeX'    => 0.32,
 			'leftEyeY'    => 0.43,
 			'rightEyeX'   => 0.68,
@@ -231,7 +231,7 @@ function facepp_tryon_get_frames() {
 			'url'         => esc_url_raw( $url ),
 			'widthFactor' => isset( $settings[ 'frame_' . $i . '_wf' ] ) ? (float) $settings[ 'frame_' . $i . '_wf' ] : 2.15,
 			'yOffset'     => isset( $settings[ 'frame_' . $i . '_yo' ] ) ? (float) $settings[ 'frame_' . $i . '_yo' ] : 0.02,
-			'fitScale'    => isset( $settings[ 'frame_' . $i . '_fs' ] ) ? (float) $settings[ 'frame_' . $i . '_fs' ] : 0.88,
+			'fitScale'    => isset( $settings[ 'frame_' . $i . '_fs' ] ) ? (float) $settings[ 'frame_' . $i . '_fs' ] : 0.78,
 			'leftEyeX'    => isset( $settings[ 'frame_' . $i . '_lx' ] ) ? (float) $settings[ 'frame_' . $i . '_lx' ] : 0.32,
 			'leftEyeY'    => isset( $settings[ 'frame_' . $i . '_ly' ] ) ? (float) $settings[ 'frame_' . $i . '_ly' ] : 0.43,
 			'rightEyeX'   => isset( $settings[ 'frame_' . $i . '_rx' ] ) ? (float) $settings[ 'frame_' . $i . '_rx' ] : 0.68,
@@ -625,10 +625,16 @@ function facepp_tryon_shortcode( $atts = array() ) {
 									<span class="facepp-tryon-stage-loading-text">Aligning frame...</span>
 								</div>
 							</div>
-							<label class="facepp-tryon-upload">
-								<input type="file" class="facepp-tryon-file" accept="image/*" />
-								<span>Upload Image</span>
-							</label>
+							<div class="facepp-tryon-upload">
+								<input
+									id="<?php echo esc_attr( $instance_id ); ?>-upload"
+									name="<?php echo esc_attr( $instance_id ); ?>-upload"
+									type="file"
+									class="facepp-tryon-file"
+									accept="image/*"
+								/>
+								<button type="button" class="facepp-tryon-upload-trigger">Upload Image</button>
+							</div>
 							<div class="facepp-tryon-controls">
 								<button type="button" class="tdo_btn" data-tryon-action="size_b">+</button>
 								<button type="button" class="tdo_btn" data-tryon-action="size_s">-</button>

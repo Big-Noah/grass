@@ -43,6 +43,7 @@
 		var frame = root.querySelector('.facepp-tryon-frame');
 		var empty = root.querySelector('.facepp-tryon-empty');
 		var fileInput = root.querySelector('.facepp-tryon-file');
+		var uploadTrigger = root.querySelector('.facepp-tryon-upload-trigger');
 		var status = root.querySelector('.facepp-tryon-status');
 		var loadingText = root.querySelector('.facepp-tryon-stage-loading-text');
 		var framesBox = root.querySelector('.facepp-tryon-frames');
@@ -145,10 +146,10 @@
 		}
 
 		function getFrameFitScale() {
-			var fitScale = state.selectedFrame && typeof state.selectedFrame.fitScale === 'number' ? state.selectedFrame.fitScale : 0.88;
+			var fitScale = state.selectedFrame && typeof state.selectedFrame.fitScale === 'number' ? state.selectedFrame.fitScale : 0.78;
 
 			if (!isFinite(fitScale) || fitScale <= 0) {
-				return 0.88;
+				return 0.78;
 			}
 
 			return fitScale;
@@ -703,6 +704,13 @@
 
 			reader.readAsDataURL(file);
 		});
+
+		if (uploadTrigger && fileInput) {
+			uploadTrigger.addEventListener('click', function () {
+				fileInput.value = '';
+				fileInput.click();
+			});
+		}
 
 		controls.forEach(function (button) {
 			button.addEventListener('click', function () {
