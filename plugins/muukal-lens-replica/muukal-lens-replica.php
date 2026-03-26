@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Lens Replica
  * Description: Standalone Muukal lens-selector replica for testing, with PHP field schema and simulated add-to-cart payload export.
- * Version: 0.2.3
+ * Version: 0.2.4
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.3' );
+define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.4' );
 define( 'MUUKAL_LENS_REPLICA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_LENS_REPLICA_URL', plugin_dir_url( __FILE__ ) );
 
@@ -171,7 +171,7 @@ function muukal_lens_replica_shortcode( $atts = array() ) {
 		<section id="lens_container" class="container-fluid" hidden>
 			<div id="lens_mask" data-close="1"></div>
 			<div id="lens_box" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $config['ui']['drawer_title'] ); ?>">
-				<div id="lens_left_close" data-close="1" aria-label="Close"><i class="icon dripicons-cross"></i></div>
+				<div id="lens_left_close" data-close="1" aria-label="Close"><i class="icon dripicons-cross" data-close="1" aria-hidden="true"></i></div>
 				<div class="container pb-60 ncpd1200_max_w">
 					<div class="row">
 						<div id="lensbox_left" class="col-12 col-xl-9">

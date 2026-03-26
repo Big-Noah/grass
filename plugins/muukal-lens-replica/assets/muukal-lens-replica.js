@@ -748,7 +748,9 @@
 					buildOptionCardMarkup(copy, renderPhoto(coatingImages[option.id], option.label.charAt(0))) + '</div>';
 				li.querySelector('.lens_key').addEventListener('click', function () {
 					state.coating = Number(option.id);
+					setStatus('');
 					render();
+					showSummaryView();
 				});
 				mount.appendChild(li);
 			});
@@ -843,6 +845,25 @@
 			setOpenStep(state.openStep);
 		}
 
+		function showSummaryView() {
+			var left = root.querySelector('#lensbox_left');
+			var right = root.querySelector('#lensbox_right');
+			left.style.display = 'none';
+			right.classList.remove('bounceInRight');
+			right.classList.add('col-full');
+			void right.offsetWidth;
+			right.classList.add('bounceInRight');
+			editAgain.style.display = 'block';
+		}
+
+		function hideSummaryView() {
+			var left = root.querySelector('#lensbox_left');
+			var right = root.querySelector('#lensbox_right');
+			left.style.display = '';
+			right.classList.remove('col-full', 'bounceInRight');
+			editAgain.style.display = 'none';
+		}
+
 		function openOverlay() {
 			if (closeTimer) {
 				window.clearTimeout(closeTimer);
@@ -859,11 +880,9 @@
 		function closeOverlay() {
 			container.classList.remove('is-open');
 			document.body.classList.remove('mlr-open-body');
+			hideSummaryView();
 			closeTimer = window.setTimeout(function () {
 				container.hidden = true;
-				root.querySelector('#lensbox_left').style.display = '';
-				root.querySelector('#lensbox_right').classList.remove('col-full');
-				editAgain.style.display = 'none';
 				closeTimer = null;
 			}, 380);
 		}
@@ -947,9 +966,7 @@
 			}
 			state.payload = result.data.payload;
 			renderPayload();
-			root.querySelector('#lensbox_left').style.display = 'none';
-			root.querySelector('#lensbox_right').classList.add('col-full');
-			editAgain.style.display = 'block';
+			showSummaryView();
 			setStatus('Lens payload generated.');
 		}
 
@@ -977,9 +994,7 @@
 			});
 		});
 		editAgain.addEventListener('click', function () {
-			root.querySelector('#lensbox_left').style.display = '';
-			root.querySelector('#lensbox_right').classList.remove('col-full');
-			editAgain.style.display = 'none';
+			hideSummaryView();
 			setOpenStep(1);
 			render();
 		});
