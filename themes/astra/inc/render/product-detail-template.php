@@ -650,11 +650,22 @@ function muukal_render_product_detail_template( $args ) {
 	$review_count    = $product->get_review_count();
 	$client_variants = array();
 	$show_image_swatches = ! empty( $variants );
+	$variant_thumb_images = array();
 
 	foreach ( $variants as $variant ) {
 		if ( empty( $variant['thumb_image'] ) ) {
 			$show_image_swatches = false;
 			break;
+		}
+
+		$variant_thumb_images[] = $variant['thumb_image'];
+	}
+
+	if ( $show_image_swatches ) {
+		$unique_variant_thumb_images = array_values( array_unique( $variant_thumb_images ) );
+
+		if ( count( $unique_variant_thumb_images ) !== count( $variants ) ) {
+			$show_image_swatches = false;
 		}
 	}
 
