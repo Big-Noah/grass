@@ -128,6 +128,12 @@
 	margin: 0 auto;
 }
 
+.mlr-app #lens_box > .container {
+	width: min(90vw, calc(100% - 48px));
+	max-width: none;
+	margin: 0 auto;
+}
+
 .row {
 	display: flex;
 	flex-wrap: wrap;
