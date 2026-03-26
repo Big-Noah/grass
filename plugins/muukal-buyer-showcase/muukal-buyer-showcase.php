@@ -87,7 +87,7 @@ function muukal_buyer_showcase_default_settings() {
 	return array(
 		'heading'       => 'Buyer Show',
 		'subheading'    => 'Real-customer looks with a quick product path built in.',
-		'columns'       => 6,
+		'columns'       => 8,
 		'button_label'  => 'View Product',
 		'items'         => muukal_buyer_showcase_default_items(),
 	);
@@ -421,7 +421,7 @@ function muukal_buyer_showcase_shortcode( $atts = array() ) {
 			'heading'    => $settings['heading'],
 			'subheading' => $settings['subheading'],
 			'columns'    => (string) $settings['columns'],
-			'limit'      => '16',
+			'limit'      => (string) count( $settings['items'] ),
 		),
 		$atts,
 		'muukal_buyer_showcase'
