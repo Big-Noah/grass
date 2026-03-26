@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.1.0' );
+define( 'FACEPP_TRYON_VERSION', '1.2.0' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -27,6 +27,7 @@ function facepp_tryon_defaults() {
 		'frame_1_url'  => '',
 		'frame_1_wf'   => '2.15',
 		'frame_1_yo'   => '0.02',
+		'frame_1_fs'   => '0.88',
 		'frame_1_lx'   => '0.32',
 		'frame_1_ly'   => '0.43',
 		'frame_1_rx'   => '0.68',
@@ -35,6 +36,7 @@ function facepp_tryon_defaults() {
 		'frame_2_url'  => '',
 		'frame_2_wf'   => '2.15',
 		'frame_2_yo'   => '0.02',
+		'frame_2_fs'   => '0.88',
 		'frame_2_lx'   => '0.32',
 		'frame_2_ly'   => '0.43',
 		'frame_2_rx'   => '0.68',
@@ -43,6 +45,7 @@ function facepp_tryon_defaults() {
 		'frame_3_url'  => '',
 		'frame_3_wf'   => '2.15',
 		'frame_3_yo'   => '0.02',
+		'frame_3_fs'   => '0.88',
 		'frame_3_lx'   => '0.32',
 		'frame_3_ly'   => '0.43',
 		'frame_3_rx'   => '0.68',
@@ -188,6 +191,7 @@ function facepp_tryon_build_product_frames( $product_id ) {
 			'thumbnail'   => ! empty( $row['main_image'] ) ? esc_url_raw( (string) $row['main_image'] ) : $image_url,
 			'widthFactor' => 2.15,
 			'yOffset'     => 0.02,
+			'fitScale'    => 0.88,
 			'leftEyeX'    => 0.32,
 			'leftEyeY'    => 0.43,
 			'rightEyeX'   => 0.68,
@@ -227,6 +231,7 @@ function facepp_tryon_get_frames() {
 			'url'         => esc_url_raw( $url ),
 			'widthFactor' => isset( $settings[ 'frame_' . $i . '_wf' ] ) ? (float) $settings[ 'frame_' . $i . '_wf' ] : 2.15,
 			'yOffset'     => isset( $settings[ 'frame_' . $i . '_yo' ] ) ? (float) $settings[ 'frame_' . $i . '_yo' ] : 0.02,
+			'fitScale'    => isset( $settings[ 'frame_' . $i . '_fs' ] ) ? (float) $settings[ 'frame_' . $i . '_fs' ] : 0.88,
 			'leftEyeX'    => isset( $settings[ 'frame_' . $i . '_lx' ] ) ? (float) $settings[ 'frame_' . $i . '_lx' ] : 0.32,
 			'leftEyeY'    => isset( $settings[ 'frame_' . $i . '_ly' ] ) ? (float) $settings[ 'frame_' . $i . '_ly' ] : 0.43,
 			'rightEyeX'   => isset( $settings[ 'frame_' . $i . '_rx' ] ) ? (float) $settings[ 'frame_' . $i . '_rx' ] : 0.68,
@@ -281,6 +286,7 @@ function facepp_tryon_sanitize_settings( $input ) {
 		if (
 			false !== strpos( $key, '_wf' ) ||
 			false !== strpos( $key, '_yo' ) ||
+			false !== strpos( $key, '_fs' ) ||
 			false !== strpos( $key, '_lx' ) ||
 			false !== strpos( $key, '_ly' ) ||
 			false !== strpos( $key, '_rx' ) ||
@@ -362,12 +368,15 @@ function facepp_tryon_enqueue_assets() {
 			'detectFailed'   => 'Face detection failed. You can drag and adjust manually.',
 			'noFace'         => 'No face detected. Please use a clearer front-facing portrait.',
 			'missingCreds'   => 'Face++ key/secret is missing in plugin settings.',
-			'photoReady'     => 'Photo loaded. Choose frame and click Auto Align.',
-			'modelReady'     => 'Model loaded. Choose frame and click Auto Align.',
+			'photoReady'     => 'Photo loaded.',
+			'modelReady'     => 'Model loaded.',
 			'encodeFailed'   => 'This image cannot be sent to Face++ (cross-origin blocked). Use local upload or WordPress Media image.',
 			'frameSelected'  => 'Frame selected.',
 			'manualReset'    => 'Manual adjustments reset.',
 			'badFrameFormat' => 'Frame image should be a transparent PNG. JPG or white-background product photos will not align correctly.',
+			'uploading'      => 'Loading your photo...',
+			'loadingModel'   => 'Loading model and aligning frame...',
+			'fallbackAligned'=> 'Face detection was not available for this photo. A fallback position was applied.',
 		),
 	);
 
@@ -384,6 +393,7 @@ function facepp_tryon_ajax_detect() {
 	$api_secret = isset( $settings['api_secret'] ) ? trim( (string) $settings['api_secret'] ) : '';
 	$endpoint   = isset( $settings['api_endpoint'] ) ? trim( (string) $settings['api_endpoint'] ) : '';
 	$image_data = isset( $_POST['image'] ) ? (string) wp_unslash( $_POST['image'] ) : '';
+	$image_url  = isset( $_POST['image_url'] ) ? esc_url_raw( (string) wp_unslash( $_POST['image_url'] ) ) : '';
 
 	if ( '' === $endpoint ) {
 		$endpoint = 'https://api-us.faceplusplus.com/facepp/v3/detect';
@@ -399,7 +409,7 @@ function facepp_tryon_ajax_detect() {
 		);
 	}
 
-	if ( ! preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) ) {
+	if ( ! preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) && '' === $image_url ) {
 		wp_send_json_error(
 			array(
 				'code'    => 'invalid_image',
@@ -412,9 +422,45 @@ function facepp_tryon_ajax_detect() {
 	$payload = array(
 		'api_key'         => $api_key,
 		'api_secret'      => $api_secret,
-		'image_base64'    => preg_replace( '/^data:image\/(?:png|jpe?g|webp);base64,/', '', $image_data ),
 		'return_landmark' => '1',
 	);
+
+	if ( preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) ) {
+		$payload['image_base64'] = preg_replace( '/^data:image\/(?:png|jpe?g|webp);base64,/', '', $image_data );
+	} else {
+		$image_response = wp_remote_get(
+			$image_url,
+			array(
+				'timeout'     => 20,
+				'redirection' => 4,
+			)
+		);
+
+		if ( is_wp_error( $image_response ) ) {
+			wp_send_json_error(
+				array(
+					'code'    => 'image_fetch_failed',
+					'message' => $image_response->get_error_message(),
+				),
+				502
+			);
+		}
+
+		$image_status = wp_remote_retrieve_response_code( $image_response );
+		$image_body   = wp_remote_retrieve_body( $image_response );
+
+		if ( 200 !== $image_status || '' === $image_body ) {
+			wp_send_json_error(
+				array(
+					'code'    => 'image_fetch_failed',
+					'message' => 'Could not fetch the source image.',
+				),
+				502
+			);
+		}
+
+		$payload['image_base64'] = base64_encode( $image_body );
+	}
 
 	$response = wp_remote_post(
 		$endpoint,
@@ -574,6 +620,10 @@ function facepp_tryon_shortcode( $atts = array() ) {
 								<span class="eye_icon facepp-tryon-eye facepp-tryon-eye-left" aria-hidden="true"></span>
 								<span class="eye_icon facepp-tryon-eye facepp-tryon-eye-right" aria-hidden="true"></span>
 								<div class="facepp-tryon-empty">Upload photo and pick a frame.</div>
+								<div class="facepp-tryon-stage-overlay" aria-hidden="true">
+									<span class="facepp-tryon-stage-spinner"></span>
+									<span class="facepp-tryon-stage-loading-text">Aligning frame...</span>
+								</div>
 							</div>
 							<label class="facepp-tryon-upload">
 								<input type="file" class="facepp-tryon-file" accept="image/*" />
@@ -663,6 +713,7 @@ function facepp_tryon_render_settings_page() {
 						<?php facepp_tryon_field( 'frame_' . $i . '_url', 'Frame ' . $i . ' PNG URL', 'url', true ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_wf', 'Frame ' . $i . ' Width Factor', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_yo', 'Frame ' . $i . ' Y Offset', 'number' ); ?>
+						<?php facepp_tryon_field( 'frame_' . $i . '_fs', 'Frame ' . $i . ' Fit Scale', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_lx', 'Frame ' . $i . ' Left Eye X (0-1)', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_ly', 'Frame ' . $i . ' Left Eye Y (0-1)', 'number' ); ?>
 						<?php facepp_tryon_field( 'frame_' . $i . '_rx', 'Frame ' . $i . ' Right Eye X (0-1)', 'number' ); ?>

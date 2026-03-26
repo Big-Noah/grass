@@ -94,6 +94,16 @@
 	overflow: hidden;
 }
 
+.facepp-tryon-stage::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.9));
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+
 .facepp-tryon-photo,
 .facepp-tryon-frame {
 	position: absolute;
@@ -133,6 +143,47 @@
 	text-align: center;
 	color: var(--tryon-muted);
 	background: rgba(255, 255, 255, 0.75);
+}
+
+.facepp-tryon-stage-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+
+.facepp-tryon-stage-spinner {
+	width: 48px;
+	height: 48px;
+	border: 3px solid rgba(255, 86, 92, 0.18);
+	border-top-color: var(--tryon-accent);
+	border-radius: 50%;
+	animation: facepp-tryon-spin 0.8s linear infinite;
+}
+
+.facepp-tryon-stage-loading-text {
+	max-width: 220px;
+	color: var(--tryon-ink);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.5;
+	text-align: center;
+}
+
+.facepp-tryon-stage.is-busy::after,
+.facepp-tryon-stage.is-busy .facepp-tryon-stage-overlay {
+	opacity: 1;
+}
+
+.facepp-tryon-stage.is-busy .facepp-tryon-frame {
+	opacity: 0.7;
 }
 
 .facepp-tryon-eye {
@@ -273,6 +324,16 @@
 	margin-top: 18px;
 	color: var(--tryon-muted);
 	font-size: 13px;
+}
+
+@keyframes facepp-tryon-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 @media (max-width: 900px) {

@@ -38,11 +38,13 @@
 		var config = parseConfig(root);
 		var openBtn = root.querySelector('.facepp-tryon-open');
 		var modal = root.querySelector('.facepp-tryon-modal');
+		var stage = root.querySelector('.facepp-tryon-stage');
 		var photo = root.querySelector('.facepp-tryon-photo');
 		var frame = root.querySelector('.facepp-tryon-frame');
 		var empty = root.querySelector('.facepp-tryon-empty');
 		var fileInput = root.querySelector('.facepp-tryon-file');
 		var status = root.querySelector('.facepp-tryon-status');
+		var loadingText = root.querySelector('.facepp-tryon-stage-loading-text');
 		var framesBox = root.querySelector('.facepp-tryon-frames');
 		var modelsBox = root.querySelector('.facepp-tryon-models');
 		var controls = root.querySelectorAll('[data-tryon-action]');
@@ -58,12 +60,16 @@
 			photoLoaded: false,
 			frameLoaded: false,
 			photoDataUrl: '',
+			photoSourceUrl: '',
 			selectedFrame: null,
 			selectedModel: null,
 			preferredFrameKey: sanitizeKey(config.defaultFrame || ''),
 			drag: null,
 			pendingDetect: false,
 			pendingPreset: null,
+			detectedEyes: null,
+			loadToken: 0,
+			alignToken: 0,
 			auto: { x: 0, y: 0, rotate: 0, width: 0 },
 			manual: { x: 0, y: 0, rotate: 0, scale: 1 }
 		};
@@ -74,8 +80,18 @@
 			}
 		}
 
-		function updateEyeMarker(marker, point, metrics) {
-			if (!marker || !point || !metrics.width || !metrics.height) {
+		function setBusy(isBusy, message) {
+			if (stage) {
+				stage.classList.toggle('is-busy', !!isBusy);
+			}
+
+			if (loadingText && message) {
+				loadingText.textContent = message;
+			}
+		}
+
+		function updateEyeMarker(marker, point) {
+			if (!marker || !point) {
 				if (marker) {
 					marker.style.display = 'none';
 				}
@@ -85,6 +101,11 @@
 			marker.style.left = point.x - 32.5 + 'px';
 			marker.style.top = point.y - 32.5 + 'px';
 			marker.style.display = 'none';
+		}
+
+		function clearEyeMarkers() {
+			updateEyeMarker(leftEye, null);
+			updateEyeMarker(rightEye, null);
 		}
 
 		function getMetrics() {
@@ -121,6 +142,16 @@
 
 		function resetManual() {
 			state.manual = { x: 0, y: 0, rotate: 0, scale: 1 };
+		}
+
+		function getFrameFitScale() {
+			var fitScale = state.selectedFrame && typeof state.selectedFrame.fitScale === 'number' ? state.selectedFrame.fitScale : 0.88;
+
+			if (!isFinite(fitScale) || fitScale <= 0) {
+				return 0.88;
+			}
+
+			return fitScale;
 		}
 
 		function autoCenter() {
@@ -161,6 +192,7 @@
 			var eyeDistance = distance(leftPoint, rightPoint);
 			var widthFactor = state.selectedFrame && state.selectedFrame.widthFactor ? state.selectedFrame.widthFactor : 2.15;
 			var yOffset = state.selectedFrame && state.selectedFrame.yOffset ? state.selectedFrame.yOffset : 0.02;
+			var fitScale = getFrameFitScale();
 			var centerX = (leftPoint.x + rightPoint.x) / 2;
 			var centerY = (leftPoint.y + rightPoint.y) / 2;
 			var rotate = Math.atan2(rightPoint.y - leftPoint.y, rightPoint.x - leftPoint.x) * (180 / Math.PI);
@@ -181,6 +213,9 @@
 			if (useAnchors) {
 				var anchorSpanX = (rightEyeX - leftEyeX) * naturalWidth;
 				var scale = anchorSpanX > 0 ? eyeDistance / anchorSpanX : 0;
+
+				scale *= fitScale;
+
 				var width = naturalWidth * scale;
 				var height = naturalHeight * scale;
 				var anchorCenterX = ((leftEyeX + rightEyeX) / 2) * width;
@@ -191,13 +226,13 @@
 				state.auto.y = centerY - anchorCenterY;
 				state.auto.rotate = rotate;
 				resetManual();
-				updateEyeMarker(leftEye, leftPoint, getMetrics());
-				updateEyeMarker(rightEye, rightPoint, getMetrics());
+				updateEyeMarker(leftEye, leftPoint);
+				updateEyeMarker(rightEye, rightPoint);
 				render();
 				return;
 			}
 
-			var fallbackWidth = eyeDistance * widthFactor;
+			var fallbackWidth = eyeDistance * widthFactor * fitScale;
 			var fallbackHeight = fallbackWidth * (naturalHeight / naturalWidth);
 
 			state.auto.width = fallbackWidth;
@@ -205,9 +240,32 @@
 			state.auto.y = centerY - fallbackHeight / 2 + eyeDistance * yOffset;
 			state.auto.rotate = rotate;
 			resetManual();
-			updateEyeMarker(leftEye, leftPoint, getMetrics());
-			updateEyeMarker(rightEye, rightPoint, getMetrics());
+			updateEyeMarker(leftEye, leftPoint);
+			updateEyeMarker(rightEye, rightPoint);
 			render();
+		}
+
+		function applyStoredEyes() {
+			var metrics = getMetrics();
+			var naturalWidth = photo.naturalWidth || metrics.width || 1;
+			var naturalHeight = photo.naturalHeight || metrics.height || 1;
+
+			if (!state.detectedEyes || !state.detectedEyes.left_eye || !state.detectedEyes.right_eye || !metrics.width || !metrics.height) {
+				return false;
+			}
+
+			applyEyes(
+				{
+					x: (state.detectedEyes.left_eye.x / naturalWidth) * metrics.width,
+					y: (state.detectedEyes.left_eye.y / naturalHeight) * metrics.height
+				},
+				{
+					x: (state.detectedEyes.right_eye.x / naturalWidth) * metrics.width,
+					y: (state.detectedEyes.right_eye.y / naturalHeight) * metrics.height
+				}
+			);
+
+			return true;
 		}
 
 		function buildFrameButtons() {
@@ -236,13 +294,30 @@
 					frame.onload = function () {
 						state.frameLoaded = true;
 
+						if (applyStoredEyes()) {
+							setBusy(false);
+							setStatus((globals.i18n || {}).aligned);
+							return;
+						}
+
+						if (state.photoLoaded && state.pendingDetect) {
+							runAutoAlign({ fallbackPreset: state.pendingPreset });
+							return;
+						}
+
 						if (state.selectedModel && state.selectedModel.preset) {
 							applyPreset(state.selectedModel.preset);
-						} else if (firstLoad) {
-							autoCenter();
-						} else {
-							render();
+							setBusy(false);
+							return;
 						}
+
+						if (state.photoLoaded || firstLoad) {
+							autoCenter();
+							setBusy(false);
+							return;
+						}
+
+						render();
 					};
 					frame.src = item.url;
 					if (frame.complete) {
@@ -271,24 +346,51 @@
 		}
 
 		function loadPhoto(src, dataUrl, readyMessage, preset, shouldDetect) {
+			var loadToken = ++state.loadToken;
+
+			state.alignToken += 1;
 			state.photoDataUrl = dataUrl || '';
+			state.photoSourceUrl = typeof src === 'string' && src.indexOf('data:image/') !== 0 ? src : '';
 			state.pendingPreset = preset || null;
 			state.pendingDetect = !!shouldDetect;
+			state.detectedEyes = null;
+			state.photoLoaded = false;
+			clearEyeMarkers();
+			resetManual();
 
 			photo.onload = function () {
+				if (loadToken !== state.loadToken) {
+					return;
+				}
+
 				state.photoLoaded = true;
+
+				if (state.pendingDetect && state.frameLoaded) {
+					runAutoAlign({ fallbackPreset: state.pendingPreset });
+					return;
+				}
 
 				if (state.pendingPreset && state.frameLoaded) {
 					applyPreset(state.pendingPreset);
-				} else if (state.pendingDetect && state.frameLoaded) {
-					runAutoAlign();
+					setBusy(false);
 				} else if (state.frameLoaded) {
 					autoCenter();
+					setBusy(false);
 				}
 
 				setStatus(readyMessage || (globals.i18n || {}).photoReady);
 			};
 
+			photo.onerror = function () {
+				if (loadToken !== state.loadToken) {
+					return;
+				}
+
+				setBusy(false);
+				setStatus((globals.i18n || {}).detectFailed);
+			};
+
+			photo.crossOrigin = typeof src === 'string' && /^https?:\/\//i.test(src) ? 'anonymous' : '';
 			photo.src = src;
 			if (photo.complete) {
 				photo.onload();
@@ -309,7 +411,8 @@
 				button.addEventListener('click', function () {
 					state.selectedModel = item;
 					setActiveModelButton(button);
-					loadPhoto(item.url, '', (globals.i18n || {}).modelReady || (globals.i18n || {}).photoReady, item.preset || null, false);
+					setBusy(true, (globals.i18n || {}).loadingModel || (globals.i18n || {}).detecting);
+					loadPhoto(item.url, '', (globals.i18n || {}).modelReady || (globals.i18n || {}).photoReady, item.preset || null, true);
 				});
 				modelsBox.appendChild(button);
 			});
@@ -317,7 +420,7 @@
 			var firstModel = modelsBox.querySelector('.facepp-tryon-model-item');
 
 			if (firstModel) {
-				firstModel.click();
+				setActiveModelButton(firstModel);
 			}
 		}
 
@@ -354,7 +457,7 @@
 		async function detectFace() {
 			var imagePayload = getPhotoPayload();
 
-			if (!imagePayload) {
+			if (!imagePayload && !state.photoSourceUrl) {
 				var encodeError = new Error('Image encode failed');
 				encodeError.code = 'encode_failed';
 				throw encodeError;
@@ -364,7 +467,12 @@
 
 			formData.append('action', 'facepp_tryon_detect');
 			formData.append('nonce', globals.ajaxNonce);
-			formData.append('image', imagePayload);
+
+			if (imagePayload) {
+				formData.append('image', imagePayload);
+			} else if (state.photoSourceUrl) {
+				formData.append('image_url', state.photoSourceUrl);
+			}
 
 			var response = await window.fetch(globals.ajaxUrl, {
 				method: 'POST',
@@ -382,30 +490,63 @@
 			return json.data;
 		}
 
-		async function runAutoAlign() {
+		async function runAutoAlign(options) {
+			var settings = options || {};
+			var alignToken = ++state.alignToken;
+
 			if (!state.photoLoaded) {
+				setBusy(false);
 				setStatus((globals.i18n || {}).noPhoto);
 				return;
 			}
 
 			if (!state.frameLoaded || !state.selectedFrame) {
+				setBusy(false);
 				setStatus((globals.i18n || {}).noFrame);
 				return;
 			}
 
 			try {
+				setBusy(true, (globals.i18n || {}).detecting);
 				setStatus((globals.i18n || {}).detecting);
 				var data = await detectFace();
+
+				if (alignToken !== state.alignToken) {
+					return;
+				}
+
 				var metrics = getMetrics();
 				var naturalWidth = photo.naturalWidth || metrics.width;
 				var naturalHeight = photo.naturalHeight || metrics.height;
+
+				state.detectedEyes = {
+					left_eye: data.left_eye,
+					right_eye: data.right_eye
+				};
+				state.pendingDetect = false;
 
 				applyEyes(
 					{ x: (data.left_eye.x / naturalWidth) * metrics.width, y: (data.left_eye.y / naturalHeight) * metrics.height },
 					{ x: (data.right_eye.x / naturalWidth) * metrics.width, y: (data.right_eye.y / naturalHeight) * metrics.height }
 				);
+				setBusy(false);
 				setStatus((globals.i18n || {}).aligned);
 			} catch (error) {
+				if (alignToken !== state.alignToken) {
+					return;
+				}
+
+				state.pendingDetect = false;
+
+				if (settings.fallbackPreset) {
+					applyPreset(settings.fallbackPreset);
+					setBusy(false);
+					setStatus((globals.i18n || {}).fallbackAligned || (globals.i18n || {}).detectFailed);
+					return;
+				}
+
+				setBusy(false);
+
 				if (error && error.code === 'missing_credentials') {
 					setStatus((globals.i18n || {}).missingCreds);
 				} else if (error && (error.code === 'no_face' || error.code === 'no_eye_landmark')) {
@@ -495,6 +636,7 @@
 		function closeModal() {
 			modal.hidden = true;
 			document.body.style.overflow = '';
+			setBusy(false);
 		}
 
 		function selectFrameByKey(key) {
@@ -508,6 +650,15 @@
 		openBtn.addEventListener('click', function () {
 			modal.hidden = false;
 			document.body.style.overflow = 'hidden';
+
+			if (!state.photoLoaded) {
+				var activeModel = modelsBox.querySelector('.facepp-tryon-model-item.is-active') || modelsBox.querySelector('.facepp-tryon-model-item');
+
+				if (activeModel) {
+					activeModel.click();
+				}
+			}
+
 			render();
 		});
 
@@ -535,11 +686,13 @@
 			modelsBox.querySelectorAll('.facepp-tryon-model-item').forEach(function (entry) {
 				entry.classList.remove('is-active');
 			});
+			setBusy(true, (globals.i18n || {}).uploading || (globals.i18n || {}).detecting);
 
 			reader.onload = function (loadEvent) {
 				var dataUrl = loadEvent && loadEvent.target ? loadEvent.target.result : '';
 
 				if (typeof dataUrl !== 'string' || dataUrl.indexOf('data:image/') !== 0) {
+					setBusy(false);
 					setStatus((globals.i18n || {}).detectFailed);
 					return;
 				}
@@ -563,7 +716,13 @@
 		window.addEventListener('touchmove', moveDrag, { passive: false });
 		window.addEventListener('mouseup', endDrag);
 		window.addEventListener('touchend', endDrag);
-		window.addEventListener('resize', render);
+		window.addEventListener('resize', function () {
+			if (applyStoredEyes()) {
+				return;
+			}
+
+			render();
+		});
 
 		document.addEventListener('muukal:productColorChanged', function (event) {
 			var detail = event.detail || {};
