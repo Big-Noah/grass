@@ -6,7 +6,18 @@
   --muukal-buyer-showcase-overlay: rgba(35, 24, 21, 0.5);
   --muukal-buyer-showcase-tile-width: 148px;
   --muukal-buyer-showcase-tile-height: 200px;
+  width: 100%;
+  max-width: min(100%, 1900px);
+  margin: 0 auto;
+  overflow: hidden;
   color: #231815;
+  box-sizing: border-box;
+}
+
+.muukal-buyer-showcase *,
+.muukal-buyer-showcase *::before,
+.muukal-buyer-showcase *::after {
+  box-sizing: border-box;
 }
 
 .muukal-buyer-showcase__header {
@@ -42,6 +53,8 @@
   padding: 0 6px 12px;
   scrollbar-width: thin;
   scrollbar-color: #caa8b3 transparent;
+  width: 100%;
+  max-width: 100%;
 }
 
 .muukal-buyer-showcase__card {
@@ -77,6 +90,10 @@
   justify-content: center;
   padding: 12px 10px;
   background: linear-gradient(180deg, rgba(35, 24, 21, 0) 0%, var(--muukal-buyer-showcase-overlay) 100%);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .muukal-buyer-showcase__overlay-label {
@@ -110,6 +127,13 @@
 .muukal-buyer-showcase__card:hover .muukal-buyer-showcase__image-wrap img,
 .muukal-buyer-showcase__card:focus-visible .muukal-buyer-showcase__image-wrap img {
   transform: scale(1.04);
+}
+
+.muukal-buyer-showcase__card:hover .muukal-buyer-showcase__overlay,
+.muukal-buyer-showcase__card:focus-visible .muukal-buyer-showcase__overlay,
+.muukal-buyer-showcase__card:focus-within .muukal-buyer-showcase__overlay {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .muukal-buyer-showcase__card:focus-visible {
