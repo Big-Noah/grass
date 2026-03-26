@@ -107,6 +107,12 @@
 .facepp-tryon-photo,
 .facepp-tryon-frame {
 	position: absolute;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none !important;
+	filter: none !important;
+	max-width: none !important;
+	max-height: none !important;
 }
 
 .facepp-tryon-photo {

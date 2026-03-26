@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.2.2' );
+define( 'FACEPP_TRYON_VERSION', '1.2.3' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
