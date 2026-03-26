@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.2.1' );
+define( 'FACEPP_TRYON_VERSION', '1.2.2' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -632,8 +632,9 @@ function facepp_tryon_shortcode( $atts = array() ) {
 									type="file"
 									class="facepp-tryon-file"
 									accept="image/*"
+									aria-label="Upload Image"
 								/>
-								<button type="button" class="facepp-tryon-upload-trigger">Upload Image</button>
+								<label class="facepp-tryon-upload-trigger" for="<?php echo esc_attr( $instance_id ); ?>-upload">Upload Image</label>
 							</div>
 							<div class="facepp-tryon-controls">
 								<button type="button" class="tdo_btn" data-tryon-action="size_b">+</button>

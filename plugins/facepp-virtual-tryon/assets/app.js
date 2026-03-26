@@ -43,7 +43,6 @@
 		var frame = root.querySelector('.facepp-tryon-frame');
 		var empty = root.querySelector('.facepp-tryon-empty');
 		var fileInput = root.querySelector('.facepp-tryon-file');
-		var uploadTrigger = root.querySelector('.facepp-tryon-upload-trigger');
 		var status = root.querySelector('.facepp-tryon-status');
 		var loadingText = root.querySelector('.facepp-tryon-stage-loading-text');
 		var framesBox = root.querySelector('.facepp-tryon-frames');
@@ -705,10 +704,9 @@
 			reader.readAsDataURL(file);
 		});
 
-		if (uploadTrigger && fileInput) {
-			uploadTrigger.addEventListener('click', function () {
+		if (fileInput) {
+			fileInput.addEventListener('click', function () {
 				fileInput.value = '';
-				fileInput.click();
 			});
 		}
 
