@@ -193,6 +193,9 @@
 	padding: 10px;
 	border-bottom: 1px solid transparent;
 	cursor: pointer;
+	font-size: 14px;
+	font-weight: 400;
+	color: #333;
 }
 
 .panel-default {
@@ -420,6 +423,7 @@
 
 .step_cn {
 	font-size: 14px;
+	color: #222;
 }
 
 .step_cn .un_line {
@@ -443,16 +447,16 @@
 }
 
 .card-header {
-	padding: 0;
-	border-bottom: 0;
-	background: transparent;
+	padding: 12px 20px;
+	border-bottom: 1px solid #ddd;
+	background: #fff;
 }
 
 .mlr-step-toggle {
-	padding: 16px 18px;
-	font-size: 22px;
-	font-weight: 700;
-	color: #222;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 400;
+	color: #000;
 	cursor: pointer;
 }
 
@@ -465,7 +469,7 @@
 }
 
 .card-body {
-	padding: 18px;
+	padding: 15px;
 }
 
 .mlr-step-options {
@@ -490,9 +494,10 @@ input[type="text"] {
 	padding: 6px 10px;
 	color: #000;
 	font-weight: 400;
+	font-size: 14px;
 	background-color: #fff;
 	border: none;
-	border-bottom: 1px solid #d7d7d7;
+	border-bottom: 1px solid #f1efec;
 	border-radius: 0;
 	box-sizing: border-box;
 	appearance: none;
@@ -555,7 +560,9 @@ select:disabled {
 
 .mlr-rx-mode {
 	margin-bottom: 16px;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	color: #7e7e7e;
+	font-size: 14px;
 }
 
 .mlr-rx-row {
@@ -564,6 +571,61 @@ select:disabled {
 	gap: 12px;
 	align-items: center;
 	margin-bottom: 12px;
+}
+
+.mlr-app #step1_div_box .panel-body {
+	font-size: 12px;
+	color: #333;
+}
+
+.mlr-app #step2_div_box label,
+.mlr-app .mlr-rx-mode label,
+.mlr-app .mlr-pd-box label,
+.mlr-app .mlr-prism-grid label,
+.mlr-app .mlr-toggle-line label {
+	color: #7e7e7e;
+	font-size: 14px;
+	font-weight: 400;
+}
+
+.mlr-app .sr-name-title span,
+.mlr-app #step2_div_box h6,
+.mlr-app .mlr-rx-name {
+	color: #333;
+	font-size: 14px;
+	font-weight: 400;
+}
+
+.mlr-app .mlr-upload-copy {
+	margin: 8px 0 16px;
+	color: #333;
+	font-size: 14px;
+	line-height: 1.7;
+}
+
+.mlr-app #step2_div_box textarea {
+	background: #fff;
+}
+
+.mlr-step-submit,
+#power-sure {
+	display: inline-block;
+	min-width: 180px;
+	padding: 15px 40px;
+	border: 1px solid #fff;
+	background: #222;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 400;
+	text-align: center;
+}
+
+.mlr-step-submit:hover,
+.mlr-step-submit:focus,
+#power-sure:hover,
+#power-sure:focus {
+	background: #222;
+	color: #fff;
 }
 
 .mlr-pd-single,

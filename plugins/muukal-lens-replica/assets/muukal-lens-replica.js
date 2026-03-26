@@ -39,6 +39,12 @@
 		return '<option value="' + option.value + '"' + (String(option.value) === String(selected) ? ' selected' : '') + '>' + option.label + '</option>';
 	}
 
+	function buildSelectMarkup(field, options, selected, disabled) {
+		return '<div class="lens-select"><select data-field="' + field + '"' + (disabled ? ' disabled' : '') + '>' + options.map(function (option) {
+			return createOption(option, selected);
+		}).join('') + '</select></div>';
+	}
+
 	function absMax(values) {
 		return Math.max.apply(null, values.map(function (value) {
 			return Math.abs(Number(value || 0));
@@ -69,13 +75,14 @@
 
 		var state = {
 			openStep: 1,
-			usage: 1,
+			usage: 0,
 			readers: 0,
 			power: '0',
 			lenstype: 0,
 			lenstype_color: 0,
 			lensindex: 0,
 			coating: 0,
+			step2Submitted: false,
 			pdkey: 1,
 			nearpd: 0,
 			prism: 0,
@@ -254,6 +261,10 @@
 		}
 
 		function validateStep2() {
+			if (!state.usage) {
+				setStatus('Choose how you use your glasses first.');
+				return false;
+			}
 			if (state.usage === 20) {
 				return true;
 			}
@@ -322,6 +333,8 @@
 			root.querySelector('#step_1_cn').innerHTML = usage ? usage.short_label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
 			if (state.usage === 20) {
 				root.querySelector('#step_2_cn').innerHTML = '';
+			} else if (!state.step2Submitted) {
+				root.querySelector('#step_2_cn').innerHTML = '';
 			} else if (state.usage === 2 && state.readers === 1 && Number(state.power || 0) > 0) {
 				root.querySelector('#step_2_cn').innerHTML = 'Readers (+' + state.power + ')&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
 			} else {
@@ -350,6 +363,7 @@
 					state.lenstype_color = 0;
 					state.lensindex = 0;
 					state.coating = 0;
+					state.step2Submitted = false;
 					state.pdkey = 1;
 					state.nearpd = 0;
 					state.prism = 0;
@@ -370,7 +384,7 @@
 				mount.innerHTML = '';
 				return;
 			}
-			mount.innerHTML = "<div class=\"poewr_t\"><div class=\"mb-10 fs14 fw600\">Select your readers' lens power</div><div class=\"mb-10\">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div><div class=\"mb-10 mk-blue strength_btn\">What is my strength?</div><div id=\"strength_info\" class=\"mt-10\" style=\"display:none;\"><p class=\"mb5\">Ready-made readers provide equal magnification to both eyes.</p><p class=\"mb5\">Download the diopter chart, print at 100%, hold it 14 inches away, and read from top to bottom.</p></div></div><div class=\"mlr-power-values\"></div><div class=\"text-center mt-20\"><button id=\"power-sure\" class=\"btn theme-btn-w fs16\">Next</button></div>";
+			mount.innerHTML = "<div class=\"poewr_t\"><div class=\"mb-10 fs14 fw600\">Select your readers' lens power</div><div class=\"mb-10\">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div><div class=\"mb-10 mk-blue strength_btn\">What is my strength?</div><div id=\"strength_info\" class=\"mt-10\" style=\"display:none;\"><p class=\"mb5\">Ready-made readers provide equal magnification to both eyes.</p><p class=\"mb5\">Download the diopter chart, print at 100%, hold it 14 inches away, and read from top to bottom.</p></div></div><div class=\"mlr-power-values\"></div><div class=\"text-center mt-20\"><button id=\"power-sure\" class=\"btn mlr-step-submit\">Next</button></div>";
 			var values = mount.querySelector('.mlr-power-values');
 			schema.prescription_fields.power.options.forEach(function (option) {
 				var value = option.value.replace('+', '');
@@ -384,7 +398,9 @@
 				values.appendChild(button);
 			});
 			mount.querySelector('#power-sure').addEventListener('click', function () {
+				state.step2Submitted = true;
 				setOpenStep(3);
+				render();
 			});
 			mount.querySelector('.strength_btn').addEventListener('click', function () {
 				var info = mount.querySelector('#strength_info');
@@ -402,12 +418,12 @@
 			var axisOdDisabled = Number(state.form.od_cyl || 0) === 0;
 			var axisOsDisabled = Number(state.form.os_cyl || 0) === 0;
 			var pdHtml = state.pdkey === 1
-				? '<div class="mlr-pd-single"><label>PD</label><select data-field="pd">' + schema.prescription_fields.pd.options.map(function (option) { return createOption(option, state.form.pd); }).join('') + '</select></div>'
-				: '<div class="mlr-pd-double"><label>Right PD</label><select data-field="od_pd">' + schema.prescription_fields.od_pd.options.map(function (option) { return createOption(option, state.form.od_pd); }).join('') + '</select><label>Left PD</label><select data-field="os_pd">' + schema.prescription_fields.os_pd.options.map(function (option) { return createOption(option, state.form.os_pd); }).join('') + '</select></div>';
-			var nearPdHtml = state.nearpd ? '<div class="mlr-pd-single"><label>Near PD</label><select data-field="npd">' + schema.prescription_fields.npd.options.map(function (option) { return createOption(option, state.form.npd === '0' ? '46' : state.form.npd); }).join('') + '</select></div>' : '';
+				? '<div class="mlr-pd-single"><label>PD</label>' + buildSelectMarkup('pd', schema.prescription_fields.pd.options, state.form.pd, false) + '</div>'
+				: '<div class="mlr-pd-double"><label>Right PD</label>' + buildSelectMarkup('od_pd', schema.prescription_fields.od_pd.options, state.form.od_pd, false) + '<label>Left PD</label>' + buildSelectMarkup('os_pd', schema.prescription_fields.os_pd.options, state.form.os_pd, false) + '</div>';
+			var nearPdHtml = state.nearpd ? '<div class="mlr-pd-single"><label>Near PD</label>' + buildSelectMarkup('npd', schema.prescription_fields.npd.options, state.form.npd === '0' ? '46' : state.form.npd, false) + '</div>' : '';
 			var prismHtml = state.prism ? '<div class="mlr-prism-grid">' +
 				['od_prismnum_v', 'os_prismnum_v', 'od_prismdir_v', 'os_prismdir_v', 'od_prismnum_h', 'os_prismnum_h', 'od_prismdir_h', 'os_prismdir_h'].map(function (field) {
-					return '<label>' + field.replace(/_/g, ' ').toUpperCase() + '<select data-field="' + field + '">' + schema.prescription_fields[field].options.map(function (option) { return createOption(option, state.form[field]); }).join('') + '</select></label>';
+					return '<label>' + field.replace(/_/g, ' ').toUpperCase() + buildSelectMarkup(field, schema.prescription_fields[field].options, state.form[field], false) + '</label>';
 				}).join('') + '</div>' : '';
 			mount.innerHTML = '<div class="mlr-rx-mode"><label><input type="radio" name="rx_mode" value="rx"' + (state.readers === 0 ? ' checked' : '') + '> Enter your prescription</label>' +
 				(state.usage === 2 ? '<label><input type="radio" name="rx_mode" value="readers"' + (state.readers === 1 ? ' checked' : '') + '> For Readers: just select a lens power</label>' : '') + '</div>' +
@@ -424,10 +440,11 @@
 				prismHtml +
 				'<h6>Comments:</h6><textarea data-field="lens_comment">' + (state.form.lens_comment || '') + '</textarea>' +
 				'<div class="mlr-rx-name">Save prescription As:<input type="text" data-field="rx_name" value="' + state.form.rx_name + '"></div>' +
-				'<div class="text-center mt-20"><button class="btn theme-btn-w fs16" data-next-step="3">SUBMIT PRESCRIPTION</button></div>';
+				'<div class="text-center mt-20"><button class="btn mlr-step-submit" data-next-step="3">SUBMIT PRESCRIPTION</button></div>';
 
 			mount.querySelectorAll('select[data-field], textarea[data-field], input[type="text"][data-field]').forEach(function (input) {
 				input.addEventListener('change', function () {
+					state.step2Submitted = false;
 					state.form[input.getAttribute('data-field')] = input.value;
 					ensureValidSelections();
 					render();
@@ -435,6 +452,7 @@
 			});
 			mount.querySelectorAll('input[name="rx_mode"]').forEach(function (input) {
 				input.addEventListener('change', function () {
+					state.step2Submitted = false;
 					state.readers = input.value === 'readers' ? 1 : 0;
 					if (state.readers === 0) {
 						state.power = '0';
@@ -444,6 +462,7 @@
 			});
 			mount.querySelectorAll('input[data-toggle]').forEach(function (input) {
 				input.addEventListener('change', function () {
+					state.step2Submitted = false;
 					var type = input.getAttribute('data-toggle');
 					if (type === 'pd') {
 						state.pdkey = input.checked ? 2 : 1;
@@ -459,15 +478,17 @@
 			});
 			mount.querySelector('[data-next-step="3"]').addEventListener('click', function () {
 				if (validateStep2()) {
+					state.step2Submitted = true;
 					setOpenStep(3);
+					render();
 				}
 			});
 		}
 
 		function buildPairSelect(label, odField, osField, odDisabled, osDisabled) {
 			return '<div class="mlr-rx-row"><div class="sr-name-title"><span>' + label + '</span></div>' +
-				'<label><select data-field="' + odField + '"' + (odDisabled ? ' disabled' : '') + '>' + schema.prescription_fields[odField].options.map(function (option) { return createOption(option, state.form[odField]); }).join('') + '</select></label>' +
-				'<label><select data-field="' + osField + '"' + (osDisabled ? ' disabled' : '') + '>' + schema.prescription_fields[osField].options.map(function (option) { return createOption(option, state.form[osField]); }).join('') + '</select></label></div>';
+				'<label' + (odDisabled ? ' class="sr-disabled"' : '') + '>' + buildSelectMarkup(odField, schema.prescription_fields[odField].options, state.form[odField], odDisabled) + '</label>' +
+				'<label' + (osDisabled ? ' class="sr-disabled"' : '') + '>' + buildSelectMarkup(osField, schema.prescription_fields[osField].options, state.form[osField], osDisabled) + '</label></div>';
 		}
 
 		function renderLensTypeStep() {
@@ -577,10 +598,12 @@
 			root.querySelector('#deta_lenst_coatinc_p').textContent = coating ? (getCoatingPrice(state.coating) ? money(getCoatingPrice(state.coating)) : 'FREE') : '';
 			blueButtonLabel.textContent = state.bluelight ? 'YES' : 'NO';
 			root.querySelector('#deta_lenst_bluelight_p').textContent = state.bluelight ? money(getBlueLightPrice()) : '';
+			root.querySelector('#data_attr_1').style.display = usage ? 'block' : 'none';
 			root.querySelector('#data_attr_2').style.display = state.prism ? 'block' : 'none';
 			root.querySelector('#data_attr_3').style.display = lensType ? 'block' : 'none';
 			root.querySelector('#data_attr_4').style.display = lensIndex ? 'block' : 'none';
 			root.querySelector('#data_attr_5').style.display = coating ? 'block' : 'none';
+			root.querySelector('#data_attr_6').style.display = usage ? 'block' : 'none';
 			root.querySelector('#lens_price').textContent = getLensTotal().toFixed(2);
 			root.querySelector('#total').textContent = getGrandTotal().toFixed(2);
 			blueButton.classList.toggle('bluelight-check', state.bluelight);
