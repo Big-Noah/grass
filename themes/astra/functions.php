@@ -207,7 +207,7 @@ require_once ASTRA_THEME_DIR . 'inc/shortcodes/header-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/footer-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/featured-collection-nav-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/index-nav-box-shortcode.php';
-require_once ASTRA_THEME_DIR . 'inc/shortcodes/home-banner-grid-shortcode.php';
+require_once ASTRA_THEME_DIR . 'inc/shortcodes/why-choose-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-loop-item-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-filter-archive-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-detail-template-shortcode.php';

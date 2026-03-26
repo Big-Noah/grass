@@ -1,0 +1,131 @@
+.muukal-why-choose {
+  padding-top: var(--muukal-why-choose-pt, 75px);
+}
+
+.muukal-why-choose * {
+  box-sizing: border-box;
+}
+
+.muukal-why-choose .container-fluid {
+  width: min(100%, 1900px);
+  margin: 0 auto;
+  padding-left: 55px;
+  padding-right: 55px;
+}
+
+.muukal-why-choose .why-cm-bg {
+  padding: 0;
+}
+
+.muukal-why-choose h2 {
+  margin: 0 0 30px;
+  color: #1f1f1f;
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.muukal-why-choose .why-cm-box {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.muukal-why-choose .why-cm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  text-align: left;
+}
+
+.muukal-why-choose .why-cm-item img {
+  display: block;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  object-fit: contain;
+}
+
+.muukal-why-choose .why-cm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.muukal-why-choose .why-cm-h {
+  color: #1f1f1f;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.muukal-why-choose .why-cm-i {
+  color: #525252;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.muukal-why-choose .trustpilot-widget {
+  width: 100%;
+  min-height: 140px;
+}
+
+.muukal-why-choose .trustpilot-widget iframe {
+  width: 100%;
+  border: 0;
+}
+
+@media (max-width: 1199px) {
+  .muukal-why-choose .container-fluid {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .muukal-why-choose h2 {
+    font-size: 36px;
+  }
+
+  .muukal-why-choose .why-cm-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .muukal-why-choose .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .muukal-why-choose h2 {
+    margin-bottom: 24px;
+    font-size: 30px;
+  }
+
+  .muukal-why-choose .why-cm-box {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .muukal-why-choose .why-cm-item {
+    gap: 14px;
+  }
+
+  .muukal-why-choose .why-cm-item img {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+  }
+
+  .muukal-why-choose .why-cm-h {
+    font-size: 20px;
+  }
+
+  .muukal-why-choose .why-cm-i {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+}
