@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Lens Replica
  * Description: Standalone Muukal lens-selector replica for testing, with PHP field schema and simulated add-to-cart payload export.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_LENS_REPLICA_VERSION', '0.1.0' );
+define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.0' );
 define( 'MUUKAL_LENS_REPLICA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_LENS_REPLICA_URL', plugin_dir_url( __FILE__ ) );
 
@@ -29,14 +29,32 @@ function muukal_lens_replica_get_config() {
  *
  * @return array
  */
-function muukal_lens_replica_get_runtime_config() {
+function muukal_lens_replica_get_runtime_config( $atts = array() ) {
 	$config  = muukal_lens_replica_get_config();
 	$product = $config['product'];
+	$atts    = wp_parse_args(
+		is_array( $atts ) ? $atts : array(),
+		array(
+			'product_id'    => '',
+			'color_id'      => '',
+			'color_label'   => '',
+			'frame_size'    => '',
+			'measurements'  => '',
+			'frame_price'   => '',
+			'image_url'     => '',
+			'button_label'  => '',
+			'button_subtext'=> '',
+			'button_class'  => '',
+			'debug'         => '',
+		)
+	);
 
 	if ( function_exists( 'wc_get_product' ) ) {
 		$current_product = null;
 
-		if ( isset( $GLOBALS['product'] ) && $GLOBALS['product'] instanceof WC_Product ) {
+		if ( ! empty( $atts['product_id'] ) ) {
+			$current_product = wc_get_product( absint( $atts['product_id'] ) );
+		} elseif ( isset( $GLOBALS['product'] ) && $GLOBALS['product'] instanceof WC_Product ) {
 			$current_product = $GLOBALS['product'];
 		} elseif ( get_the_ID() ) {
 			$current_product = wc_get_product( get_the_ID() );
@@ -48,6 +66,7 @@ function muukal_lens_replica_get_runtime_config() {
 			$product['describe']    = $current_product->get_name();
 			$product['name']        = $current_product->get_name();
 			$product['frame_price'] = (float) ( $current_product->get_price() ? $current_product->get_price() : $product['frame_price'] );
+			$product['image_url']   = $current_product->get_image_id() ? wp_get_attachment_image_url( $current_product->get_image_id(), 'woocommerce_single' ) : '';
 
 			$size_terms = wc_get_product_terms(
 				$current_product->get_id(),
@@ -62,6 +81,35 @@ function muukal_lens_replica_get_runtime_config() {
 			}
 		}
 	}
+
+	if ( '' !== (string) $atts['color_id'] ) {
+		$product['color_id'] = (string) $atts['color_id'];
+	}
+
+	if ( '' !== (string) $atts['color_label'] ) {
+		$product['color_label'] = sanitize_text_field( (string) $atts['color_label'] );
+	}
+
+	if ( '' !== (string) $atts['frame_size'] ) {
+		$product['size'] = sanitize_text_field( (string) $atts['frame_size'] );
+	}
+
+	if ( '' !== (string) $atts['measurements'] ) {
+		$product['measurements'] = sanitize_text_field( (string) $atts['measurements'] );
+	}
+
+	if ( '' !== (string) $atts['frame_price'] ) {
+		$product['frame_price'] = (float) $atts['frame_price'];
+	}
+
+	if ( '' !== (string) $atts['image_url'] ) {
+		$product['image_url'] = esc_url_raw( (string) $atts['image_url'] );
+	}
+
+	$config['ui']['open_button_label']   = '' !== (string) $atts['button_label'] ? sanitize_text_field( (string) $atts['button_label'] ) : 'SELECT LENSES';
+	$config['ui']['open_button_subtext'] = '' !== (string) $atts['button_subtext'] ? sanitize_text_field( (string) $atts['button_subtext'] ) : 'or Non-prescription';
+	$config['ui']['button_class']        = '' !== (string) $atts['button_class'] ? sanitize_text_field( (string) $atts['button_class'] ) : 'btn theme-btn-b f-right go-select-lenses';
+	$config['ui']['debug']               = ! empty( $atts['debug'] );
 
 	$config['product'] = $product;
 
@@ -90,17 +138,35 @@ function muukal_lens_replica_enqueue_assets( $runtime_config = null ) {
 	);
 }
 
-function muukal_lens_replica_shortcode() {
-	$config  = muukal_lens_replica_get_runtime_config();
+function muukal_lens_replica_shortcode( $atts = array() ) {
+	$atts    = shortcode_atts(
+		array(
+			'product_id'     => '',
+			'color_id'       => '',
+			'color_label'    => '',
+			'frame_size'     => '',
+			'measurements'   => '',
+			'frame_price'    => '',
+			'image_url'      => '',
+			'button_label'   => '',
+			'button_subtext' => '',
+			'button_class'   => '',
+			'debug'          => '',
+		),
+		$atts,
+		'muukal_lens_replica'
+	);
+	$config  = muukal_lens_replica_get_runtime_config( $atts );
 	muukal_lens_replica_enqueue_assets( $config );
 	$product = $config['product'];
+	$image   = ! empty( $product['image_url'] ) ? esc_url( $product['image_url'] ) : '';
 
 	ob_start();
 	?>
-	<div class="mlr-app" data-product-id="<?php echo esc_attr( $product['id'] ); ?>">
-		<button type="button" id="hadStock" class="btn theme-btn-b f-right go-select-lenses">
-			SELECT LENSES
-			<div class="fs14 mt5">or Non-prescription</div>
+	<div class="mlr-app" data-product-id="<?php echo esc_attr( $product['id'] ); ?>" data-color-id="<?php echo esc_attr( $product['color_id'] ); ?>" data-color-label="<?php echo esc_attr( $product['color_label'] ); ?>">
+		<button type="button" id="hadStock" class="<?php echo esc_attr( $config['ui']['button_class'] ); ?>">
+			<?php echo esc_html( $config['ui']['open_button_label'] ); ?>
+			<div class="fs14 mt5"><?php echo esc_html( $config['ui']['open_button_subtext'] ); ?></div>
 		</button>
 		<section id="lens_container" class="container-fluid" hidden>
 			<div id="lens_mask" data-close="1"></div>
@@ -183,7 +249,11 @@ function muukal_lens_replica_shortcode() {
 							<div id="lens_goods_box" class="mt-20 borderd7">
 								<div class="lens_goods_info">
 									<div id="lens_img_v_box">
-										<div id="lens_img_v" aria-hidden="true"><?php echo esc_html( substr( $product['describe'], 0, 1 ) ); ?></div>
+										<?php if ( $image ) : ?>
+											<img id="lens_img_v" src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $product['describe'] ); ?>">
+										<?php else : ?>
+											<div id="lens_img_v" aria-hidden="true"><?php echo esc_html( substr( $product['describe'], 0, 1 ) ); ?></div>
+										<?php endif; ?>
 									</div>
 									<div class="mlr-divider"></div>
 									<div class="mt-10 pb-10 ml-10 mr-10">
@@ -204,19 +274,21 @@ function muukal_lens_replica_shortcode() {
 											<div class="clear"></div>
 										</div>
 										<div id="lens-add-cart" class="btn theme-btn-b">ADD TO CART</div>
-										<div class="mt-10 text-center mk-blue fs16" id="edit-again">Back to Edit Lenses</div>
-										<div class="mlr-payload-card">
-											<div class="mlr-payload-head">
-												<strong>Payload Preview</strong>
-												<button type="button" class="mlr-copy-payload">Copy</button>
+										<div class="mt-10 text-center mk-blue fs16" id="edit-again" style="display:none;">Back to Edit Lenses</div>
+										<?php if ( ! empty( $config['ui']['debug'] ) ) : ?>
+											<div class="mlr-payload-card">
+												<div class="mlr-payload-head">
+													<strong>Payload Preview</strong>
+													<button type="button" class="mlr-copy-payload">Copy</button>
+												</div>
+												<pre class="mlr-payload-preview">Waiting for simulation...</pre>
 											</div>
-											<pre class="mlr-payload-preview">Waiting for simulation...</pre>
-										</div>
+										<?php endif; ?>
 									</div>
 									<div class="mt-10 ml-20 lens-line borderb-d7">
-										<div class="lens_goods_title"><?php echo esc_html( $product['describe'] ); ?></div>
+										<div class="lens_goods_title" id="lens_goods_title"><?php echo esc_html( $product['describe'] ); ?></div>
 									</div>
-									<div class="ml-20 mt-10 lens-line"><span class="lens_lab">Frame Size:</span> <span><?php echo esc_html( $product['size'] ); ?></span>&nbsp;&nbsp;<?php echo esc_html( $product['measurements'] ); ?></div>
+									<div class="ml-20 mt-10 lens-line"><span class="lens_lab">Frame Size:</span> <span id="lens_size_v"><?php echo esc_html( $product['size'] ); ?></span>&nbsp;&nbsp;<span id="lens_measurements_v"><?php echo esc_html( $product['measurements'] ); ?></span></div>
 									<div class="ml-20 lens-line"><span class="lens_lab">Frame Color:</span> <span id="lens_color_v"><?php echo esc_html( $product['color_label'] ); ?></span></div>
 									<div class="ml-20 lens-line mr-20"><span class="lens_lab">Frame Price:</span> <span class="mk-price f-right">$<span id="frame_price"><?php echo esc_html( number_format( (float) $product['frame_price'], 2, '.', '' ) ); ?></span></span></div>
 									<div class="ml-20 pb-10 borderb-d7"></div>
@@ -303,6 +375,20 @@ function muukal_lens_replica_build_payload() {
 	$product = $config['product'];
 	$form    = isset( $state['form'] ) && is_array( $state['form'] ) ? $state['form'] : array();
 
+	if ( ! empty( $state['product'] ) && is_array( $state['product'] ) ) {
+		if ( isset( $state['product']['id'] ) ) {
+			$product['id'] = (int) $state['product']['id'];
+		}
+
+		if ( isset( $state['product']['color_id'] ) ) {
+			$product['color_id'] = (string) $state['product']['color_id'];
+		}
+
+		if ( isset( $state['product']['frame_price'] ) ) {
+			$product['frame_price'] = (float) $state['product']['frame_price'];
+		}
+	}
+
 	$payload = array(
 		'goodsid'        => (int) $product['id'],
 		'color'          => (string) $product['color_id'],
@@ -351,7 +437,7 @@ function muukal_lens_replica_build_payload() {
 
 	wp_send_json_success(
 		array(
-			'message'        => 'Simulated add-to-cart payload generated.',
+			'message'        => 'Lens payload generated.',
 			'payload'        => $payload,
 			'payload_fields' => $config['payload_fields'],
 			'response_mock'  => array(

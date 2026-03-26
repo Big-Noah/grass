@@ -588,7 +588,44 @@
 		}
 
 		function renderPayload() {
-			payloadPreview.textContent = state.payload ? JSON.stringify(state.payload, null, 2) : 'Waiting for simulation...';
+			if (!payloadPreview) {
+				return;
+			}
+
+			payloadPreview.textContent = state.payload ? JSON.stringify(state.payload, null, 2) : 'Waiting for payload...';
+		}
+
+		function renderProductSummary() {
+			var image = root.querySelector('#lens_img_v');
+			var title = root.querySelector('#lens_goods_title');
+			var size = root.querySelector('#lens_size_v');
+			var measurements = root.querySelector('#lens_measurements_v');
+			var color = root.querySelector('#lens_color_v');
+			var framePrice = root.querySelector('#frame_price');
+
+			if (title) {
+				title.textContent = schema.product.describe || '';
+			}
+
+			if (size) {
+				size.textContent = schema.product.size || '';
+			}
+
+			if (measurements) {
+				measurements.textContent = schema.product.measurements || '';
+			}
+
+			if (color) {
+				color.textContent = schema.product.color_label || '';
+			}
+
+			if (framePrice) {
+				framePrice.textContent = Number(schema.product.frame_price || 0).toFixed(2);
+			}
+
+			if (image && image.tagName === 'IMG' && schema.product.image_url) {
+				image.src = schema.product.image_url;
+			}
 		}
 
 		function render() {
@@ -599,6 +636,7 @@
 			renderLensTypeStep();
 			renderLensIndexStep();
 			renderCoatingStep();
+			renderProductSummary();
 			updateStepSummaries();
 			renderSummary();
 			renderPayload();
@@ -608,6 +646,7 @@
 		function openOverlay() {
 			container.hidden = false;
 			document.body.classList.add('mlr-open-body');
+			render();
 		}
 
 		function closeOverlay() {
@@ -615,7 +654,7 @@
 			document.body.classList.remove('mlr-open-body');
 			root.querySelector('#lensbox_left').style.display = '';
 			root.querySelector('#lensbox_right').classList.remove('col-full');
-			editAgain.style.display = '';
+			editAgain.style.display = 'none';
 		}
 
 		function maybeHandleProgressiveUpgrade() {
@@ -660,11 +699,16 @@
 			if (!validateBeforeSubmit()) {
 				return;
 			}
-			setStatus('Generating simulated add-to-cart payload...');
+			setStatus('Generating lens payload...');
 			var body = new window.URLSearchParams();
 			body.append('action', 'muukal_lens_replica_build_payload');
 			body.append('nonce', config.nonce);
 			body.append('state', JSON.stringify({
+				product: {
+					id: schema.product.id,
+					color_id: schema.product.color_id,
+					frame_price: schema.product.frame_price
+				},
 				usage: state.usage,
 				lenstype: state.lenstype,
 				lenstype_color: state.lenstype_color,
@@ -695,7 +739,7 @@
 			root.querySelector('#lensbox_left').style.display = 'none';
 			root.querySelector('#lensbox_right').classList.add('col-full');
 			editAgain.style.display = 'block';
-			setStatus('Simulated payload generated. No database writes were performed.');
+			setStatus('Lens payload generated.');
 		}
 
 		openButton.addEventListener('click', openOverlay);
@@ -724,16 +768,45 @@
 		editAgain.addEventListener('click', function () {
 			root.querySelector('#lensbox_left').style.display = '';
 			root.querySelector('#lensbox_right').classList.remove('col-full');
-			editAgain.style.display = '';
+			editAgain.style.display = 'none';
 			setOpenStep(1);
 			render();
 		});
-		copyButton.addEventListener('click', function () {
-			if (!state.payload) {
+
+		if (copyButton) {
+			copyButton.addEventListener('click', function () {
+				if (!state.payload) {
+					return;
+				}
+				window.navigator.clipboard.writeText(JSON.stringify(state.payload, null, 2));
+				setStatus('Payload copied to clipboard.');
+			});
+		}
+
+		document.addEventListener('muukal:productColorChanged', function (event) {
+			var detail = event.detail || {};
+
+			if (String(detail.productId || '') !== String(schema.product.id || '')) {
 				return;
 			}
-			window.navigator.clipboard.writeText(JSON.stringify(state.payload, null, 2));
-			setStatus('Payload copied to clipboard.');
+
+			if (detail.colorId) {
+				schema.product.color_id = detail.colorId;
+			}
+
+			if (detail.colorLabel) {
+				schema.product.color_label = detail.colorLabel;
+			}
+
+			if (detail.price) {
+				schema.product.frame_price = Number(detail.price);
+			}
+
+			if (detail.imageUrl) {
+				schema.product.image_url = detail.imageUrl;
+			}
+
+			render();
 		});
 		render();
 	}

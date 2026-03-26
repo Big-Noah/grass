@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.0.1' );
+define( 'FACEPP_TRYON_VERSION', '1.1.0' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -58,8 +58,158 @@ function facepp_tryon_defaults() {
 	);
 }
 
+function facepp_tryon_default_models() {
+	return array(
+		array(
+			'name'   => 'Model 1',
+			'url'    => 'https://img.muukal.com/img/model/m3.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 172,
+				'frameTop'    => 121,
+				'frameLeft'   => 85,
+				'frameRotate' => 0,
+			),
+		),
+		array(
+			'name'   => 'Model 2',
+			'url'    => 'https://img.muukal.com/img/model/m1.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 188,
+				'frameTop'    => 120,
+				'frameLeft'   => 87,
+				'frameRotate' => 0,
+			),
+		),
+		array(
+			'name'   => 'Model 3',
+			'url'    => 'https://img.muukal.com/img/model/m5.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 120,
+				'frameTop'    => 131,
+				'frameLeft'   => 106,
+				'frameRotate' => -7,
+			),
+		),
+		array(
+			'name'   => 'Model 4',
+			'url'    => 'https://img.muukal.com/img/model/m6.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 141,
+				'frameTop'    => 98,
+				'frameLeft'   => 113,
+				'frameRotate' => 0,
+			),
+		),
+		array(
+			'name'   => 'Model 5',
+			'url'    => 'https://img.muukal.com/img/model/m2.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 143,
+				'frameTop'    => 96,
+				'frameLeft'   => 101,
+				'frameRotate' => 0,
+			),
+		),
+		array(
+			'name'   => 'Model 6',
+			'url'    => 'https://img.muukal.com/img/model/m4.jpg!mk',
+			'preset' => array(
+				'frameWidth'  => 169,
+				'frameTop'    => 87,
+				'frameLeft'   => 89,
+				'frameRotate' => 1,
+			),
+		),
+	);
+}
+
 function facepp_tryon_get_settings() {
 	return wp_parse_args( get_option( 'facepp_tryon_settings', array() ), facepp_tryon_defaults() );
+}
+
+function facepp_tryon_build_product_frames( $product_id ) {
+	if ( ! $product_id || ! function_exists( 'muukal_loop_swatch_get_rows' ) ) {
+		return array();
+	}
+
+	$rows   = muukal_loop_swatch_get_rows( $product_id );
+	$frames = array();
+
+	foreach ( $rows as $index => $row ) {
+		if ( ! is_array( $row ) ) {
+			continue;
+		}
+
+		$image_url = '';
+		$keys      = array(
+			'tryon_image',
+			'try_on_image',
+			'tryon_url',
+			'tryon_png',
+			'png_url',
+			'frame_png',
+			'overlay_png',
+			'overlay_image',
+			'transparent_png',
+			'transparent_image',
+			'main_image',
+		);
+
+		foreach ( $keys as $key ) {
+			if ( empty( $row[ $key ] ) ) {
+				continue;
+			}
+
+			$candidate = (string) $row[ $key ];
+
+			if ( 'main_image' === $key && ! preg_match( '/\.png(?:$|\?)/i', $candidate ) ) {
+				continue;
+			}
+
+			$image_url = esc_url_raw( $candidate );
+			break;
+		}
+
+		if ( '' === $image_url ) {
+			continue;
+		}
+
+		$color_name = ! empty( $row['color_name'] ) ? sanitize_text_field( (string) $row['color_name'] ) : 'Frame ' . ( $index + 1 );
+		$key        = sanitize_title(
+			! empty( $row['color_slug'] )
+				? (string) $row['color_slug']
+				: ( ! empty( $row['variant_slug'] ) ? (string) $row['variant_slug'] : $color_name )
+		);
+
+		$frames[] = array(
+			'key'         => $key,
+			'name'        => $color_name,
+			'url'         => $image_url,
+			'thumbnail'   => ! empty( $row['main_image'] ) ? esc_url_raw( (string) $row['main_image'] ) : $image_url,
+			'widthFactor' => 2.15,
+			'yOffset'     => 0.02,
+			'leftEyeX'    => 0.32,
+			'leftEyeY'    => 0.43,
+			'rightEyeX'   => 0.68,
+			'rightEyeY'   => 0.43,
+		);
+	}
+
+	return $frames;
+}
+
+function facepp_tryon_get_instance_frames( $atts ) {
+	$product_id = isset( $atts['product_id'] ) ? absint( $atts['product_id'] ) : 0;
+
+	if ( $product_id ) {
+		$product_frames = facepp_tryon_build_product_frames( $product_id );
+
+		if ( ! empty( $product_frames ) ) {
+			return $product_frames;
+		}
+	}
+
+	return facepp_tryon_get_frames();
 }
 
 function facepp_tryon_get_frames() {
@@ -103,7 +253,11 @@ function facepp_tryon_get_models() {
 		);
 	}
 
-	return $models;
+	if ( ! empty( $models ) ) {
+		return $models;
+	}
+
+	return facepp_tryon_default_models();
 }
 
 function facepp_tryon_sanitize_settings( $input ) {
@@ -200,9 +354,6 @@ function facepp_tryon_enqueue_assets() {
 	$config   = array(
 		'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 		'ajaxNonce'  => wp_create_nonce( 'facepp_tryon_detect' ),
-		'frames'     => facepp_tryon_get_frames(),
-		'testModels' => facepp_tryon_get_models(),
-		'modalTitle' => $settings['modal_title'],
 		'i18n'       => array(
 			'noPhoto'        => 'Upload a photo first.',
 			'noFrame'        => 'Select a frame first.',
@@ -222,7 +373,7 @@ function facepp_tryon_enqueue_assets() {
 
 	wp_enqueue_style( 'facepp-tryon-style' );
 	wp_enqueue_script( 'facepp-tryon-script' );
-	wp_localize_script( 'facepp-tryon-script', 'faceppTryonConfig', $config );
+	wp_localize_script( 'facepp-tryon-script', 'faceppTryonGlobals', $config );
 }
 
 function facepp_tryon_ajax_detect() {
@@ -357,53 +508,117 @@ function facepp_tryon_ajax_detect() {
 add_action( 'wp_ajax_facepp_tryon_detect', 'facepp_tryon_ajax_detect' );
 add_action( 'wp_ajax_nopriv_facepp_tryon_detect', 'facepp_tryon_ajax_detect' );
 
-function facepp_tryon_shortcode() {
+function facepp_tryon_shortcode( $atts = array() ) {
 	$settings = facepp_tryon_get_settings();
+	$atts     = shortcode_atts(
+		array(
+			'product_id'    => '',
+			'button_label'  => '',
+			'button_class'  => 'tyr-btn col-xl-2',
+			'modal_title'   => '',
+			'helper_text'   => '',
+			'default_frame' => '',
+		),
+		$atts,
+		'facepp_virtual_tryon'
+	);
+
+	$button_label  = '' !== trim( (string) $atts['button_label'] ) ? sanitize_text_field( (string) $atts['button_label'] ) : $settings['button_label'];
+	$button_class  = trim( (string) $atts['button_class'] );
+	$modal_title   = '' !== trim( (string) $atts['modal_title'] ) ? sanitize_text_field( (string) $atts['modal_title'] ) : $settings['modal_title'];
+	$helper_text   = '' !== trim( (string) $atts['helper_text'] ) ? sanitize_text_field( (string) $atts['helper_text'] ) : $settings['helper_text'];
+	$product_id    = absint( $atts['product_id'] );
+	$default_frame = sanitize_title( (string) $atts['default_frame'] );
+	$instance_id   = wp_unique_id( 'facepp-tryon-' );
+	$models        = facepp_tryon_get_models();
+	$frames        = facepp_tryon_get_instance_frames(
+		array(
+			'product_id' => $product_id,
+		)
+	);
+
+	if ( '' === $default_frame && ! empty( $frames[0]['key'] ) ) {
+		$default_frame = sanitize_title( (string) $frames[0]['key'] );
+	}
+
+	$pd_options = range( 50, 80 );
+	$config     = array(
+		'productId'    => $product_id,
+		'modalTitle'   => $modal_title,
+		'helperText'   => $helper_text,
+		'defaultFrame' => $default_frame,
+		'stageWidth'   => 350,
+		'stageHeight'  => 410,
+		'frames'       => $frames,
+		'testModels'   => $models,
+	);
+
 	facepp_tryon_enqueue_assets();
 	ob_start();
 	?>
-	<div class="facepp-tryon-app">
-		<button type="button" class="facepp-tryon-open button button-primary"><?php echo esc_html( $settings['button_label'] ); ?></button>
+	<div class="facepp-tryon-app" data-instance-id="<?php echo esc_attr( $instance_id ); ?>" data-product-id="<?php echo esc_attr( $product_id ); ?>">
+		<button type="button" class="facepp-tryon-open <?php echo esc_attr( $button_class ); ?>"><?php echo esc_html( $button_label ); ?></button>
 		<div class="facepp-tryon-modal" hidden>
 			<div class="facepp-tryon-mask" data-close="1"></div>
 			<div class="facepp-tryon-dialog" role="dialog" aria-modal="true">
-				<button class="facepp-tryon-close" type="button" data-close="1">&times;</button>
+				<div class="facepp-tryon-header">
+					<button class="facepp-tryon-close" type="button" data-close="1" aria-label="Close">&times;</button>
+					<h4 class="facepp-tryon-title"><?php echo esc_html( $modal_title ); ?></h4>
+				</div>
 				<div class="facepp-tryon-main">
-					<div class="facepp-tryon-stage-wrap">
-						<div class="facepp-tryon-stage">
-							<img class="facepp-tryon-photo" alt="" />
-							<img class="facepp-tryon-frame" alt="" />
-							<div class="facepp-tryon-empty">Upload photo and pick a frame.</div>
+					<div class="facepp-tryon-stage-shell">
+						<div class="facepp-tryon-stage-wrap">
+							<div class="facepp-tryon-stage">
+								<img class="facepp-tryon-photo" alt="" />
+								<img class="facepp-tryon-frame" alt="" />
+								<span class="eye_icon facepp-tryon-eye facepp-tryon-eye-left" aria-hidden="true"></span>
+								<span class="eye_icon facepp-tryon-eye facepp-tryon-eye-right" aria-hidden="true"></span>
+								<div class="facepp-tryon-empty">Upload photo and pick a frame.</div>
+							</div>
+							<label class="facepp-tryon-upload">
+								<input type="file" class="facepp-tryon-file" accept="image/*" />
+								<span>Upload Image</span>
+							</label>
+							<div class="facepp-tryon-controls">
+								<button type="button" class="tdo_btn" data-tryon-action="size_b">+</button>
+								<button type="button" class="tdo_btn" data-tryon-action="size_s">-</button>
+								<button type="button" class="tdo_btn" data-tryon-action="rotate_l">&#8634;</button>
+								<button type="button" class="tdo_btn" data-tryon-action="rotate_r">&#8635;</button>
+								<button type="button" class="tdo_btn" data-tryon-action="move_t">&#8593;</button>
+								<button type="button" class="tdo_btn" data-tryon-action="move_r">&#8594;</button>
+								<button type="button" class="tdo_btn" data-tryon-action="move_b">&#8595;</button>
+								<button type="button" class="tdo_btn" data-tryon-action="move_l">&#8592;</button>
+							</div>
 						</div>
 					</div>
 					<div class="facepp-tryon-panel">
-						<h3><?php echo esc_html( $settings['modal_title'] ); ?></h3>
-						<p class="facepp-tryon-helper"><?php echo esc_html( $settings['helper_text'] ); ?></p>
+						<h4 class="facepp-tryon-panel-title">Upload your picture or use any of our models</h4>
+						<div class="facepp-tryon-models"></div>
+						<div class="facepp-tryon-color-list">
+							<h4 class="facepp-tryon-panel-title">Click and change the color</h4>
+							<div class="facepp-tryon-frames"></div>
+						</div>
+						<div class="facepp-tryon-helper">
+							<p><?php echo esc_html( $helper_text ); ?></p>
+							<p>1, Adjust the photo with the bottom controls.</p>
+							<p>2, Drag the glasses to change the position.</p>
+							<p>3, Set your PD, if you know it.</p>
+						</div>
+						<div class="facepp-tryon-pd-row">
+							<span>Set your PD</span>
+							<select class="facepp-tryon-pd">
+								<?php foreach ( $pd_options as $pd_option ) : ?>
+									<option value="<?php echo esc_attr( $pd_option ); ?>"<?php selected( 63, $pd_option ); ?>><?php echo esc_html( $pd_option ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
 						<p class="facepp-tryon-status" aria-live="polite"></p>
-						<label class="facepp-tryon-upload">
-							<span>Upload Photo</span>
-							<input type="file" class="facepp-tryon-file" accept="image/*" />
-						</label>
-						<div class="facepp-tryon-actions">
-							<button type="button" class="button facepp-tryon-auto">Auto Align</button>
-							<button type="button" class="button facepp-tryon-reset">Reset Manual</button>
-						</div>
-						<div class="facepp-tryon-grid">
-							<label><span>Move X</span><input data-control="x" type="range" min="-220" max="220" step="1" value="0"></label>
-							<label><span>Move Y</span><input data-control="y" type="range" min="-220" max="220" step="1" value="0"></label>
-							<label><span>Scale</span><input data-control="scale" type="range" min="0.5" max="2.4" step="0.01" value="1"></label>
-							<label><span>Rotate</span><input data-control="rotate" type="range" min="-35" max="35" step="0.1" value="0"></label>
-						</div>
-						<div class="facepp-tryon-model-wrap">
-							<h4>Test Models</h4>
-							<div class="facepp-tryon-models"></div>
-						</div>
-						<h4>Frames</h4>
-						<div class="facepp-tryon-frames"></div>
+						<div class="facepp-tryon-footnote">Try on is only for style reference. Not Size.</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<script type="application/json" class="facepp-tryon-instance-config"><?php echo wp_json_encode( $config ); ?></script>
 	</div>
 	<?php
 	return ob_get_clean();
@@ -431,7 +646,7 @@ function facepp_tryon_render_settings_page() {
 	?>
 	<div class="wrap">
 		<h1>Face++ Virtual Try On</h1>
-		<p>Use shortcode <code>[facepp_virtual_tryon]</code> on any page or product description.</p>
+		<p>Use shortcode <code>[facepp_virtual_tryon]</code> on any page or inside the product detail shortcode.</p>
 		<p><a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=facepp-tryon-preview' ) ); ?>">Open Admin Preview</a></p>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'facepp_tryon_settings_group' ); ?>
@@ -471,7 +686,7 @@ function facepp_tryon_render_preview_page() {
 	?>
 	<div class="wrap">
 		<h1>Face++ Try On Preview</h1>
-		<p>Use this page to upload or choose model photos and test alignment before adding the shortcode to front-end pages.</p>
+		<p>Use this page to preview the Muukal-style try-on modal before adding the shortcode to front-end pages.</p>
 		<?php echo do_shortcode( '[facepp_virtual_tryon]' ); ?>
 	</div>
 	<?php

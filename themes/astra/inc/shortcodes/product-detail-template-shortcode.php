@@ -59,3 +59,4 @@ function muukal_product_detail_template_shortcode( $atts = array() ) {
 	return muukal_render_product_detail_template( $atts );
 }
 add_shortcode( 'muukal_product_detail_template', 'muukal_product_detail_template_shortcode' );
+add_shortcode( 'muukal_product_detail_replica', 'muukal_product_detail_template_shortcode' );
