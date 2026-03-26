@@ -12,23 +12,23 @@
 		20: 'https://img.muukal.com//img/home/frame/usage_20.jpg'
 	};
 	var lensTypeImages = {
-		1: 'https://img.muukal.com//img/home/frame/lens_type_1.jpg',
-		3: 'https://img.muukal.com//img/home/frame/lens_type_3.jpg',
-		4: 'https://img.muukal.com//img/home/frame/lens_type_4.jpg',
-		6: 'https://img.muukal.com//img/home/frame/lens_type_6.jpg',
-		7: 'https://img.muukal.com//img/home/frame/lens_type_7.jpg',
-		8: 'https://img.muukal.com//img/home/frame/lens_type_8.jpg'
+		1: 'https://static.muukal.com/public/static/img/home/frame/lenstype_1.jpg?v=1',
+		3: 'https://static.muukal.com/public/static/img/home/frame/lenstype_3.jpg?v=1',
+		4: 'https://static.muukal.com/public/static/img/home/frame/lenstype_4.jpg?v=1',
+		6: 'https://static.muukal.com/public/static/img/home/frame/lenstype_6.jpg?v=1',
+		7: 'https://static.muukal.com/public/static/img/home/frame/lenstype_7.jpg?v=1',
+		8: 'https://static.muukal.com/public/static/img/home/frame/lenstype_8.jpg?v=1'
 	};
 	var lensIndexImages = {
-		2: 'https://img.muukal.com//img/home/frame/lens_index_2.jpg',
-		3: 'https://img.muukal.com//img/home/frame/lens_index_3.jpg',
-		4: 'https://img.muukal.com//img/home/frame/lens_index_4.jpg',
-		5: 'https://img.muukal.com//img/home/frame/lens_index_5.jpg'
+		2: 'https://static.muukal.com/public/static/img/home/frame/thickness_2.png',
+		3: 'https://static.muukal.com/public/static/img/home/frame/thickness_3.png',
+		4: 'https://static.muukal.com/public/static/img/home/frame/thickness_4.png',
+		5: 'https://static.muukal.com/public/static/img/home/frame/thickness_5.png'
 	};
 	var coatingImages = {
-		1: 'https://img.muukal.com//img/home/frame/coating_1.jpg',
-		2: 'https://img.muukal.com//img/home/frame/coating_2.jpg',
-		3: 'https://img.muukal.com//img/home/frame/coating_3.jpg'
+		1: 'https://static.muukal.com/public/static/img/home/frame/coating_1.jpg',
+		2: 'https://static.muukal.com/public/static/img/home/frame/coating_2.jpg',
+		3: 'https://static.muukal.com/public/static/img/home/frame/coating_3.jpg'
 	};
 	var replicaCopy = {
 		usage: {
