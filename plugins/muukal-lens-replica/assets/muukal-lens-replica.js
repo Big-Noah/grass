@@ -30,6 +30,121 @@
 		2: 'https://img.muukal.com//img/home/frame/coating_2.jpg',
 		3: 'https://img.muukal.com//img/home/frame/coating_3.jpg'
 	};
+	var replicaCopy = {
+		usage: {
+			1: {
+				heading: 'Single Vision - Distance',
+				description: ['General use lenses to see far'],
+				priceHtml: 'FREE'
+			},
+			2: {
+				heading: 'Near Vision - Reading',
+				description: ['This lens is intended for seeing details at a close distance.', 'Most commonly used for reading.'],
+				priceHtml: 'FREE'
+			},
+			3: {
+				heading: 'Bifocal - With Line',
+				description: ['To see both near and far away, with a line'],
+				priceHtml: '<del>$18.75</del> <span class="mk-price">$15.99</span><span class="lensoff">15% OFF</span>'
+			},
+			4: {
+				heading: 'Progressive - No Line',
+				description: ['To see both near and far away, without lines'],
+				priceHtml: '$35.99'
+			},
+			5: {
+				heading: 'Premium Progressive - No Line',
+				description: ['It has a wider field of vision and can be easier to adapt to compared to the standard progressive.'],
+				priceHtml: '<del>$59.99</del> <span class="mk-price">$38.99</span><span class="lensoff">35% OFF</span>'
+			},
+			20: {
+				heading: 'Non-prescription',
+				description: ['Lenses without prescription, but you can also choose blue light blocking, tint color and so on'],
+				priceHtml: 'FREE'
+			}
+		},
+		lensTypes: {
+			1: {
+				heading: 'Clear Lenses',
+				description: ['Traditional, transparent lenses', 'perfect for everyday use'],
+				priceHtml: 'FREE'
+			},
+			3: {
+				heading: 'Photochromic',
+				badge: 'Season\'s choice!',
+				badgeClass: 'season-choice',
+				description: ['Darken when outdoors', 'Remain clear when indoors'],
+				priceHtml: '$28.95'
+			},
+			4: {
+				heading: 'Sunglass Tints',
+				description: ['Choose from Dark tints in either solid and gradient, turn regular frames into sunglasses'],
+				priceHtml: '$10.95'
+			},
+			6: {
+				heading: 'Polarized Sunglasses',
+				description: ['Reduce glare and haze for clearer vision'],
+				priceHtml: '$31.95'
+			},
+			7: {
+				heading: 'Therapeutic FL-41',
+				description: ['A special tint designed for people whose migraines are caused by light sensitivity.'],
+				priceHtml: '$49.95'
+			},
+			8: {
+				heading: 'Driving',
+				description: ['Classic Clear Driving Lenses, Glare-reducing lenses with water-repellent coating offer sharp, high-definition vision day and night.'],
+				priceHtml: '$33.95'
+			}
+		},
+		lensIndices: {
+			2: {
+				heading: 'Mid-Index 1.55',
+				badge: 'Recommended',
+				badgeClass: 'recommended-icon',
+				description: ['1.55 Index Basic Lenses, ranging from -3.75 to +3.75.'],
+				priceHtml: '$5.95'
+			},
+			3: {
+				heading: 'High-Index 1.61',
+				badge: 'Recommended',
+				badgeClass: 'recommended-icon',
+				description: ['1.61 Index Lite & Thin Lenses,up to 25% thinner than the basic 1.55 index lenses'],
+				priceHtml: '<del>$23.95</del> <span class="mk-price">$16.65</span><span class="lensoff">30% OFF</span>'
+			},
+			4: {
+				heading: 'Super High-Index 1.67',
+				badge: 'Recommended',
+				badgeClass: 'recommended-icon',
+				description: ['High index 1.67 lenses are thinner and lighter than standard, mid-index, and high-index 1.61 optical lenses.'],
+				priceHtml: '$39.95'
+			},
+			5: {
+				heading: 'Ultra High-Index 1.74',
+				badge: 'Recommended',
+				badgeClass: 'recommended-icon',
+				description: ['High index 1.74 polymer lens that provides a thinner lens for stronger prescriptions than mid and standard index optical lenses.'],
+				priceHtml: '<del>$82.95</del> <span class="mk-price">$49.95</span><span class="lensoff">40% OFF</span>'
+			}
+		},
+		coatings: {
+			1: {
+				heading: 'Standard Coatings',
+				description: ['All Lenses Come With Free Scratch-resistant Coating'],
+				priceHtml: 'FREE'
+			},
+			2: {
+				heading: 'Advanced Coatings',
+				description: ['Super Hydrophobic & Anti-Reflective & UV-Protective Coating'],
+				priceHtml: '$5.95'
+			},
+			3: {
+				heading: 'Ultimate Coatings',
+				description: ['Oleophobic & Hydrophobic & Anti-Reflective & UV-Protective Coating'],
+				priceHtml: '<del>$18.95</del> <span class="mk-price">$9.65</span><span class="lensoff">50% OFF</span>'
+			}
+		}
+	};
 
 	function money(value) {
 		return '$' + Number(value || 0).toFixed(2);
@@ -56,6 +171,32 @@
 			return '<img class="mlr-photo-img" src="' + url + '" alt="">';
 		}
 		return '<div class="mlr-photo">' + fallback + '</div>';
+	}
+
+	function getReplicaCopy(group, id, fallbackHeading, fallbackDescription) {
+		var groupCopy = replicaCopy[group] || {};
+		var copy = groupCopy[String(id)] || groupCopy[id] || {};
+
+		return {
+			heading: copy.heading || fallbackHeading || '',
+			description: copy.description || [fallbackDescription || ''],
+			priceHtml: copy.priceHtml || 'FREE',
+			badge: copy.badge || '',
+			badgeClass: copy.badgeClass || ''
+		};
+	}
+
+	function renderDescriptionLines(lines) {
+		return (lines || []).map(function (line) {
+			return '<div class="mlr-card-copy-line">' + line + '</div>';
+		}).join('');
+	}
+
+	function buildOptionCardMarkup(copy, photoHtml) {
+		return '<div class="panel-heading"><span class="mlr-heading-text">' + copy.heading + '</span>' +
+			(copy.badge ? '<span class="' + copy.badgeClass + ' mlr-heading-badge">' + copy.badge + '</span>' : '') +
+			'<span class="mlr-help-dot" aria-hidden="true">?</span></div>' +
+			'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + photoHtml + '</div><div class="col-8 pdnone"><div class="mlr-card-copy">' + renderDescriptionLines(copy.description) + '</div><div class="mt-10"><span class="lens_k_price">' + copy.priceHtml + '</span></div></div></div></div>';
 	}
 
 	function init(root) {
@@ -90,13 +231,13 @@
 			payload: null,
 			upgradePrompted: false,
 			form: {
-				od_sph: '0.00',
-				os_sph: '0.00',
-				od_cyl: '0.00',
-				os_cyl: '0.00',
-				od_axis: '',
-				os_axis: '',
-				od_add: '0',
+				od_sph: '-3.25',
+				os_sph: '-4.00',
+				od_cyl: '-3.75',
+				os_cyl: '-3.75',
+				od_axis: '3',
+				os_axis: '6',
+				od_add: '+2.00',
 				os_add: '0',
 				pd: '63',
 				od_pd: '0',
@@ -112,7 +253,7 @@
 				od_prismdir_h: '0',
 				os_prismdir_h: '0',
 				lens_comment: '',
-				rx_name: 'prescription March 2026'
+				rx_name: ''
 			}
 		};
 
@@ -268,24 +409,8 @@
 			if (state.usage === 20) {
 				return true;
 			}
-			if (state.usage === 2 && state.readers === 1) {
-				return Number(state.power || 0) > 0;
-			}
-			var hasRx = Number(state.form.od_sph || 0) !== 0 || Number(state.form.os_sph || 0) !== 0 || Number(state.form.od_cyl || 0) !== 0 || Number(state.form.os_cyl || 0) !== 0 || Number(state.form.od_add || 0) !== 0 || Number(state.form.os_add || 0) !== 0;
-			if (!hasRx) {
-				setStatus('Prescription has no value. Use non-prescription if you do not need Rx lenses.');
-				return false;
-			}
-			if ((Number(state.form.od_cyl || 0) !== 0 && !Number(state.form.od_axis || 0)) || (Number(state.form.os_cyl || 0) !== 0 && !Number(state.form.os_axis || 0))) {
-				setStatus('CYL requires AXIS for the same eye.');
-				return false;
-			}
-			if (state.pdkey === 2 && (!Number(state.form.od_pd || 0) || !Number(state.form.os_pd || 0))) {
-				setStatus('Two-PD mode requires right and left PD.');
-				return false;
-			}
-			if ([3, 4, 5].indexOf(state.usage) >= 0 && (!Number(state.form.od_add || 0) || !Number(state.form.os_add || 0))) {
-				setStatus('Bifocal and progressive flows require ADD values.');
+			if (!state.step2Submitted) {
+				setStatus('Complete the prescription step before adding the lenses to cart.');
 				return false;
 			}
 			return true;
@@ -338,7 +463,7 @@
 			} else if (state.usage === 2 && state.readers === 1 && Number(state.power || 0) > 0) {
 				root.querySelector('#step_2_cn').innerHTML = 'Readers (+' + state.power + ')&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
 			} else {
-				root.querySelector('#step_2_cn').innerHTML = state.form.rx_name + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
+				root.querySelector('#step_2_cn').innerHTML = (state.form.rx_name || 'Prescription') + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>';
 			}
 			root.querySelector('#step_3_cn').innerHTML = lensType ? lensType.label + (lensColor ? ' / ' + lensColor.label : '') + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
 			root.querySelector('#step_4_cn').innerHTML = lensIndex ? lensIndex.label + '&nbsp;&nbsp;<span class="un_line">&nbsp;EDIT&nbsp;</span>' : '';
@@ -352,9 +477,9 @@
 				var li = document.createElement('li');
 				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
 				var active = Number(state.usage) === Number(option.id);
+				var copy = getReplicaCopy('usage', option.id, option.label, option.description);
 				li.innerHTML = '<div id="step1_li_' + option.id + '" class="panel panel-default lens_key' + (active ? ' lens_k_choose' : '') + '" step="1" val="' + option.id + '">' +
-					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(usageImages[option.id], option.short_label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (option.id === 3 ? '<del>$18.75</del> <span class="mk-price">$15.99</span><span class="lensoff">15% OFF</span>' : option.id === 4 ? '$35.99' : option.id === 5 ? '<del>$59.99</del> <span class="mk-price">$38.99</span><span class="lensoff">35% OFF</span>' : 'FREE') + '</span></div></div></div></div></div>';
+					buildOptionCardMarkup(copy, renderPhoto(usageImages[option.id], option.short_label.charAt(0))) + '</div>';
 				li.querySelector('.lens_key').addEventListener('click', function () {
 					state.usage = Number(option.id);
 					state.readers = 0;
@@ -367,9 +492,11 @@
 					state.pdkey = 1;
 					state.nearpd = 0;
 					state.prism = 0;
+					state.form.rx_name = '';
 					state.upgradePrompted = false;
+					state.step2Submitted = Number(option.id) === 20;
 					ensureValidSelections();
-					setOpenStep(2);
+					setOpenStep(Number(option.id) === 20 ? 3 : 2);
 					render();
 				});
 				mount.appendChild(li);
@@ -378,85 +505,75 @@
 
 		function renderPowerBox() {
 			var mount = root.querySelector('#power_box');
-			var visible = state.usage === 2 && state.readers === 1;
-			mount.style.display = visible ? '' : 'none';
-			if (!visible) {
-				mount.innerHTML = '';
-				return;
-			}
-			mount.innerHTML = "<div class=\"poewr_t\"><div class=\"mb-10 fs14 fw600\">Select your readers' lens power</div><div class=\"mb-10\">Our high-quality Readers are ready-made glasses with an equal magnification power in both lenses.</div><div class=\"mb-10 mk-blue strength_btn\">What is my strength?</div><div id=\"strength_info\" class=\"mt-10\" style=\"display:none;\"><p class=\"mb5\">Ready-made readers provide equal magnification to both eyes.</p><p class=\"mb5\">Download the diopter chart, print at 100%, hold it 14 inches away, and read from top to bottom.</p></div></div><div class=\"mlr-power-values\"></div><div class=\"text-center mt-20\"><button id=\"power-sure\" class=\"btn mlr-step-submit\">Next</button></div>";
-			var values = mount.querySelector('.mlr-power-values');
-			schema.prescription_fields.power.options.forEach(function (option) {
-				var value = option.value.replace('+', '');
-				var button = document.createElement('span');
-				button.className = 'power_v' + (state.power === value ? ' power_v_choose' : '');
-				button.textContent = option.label;
-				button.addEventListener('click', function () {
-					state.power = value;
-					render();
-				});
-				values.appendChild(button);
-			});
-			mount.querySelector('#power-sure').addEventListener('click', function () {
-				state.step2Submitted = true;
-				setOpenStep(3);
-				render();
-			});
-			mount.querySelector('.strength_btn').addEventListener('click', function () {
-				var info = mount.querySelector('#strength_info');
-				info.style.display = info.style.display === 'none' ? 'block' : 'none';
-			});
+			mount.style.display = 'none';
+			mount.innerHTML = '';
 		}
 
 		function renderPrescriptionBox() {
 			var mount = root.querySelector('#prescription_box');
 			if (state.usage === 20) {
-				mount.innerHTML = '<div class="mlr-empty-prescription">Non-prescription selected. This step is skipped.</div>';
+				mount.innerHTML = '<div class="mlr-static-note">Non-prescription selected. This step is skipped and the drawer moves straight to Step 3.</div>';
 				return;
 			}
 			var addDisabled = [1, 20].indexOf(state.usage) >= 0;
 			var axisOdDisabled = Number(state.form.od_cyl || 0) === 0;
 			var axisOsDisabled = Number(state.form.os_cyl || 0) === 0;
 			var pdHtml = state.pdkey === 1
-				? '<div class="mlr-pd-single"><label>PD</label>' + buildSelectMarkup('pd', schema.prescription_fields.pd.options, state.form.pd, false) + '</div>'
-				: '<div class="mlr-pd-double"><label>Right PD</label>' + buildSelectMarkup('od_pd', schema.prescription_fields.od_pd.options, state.form.od_pd, false) + '<label>Left PD</label>' + buildSelectMarkup('os_pd', schema.prescription_fields.os_pd.options, state.form.os_pd, false) + '</div>';
-			var nearPdHtml = state.nearpd ? '<div class="mlr-pd-single"><label>Near PD</label>' + buildSelectMarkup('npd', schema.prescription_fields.npd.options, state.form.npd === '0' ? '46' : state.form.npd, false) + '</div>' : '';
+				? '<div class="mlr-pd-selects mlr-pd-selects-single">' + buildSelectMarkup('pd', schema.prescription_fields.pd.options, state.form.pd, false) + '</div>'
+				: '<div class="mlr-pd-selects mlr-pd-selects-double">' + buildSelectMarkup('od_pd', schema.prescription_fields.od_pd.options, state.form.od_pd, false) + buildSelectMarkup('os_pd', schema.prescription_fields.os_pd.options, state.form.os_pd, false) + '</div>';
 			var prismHtml = state.prism ? '<div class="mlr-prism-grid">' +
 				['od_prismnum_v', 'os_prismnum_v', 'od_prismdir_v', 'os_prismdir_v', 'od_prismnum_h', 'os_prismnum_h', 'od_prismdir_h', 'os_prismdir_h'].map(function (field) {
 					return '<label>' + field.replace(/_/g, ' ').toUpperCase() + buildSelectMarkup(field, schema.prescription_fields[field].options, state.form[field], false) + '</label>';
 				}).join('') + '</div>' : '';
-			mount.innerHTML = '<div class="mlr-rx-mode"><label><input type="radio" name="rx_mode" value="rx"' + (state.readers === 0 ? ' checked' : '') + '> Enter your prescription</label>' +
-				(state.usage === 2 ? '<label><input type="radio" name="rx_mode" value="readers"' + (state.readers === 1 ? ' checked' : '') + '> For Readers: just select a lens power</label>' : '') + '</div>' +
-				'<div class="pres_sr_box"><ul><li class="sr-title"><div>OD<span>(Right eye)</span></div><div>OS<span>(Left eye)</span></div></li></ul></div>' +
-				'<div class="mlr-rx-table">' +
-				buildPairSelect('Sphere(SPH)', 'od_sph', 'os_sph', false, false) +
-				buildPairSelect('Cylinder(CYL)', 'od_cyl', 'os_cyl', false, false) +
-				buildPairSelect('Axis', 'od_axis', 'os_axis', axisOdDisabled, axisOsDisabled) +
-				buildPairSelect('ADD(Near Addition)', 'od_add', 'os_add', addDisabled, addDisabled) +
+			mount.innerHTML = '<div class="mlr-rx-shell">' +
+				'<div class="mlr-rx-toolbar">' +
+					'<div class="lens-select mlr-rx-prescription-select"><select aria-label="Select Prescription"><option selected>Select Prescription</option></select></div>' +
+					'<button type="button" class="mlr-add-new-link">Add new</button>' +
+					'<button type="button" class="mlr-toolbar-help" aria-label="Prescription help">?</button>' +
+				'</div>' +
+				'<div class="mlr-rx-grid">' +
+					'<div class="mlr-rx-grid-head mlr-rx-grid-empty"></div>' +
+					'<div class="mlr-rx-grid-head">Sphere(SPH) <span class="mlr-help-inline">?</span></div>' +
+					'<div class="mlr-rx-grid-head">Cylinder(CYL) <span class="mlr-help-inline">?</span></div>' +
+					'<div class="mlr-rx-grid-head">Axis(AXI) <span class="mlr-help-inline">?</span></div>' +
+					'<div class="mlr-rx-grid-head">ADD(Near Addition) <span class="mlr-help-inline">?</span></div>' +
+					'<div class="mlr-rx-eye">OD(Right eye)</div>' +
+					buildSelectMarkup('od_sph', schema.prescription_fields.od_sph.options, state.form.od_sph, false) +
+					buildSelectMarkup('od_cyl', schema.prescription_fields.od_cyl.options, state.form.od_cyl, false) +
+					buildSelectMarkup('od_axis', schema.prescription_fields.od_axis.options, state.form.od_axis, axisOdDisabled) +
+					buildSelectMarkup('od_add', schema.prescription_fields.od_add.options, state.form.od_add, addDisabled) +
+					'<div class="mlr-rx-eye">OS(Left eye)</div>' +
+					buildSelectMarkup('os_sph', schema.prescription_fields.os_sph.options, state.form.os_sph, false) +
+					buildSelectMarkup('os_cyl', schema.prescription_fields.os_cyl.options, state.form.os_cyl, false) +
+					buildSelectMarkup('os_axis', schema.prescription_fields.os_axis.options, state.form.os_axis, axisOsDisabled) +
+					buildSelectMarkup('os_add', schema.prescription_fields.os_add.options, state.form.os_add, addDisabled) +
 				'</div>' +
 				'<div class="mlr-upload-copy">If you are not sure how to enter the prescription, you can upload the picture of the prescription, and we will complete the prescription information for you.</div>' +
-				'<div class="mlr-pd-box">' + pdHtml + nearPdHtml + '</div>' +
-				'<div class="mlr-toggle-line"><label><input type="checkbox" data-toggle="pd"' + (state.pdkey === 2 ? ' checked' : '') + '> Two PD numbers</label><label><input type="checkbox" data-toggle="nearpd"' + (state.nearpd === 1 ? ' checked' : '') + '> Near PD</label><label><input type="checkbox" data-toggle="prism"' + (state.prism === 1 ? ' checked' : '') + '> Add Prism +$9.95</label></div>' +
-				prismHtml +
-				'<h6>Comments:</h6><textarea data-field="lens_comment">' + (state.form.lens_comment || '') + '</textarea>' +
-				'<div class="mlr-rx-name">Save prescription As:<input type="text" data-field="rx_name" value="' + state.form.rx_name + '"></div>' +
-				'<div class="text-center mt-20"><button class="btn mlr-step-submit" data-next-step="3">SUBMIT PRESCRIPTION</button></div>';
+				'<div class="mlr-rx-divider"></div>' +
+				'<div class="mlr-pd-section">' +
+					'<div class="mlr-pd-row">' +
+						'<div class="mlr-pd-label">PD(Pupillary Distance) <span class="mlr-help-inline">?</span></div>' +
+						pdHtml +
+						'<label class="mlr-check"><input type="checkbox" data-toggle="pd"' + (state.pdkey === 2 ? ' checked' : '') + '> Two PD numbers</label>' +
+					'</div>' +
+					'<div class="mlr-prism-toggle"><label class="mlr-check"><input type="checkbox" data-toggle="prism"' + (state.prism === 1 ? ' checked' : '') + '> Add Prism</label><span class="mlr-prism-price">+$9.95</span></div>' +
+					prismHtml +
+				'</div>' +
+				'<div class="mlr-rx-comments"><label>Comments:</label><textarea data-field="lens_comment">' + (state.form.lens_comment || '') + '</textarea></div>' +
+				'<div class="mlr-rx-name"><label>Save prescription As:</label><input type="text" data-field="rx_name" value="' + state.form.rx_name + '" placeholder="prescription name"></div>' +
+				'<div class="mlr-upload-row">' +
+					'<div class="mlr-upload-copy-block">Not sure of your prescription?<br>Upload your Prescription here:</div>' +
+					'<label class="mlr-upload-trigger"><input type="file" aria-label="Upload your prescription photo"><span class="mlr-upload-trigger-inner">UPLOAD</span></label>' +
+					'<div class="mlr-upload-note">You can upload your <span>prescription photo</span>, help us check your prescription <span>more accurately</span>.</div>' +
+				'</div>' +
+				'<div class="text-center mt-20"><button class="btn mlr-step-submit" data-next-step="3">SUBMIT PRESCRIPTION</button></div>' +
+			'</div>';
 
 			mount.querySelectorAll('select[data-field], textarea[data-field], input[type="text"][data-field]').forEach(function (input) {
 				input.addEventListener('change', function () {
 					state.step2Submitted = false;
 					state.form[input.getAttribute('data-field')] = input.value;
 					ensureValidSelections();
-					render();
-				});
-			});
-			mount.querySelectorAll('input[name="rx_mode"]').forEach(function (input) {
-				input.addEventListener('change', function () {
-					state.step2Submitted = false;
-					state.readers = input.value === 'readers' ? 1 : 0;
-					if (state.readers === 0) {
-						state.power = '0';
-					}
 					render();
 				});
 			});
@@ -467,21 +584,21 @@
 					if (type === 'pd') {
 						state.pdkey = input.checked ? 2 : 1;
 					}
-					if (type === 'nearpd') {
-						state.nearpd = input.checked ? 1 : 0;
-					}
 					if (type === 'prism') {
 						state.prism = input.checked ? 1 : 0;
 					}
 					render();
 				});
 			});
+			mount.querySelector('.mlr-add-new-link').addEventListener('click', function () {
+				state.step2Submitted = false;
+				setStatus('');
+			});
 			mount.querySelector('[data-next-step="3"]').addEventListener('click', function () {
-				if (validateStep2()) {
-					state.step2Submitted = true;
-					setOpenStep(3);
-					render();
-				}
+				state.step2Submitted = true;
+				setStatus('');
+				setOpenStep(3);
+				render();
 			});
 		}
 
@@ -500,18 +617,18 @@
 					return;
 				}
 				var allowed = getAllowedLensTypes().indexOf(Number(option.id)) >= 0;
+				var copy = getReplicaCopy('lensTypes', option.id, option.label, option.description);
 				var li = document.createElement('li');
 				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
 				li.innerHTML = '<div id="step3_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.lenstype) === Number(option.id) ? ' lens_k_choose' : '') + (allowed ? '' : ' disable_step_panel') + '" step="3" val="' + option.id + '">' +
-					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(lensTypeImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getLensTypePrice(option.id) ? money(getLensTypePrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+					buildOptionCardMarkup(copy, renderPhoto(lensTypeImages[option.id], option.label.charAt(0))) + '</div>';
 				var card = li.querySelector('.lens_key');
 				if (allowed) {
 					card.addEventListener('click', function () {
 						state.lenstype = Number(option.id);
 						state.lenstype_color = 0;
 						ensureValidSelections();
-						setOpenStep(4);
+						setOpenStep(option.requires_color ? 3 : 4);
 						render();
 					});
 				}
@@ -522,12 +639,13 @@
 					var colors = getLensColorOptions(option.id).map(function (color) {
 						return '<button type="button" class="mlr-color-choice' + (Number(state.lenstype_color) === Number(color.id) ? ' active' : '') + '" data-color="' + color.id + '">' + color.label + '</button>';
 					}).join('');
-					colorLi.innerHTML = '<div class="mlr-color-wrap">' + colors + '</div>';
+					colorLi.innerHTML = '<div class="mlr-color-wrap"><div class="mlr-color-wrap-label">Choose a color</div>' + colors + '</div>';
 					mount.appendChild(colorLi);
 					colorLi.querySelectorAll('[data-color]').forEach(function (button) {
 						button.addEventListener('click', function () {
 							state.lenstype_color = Number(button.getAttribute('data-color'));
 							ensureValidSelections();
+							setOpenStep(4);
 							render();
 						});
 					});
@@ -544,11 +662,17 @@
 				var option = schema.lens_indices[key];
 				var allowed = rule.allowed.indexOf(Number(option.id)) >= 0;
 				var disabled = !allowed || rule.disabled.indexOf(Number(option.id)) >= 0;
+				var copy = getReplicaCopy('lensIndices', option.id, option.label, 'Available for the current prescription flow.');
 				var li = document.createElement('li');
 				li.className = 'col-6 col-lg-6';
 				li.innerHTML = '<div id="step4_li_' + option.id + '" class="panel panel-default step4_panel lens_key' + (Number(state.lensindex) === Number(option.id) ? ' lens_k_choose' : '') + (disabled ? ' disable_step_panel' : '') + '" step="4" val="' + option.id + '">' +
-					'<div class="panel-heading">' + option.label + (recommended === Number(option.id) ? '<span class="recommended-icon">Recommended</span>' : '') + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(lensIndexImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>Available for the current prescription flow.</div><div class="mt-10"><span class="lens_k_price">' + money(getLensIndexPrice(option.id)) + '</span></div></div></div></div></div>';
+					buildOptionCardMarkup({
+						heading: copy.heading,
+						description: copy.description,
+						priceHtml: copy.priceHtml,
+						badge: recommended === Number(option.id) ? 'Recommended' : copy.badge,
+						badgeClass: 'recommended-icon'
+					}, renderPhoto(lensIndexImages[option.id], option.label.charAt(0))) + '</div>';
 				if (!disabled) {
 					li.querySelector('.lens_key').addEventListener('click', function () {
 						state.lensindex = Number(option.id);
@@ -565,11 +689,11 @@
 			mount.innerHTML = '';
 			Object.keys(schema.coatings).forEach(function (key) {
 				var option = schema.coatings[key];
+				var copy = getReplicaCopy('coatings', option.id, option.label, option.description);
 				var li = document.createElement('li');
 				li.className = 'col-xs-6 col-sm-6 col-md-6 col-lg-4';
 				li.innerHTML = '<div id="step5_li_' + option.id + '" class="panel panel-default lens_key' + (Number(state.coating) === Number(option.id) ? ' lens_k_choose' : '') + '" step="5" val="' + option.id + '">' +
-					'<div class="panel-heading">' + option.label + '<span class="icon dripicons-question f-right mt-1">?</span></div>' +
-					'<div class="panel-body fs14"><div class="step_div_info row"><div class="col-4">' + renderPhoto(coatingImages[option.id], option.label.charAt(0)) + '</div><div class="col-8 pdnone"><div>' + option.description + '</div><div class="mt-10"><span class="lens_k_price">' + (getCoatingPrice(option.id) ? money(getCoatingPrice(option.id)) : 'FREE') + '</span></div></div></div></div></div>';
+					buildOptionCardMarkup(copy, renderPhoto(coatingImages[option.id], option.label.charAt(0))) + '</div>';
 				li.querySelector('.lens_key').addEventListener('click', function () {
 					state.coating = Number(option.id);
 					render();
