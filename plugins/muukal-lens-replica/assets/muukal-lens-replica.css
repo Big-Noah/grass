@@ -612,9 +612,9 @@ select:disabled {
 	display: inline-block;
 	min-width: 180px;
 	padding: 15px 40px;
-	border: 1px solid #fff;
-	background: #222;
-	color: #fff;
+	border: 1px solid #fff !important;
+	background: #222 !important;
+	color: #fff !important;
 	font-size: 14px;
 	font-weight: 400;
 	text-align: center;
@@ -624,8 +624,8 @@ select:disabled {
 .mlr-step-submit:focus,
 #power-sure:hover,
 #power-sure:focus {
-	background: #222;
-	color: #fff;
+	background: #222 !important;
+	color: #fff !important;
 }
 
 .mlr-pd-single,
