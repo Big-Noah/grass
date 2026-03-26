@@ -65,6 +65,7 @@
 		var upgradeCopy = root.querySelector('.mlr-upgrade-copy');
 		var upgradeAccept = root.querySelector('.mlr-upgrade-accept');
 		var upgradeSkip = root.querySelector('.mlr-upgrade-skip');
+		var closeTimer = null;
 
 		var state = {
 			openStep: 1,
@@ -644,17 +645,28 @@
 		}
 
 		function openOverlay() {
+			if (closeTimer) {
+				window.clearTimeout(closeTimer);
+				closeTimer = null;
+			}
 			container.hidden = false;
 			document.body.classList.add('mlr-open-body');
+			window.requestAnimationFrame(function () {
+				container.classList.add('is-open');
+			});
 			render();
 		}
 
 		function closeOverlay() {
-			container.hidden = true;
+			container.classList.remove('is-open');
 			document.body.classList.remove('mlr-open-body');
-			root.querySelector('#lensbox_left').style.display = '';
-			root.querySelector('#lensbox_right').classList.remove('col-full');
-			editAgain.style.display = 'none';
+			closeTimer = window.setTimeout(function () {
+				container.hidden = true;
+				root.querySelector('#lensbox_left').style.display = '';
+				root.querySelector('#lensbox_right').classList.remove('col-full');
+				editAgain.style.display = 'none';
+				closeTimer = null;
+			}, 380);
 		}
 
 		function maybeHandleProgressiveUpgrade() {
