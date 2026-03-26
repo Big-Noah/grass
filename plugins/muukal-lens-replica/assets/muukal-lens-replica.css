@@ -287,13 +287,16 @@
 
 #lens_left_close {
 	position: absolute;
-	right: 0;
-	top: 0;
+	right: 12px;
+	top: 8px;
 	z-index: 99;
-	width: 42px;
-	height: 63px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
 	font-size: 42px;
-	line-height: 63px;
+	line-height: 1;
 	text-align: center;
 	cursor: pointer;
 }
@@ -367,8 +370,32 @@
 
 #lens_left_close i {
 	display: block;
+	position: relative;
+	width: 24px;
+	height: 24px;
 	font-style: normal;
 	line-height: inherit;
+	font-size: 0;
+}
+
+#lens_left_close i:before,
+#lens_left_close i:after {
+	position: absolute;
+	top: 1px;
+	left: 11px;
+	width: 2px;
+	height: 22px;
+	border-radius: 2px;
+	background: #222;
+	content: "";
+}
+
+#lens_left_close i:before {
+	transform: rotate(45deg);
+}
+
+#lens_left_close i:after {
+	transform: rotate(-45deg);
 }
 
 .lens_key,
