@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Lens Replica
  * Description: Standalone Muukal lens-selector replica for testing, with PHP field schema and simulated add-to-cart payload export.
- * Version: 0.2.2
+ * Version: 0.2.3
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.2' );
+define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.3' );
 define( 'MUUKAL_LENS_REPLICA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_LENS_REPLICA_URL', plugin_dir_url( __FILE__ ) );
 

@@ -220,6 +220,7 @@
 			readers: 0,
 			power: '0',
 			lenstype: 0,
+			pending_lenstype_color: 0,
 			lenstype_color: 0,
 			lensindex: 0,
 			coating: 0,
@@ -317,6 +318,10 @@
 			});
 		}
 
+		function getLensColorSwatchSrc(colorId) {
+			return 'https://static.muukal.com/public/static/img/home/frame/lens_c_' + colorId + '.jpg?v=1';
+		}
+
 		function getLensTypePrice(id) {
 			var row = getUsagePriceTable()[String(id)] || getUsagePriceTable()[id];
 			return row ? Number(row[4]) : 0;
@@ -365,7 +370,23 @@
 		function ensureValidSelections() {
 			if (getAllowedLensTypes().indexOf(Number(state.lenstype)) === -1) {
 				state.lenstype = 0;
+				state.pending_lenstype_color = 0;
 				state.lenstype_color = 0;
+			}
+			var currentLensType = schema.lens_types[String(state.lenstype)] || schema.lens_types[state.lenstype];
+			if (!currentLensType || !currentLensType.requires_color) {
+				state.pending_lenstype_color = 0;
+				state.lenstype_color = 0;
+			} else {
+				var allowedColors = getLensColorOptions(state.lenstype).map(function (color) {
+					return Number(color.id);
+				});
+				if (allowedColors.indexOf(Number(state.lenstype_color)) === -1) {
+					state.lenstype_color = 0;
+				}
+				if (allowedColors.indexOf(Number(state.pending_lenstype_color)) === -1) {
+					state.pending_lenstype_color = Number(state.lenstype_color || 0);
+				}
 			}
 			var lensIndexRule = getAllowedLensIndices();
 			if (lensIndexRule.allowed.indexOf(Number(state.lensindex)) === -1 || lensIndexRule.disabled.indexOf(Number(state.lensindex)) >= 0) {
@@ -485,6 +506,7 @@
 					state.readers = 0;
 					state.power = '0';
 					state.lenstype = 0;
+					state.pending_lenstype_color = 0;
 					state.lenstype_color = 0;
 					state.lensindex = 0;
 					state.coating = 0;
@@ -625,8 +647,10 @@
 				var card = li.querySelector('.lens_key');
 				if (allowed) {
 					card.addEventListener('click', function () {
+						var sameLensType = Number(state.lenstype) === Number(option.id);
 						state.lenstype = Number(option.id);
-						state.lenstype_color = 0;
+						state.pending_lenstype_color = option.requires_color && sameLensType ? Number(state.lenstype_color || 0) : 0;
+						state.lenstype_color = option.requires_color && sameLensType ? Number(state.lenstype_color || 0) : 0;
 						ensureValidSelections();
 						setOpenStep(option.requires_color ? 3 : 4);
 						render();
@@ -635,18 +659,46 @@
 				mount.appendChild(li);
 				if (Number(state.lenstype) === Number(option.id) && option.requires_color) {
 					var colorLi = document.createElement('li');
-					colorLi.className = 'col-12';
+					var activeColorId = Number(state.pending_lenstype_color || state.lenstype_color || 0);
+					var activeColor = schema.lens_colors[String(activeColorId)] || schema.lens_colors[activeColorId];
+					colorLi.className = 'col-12 mb-20 lens_entry_info';
+					colorLi.id = 'lenstype_sec_' + option.id;
 					var colors = getLensColorOptions(option.id).map(function (color) {
-						return '<button type="button" class="mlr-color-choice' + (Number(state.lenstype_color) === Number(color.id) ? ' active' : '') + '" data-color="' + color.id + '">' + color.label + '</button>';
+						return '<span class="mid-cspan color_btn' + (activeColorId === Number(color.id) ? ' mid-choose-color' : '') + '" data-color="' + color.id + '" data-color-name="' + color.label + '">' +
+							'<img class="lens_c_icon" src="' + getLensColorSwatchSrc(color.id) + '" alt="' + color.label + '">' +
+						'</span>';
 					}).join('');
-					colorLi.innerHTML = '<div class="mlr-color-wrap"><div class="mlr-color-wrap-label">Choose a color</div>' + colors + '</div>';
+					colorLi.innerHTML = '<div class="borderd7 mlr-color-panel">' +
+						'<div class="mlr-color-panel-heading">&nbsp;&nbsp;TINT COLOR:&nbsp;&nbsp;<span class="dark-s">Darkness 80%</span></div>' +
+						'<div class="mid-color-box">' + colors + '</div>' +
+						'<button type="button" class="btn theme-btn-s lens_key color-confirm-btn">' +
+							'CONFIRM' + (activeColor ? '&nbsp;&nbsp;(' + activeColor.label + ')' : '') +
+						'</button>' +
+					'</div>';
 					mount.appendChild(colorLi);
 					colorLi.querySelectorAll('[data-color]').forEach(function (button) {
 						button.addEventListener('click', function () {
-							state.lenstype_color = Number(button.getAttribute('data-color'));
-							ensureValidSelections();
-							setOpenStep(4);
+							state.pending_lenstype_color = Number(button.getAttribute('data-color'));
+							setStatus('');
 							render();
+						});
+					});
+					colorLi.querySelector('.color-confirm-btn').addEventListener('click', function () {
+						if (!state.pending_lenstype_color) {
+							setStatus('Pick a tint color first.');
+							return;
+						}
+						state.lenstype_color = Number(state.pending_lenstype_color);
+						ensureValidSelections();
+						setStatus('');
+						setOpenStep(4);
+						render();
+					});
+					colorLi.querySelectorAll('.lens_c_icon').forEach(function (image) {
+						image.addEventListener('error', function () {
+							image.setAttribute('alt', image.getAttribute('alt') || 'Lens color');
+							image.style.background = '#f5f5f5';
+							image.style.opacity = '0.35';
 						});
 					});
 				}

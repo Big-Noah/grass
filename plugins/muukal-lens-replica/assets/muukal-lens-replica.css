@@ -886,6 +886,18 @@ select:disabled {
 	font-weight: 400;
 }
 
+.mb-20 {
+	margin-bottom: 20px;
+}
+
+.mt15 {
+	margin-top: 15px;
+}
+
+.dark-s {
+	color: #8a8a8a;
+}
+
 .mlr-step-submit,
 #power-sure {
 	display: inline-block;
@@ -926,6 +938,84 @@ select:disabled {
 
 .borderd7 {
 	border: 1px solid #d7d7d7;
+}
+
+.lens_entry_info {
+	width: 100%;
+}
+
+.lens_entry_info .borderd7 {
+	background: #fff;
+}
+
+.mlr-color-panel {
+	padding-bottom: 18px;
+}
+
+.mlr-color-panel-heading {
+	padding: 16px 18px 0;
+	color: #222;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.mid-color-box {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 14px 18px 0;
+}
+
+.mid-cspan {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 50px;
+	height: 50px;
+	margin: 0 10px 10px 0;
+	padding: 0;
+	border: 1px solid #fff;
+	border-radius: 50%;
+	background: #fff;
+	cursor: pointer;
+	overflow: hidden;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mid-cspan:hover,
+.mid-cspan:focus {
+	border-color: #ff565c;
+}
+
+.mid-cspan.mid-choose-color {
+	border-color: #ff565c;
+	box-shadow: 0 0 0 1px #ff565c;
+}
+
+.lens_c_icon {
+	display: block;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.color-confirm-btn {
+	display: table;
+	margin: 8px 18px 0;
+	padding: 9px 22px;
+	border: 1px solid #1f1f1f !important;
+	background: #fff !important;
+	color: #222 !important;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.4;
+}
+
+.color-confirm-btn:hover,
+.color-confirm-btn:focus {
+	background: #fff !important;
+	color: #222 !important;
 }
 
 .borderb-d7 {
