@@ -135,7 +135,7 @@ function muukal_buyer_showcase_sanitize_settings( $input ) {
 
 	$output['heading']      = sanitize_text_field( $input['heading'] ?? $defaults['heading'] );
 	$output['subheading']   = sanitize_text_field( $input['subheading'] ?? $defaults['subheading'] );
-	$output['columns']      = min( 6, max( 2, absint( $input['columns'] ?? $defaults['columns'] ) ) );
+	$output['columns']      = min( 12, max( 2, absint( $input['columns'] ?? $defaults['columns'] ) ) );
 	$output['button_label'] = sanitize_text_field( $input['button_label'] ?? $defaults['button_label'] );
 	$output['items']        = array();
 
@@ -359,7 +359,7 @@ function muukal_buyer_showcase_render_admin_page() {
 					</tr>
 					<tr>
 						<th scope="row"><label for="muukal-buyer-showcase-columns"><?php esc_html_e( 'Desktop columns', 'muukal-buyer-showcase' ); ?></label></th>
-						<td><input id="muukal-buyer-showcase-columns" name="muukal_buyer_showcase_settings[columns]" type="number" min="2" max="6" class="small-text" value="<?php echo esc_attr( $settings['columns'] ); ?>" /></td>
+						<td><input id="muukal-buyer-showcase-columns" name="muukal_buyer_showcase_settings[columns]" type="number" min="2" max="12" class="small-text" value="<?php echo esc_attr( $settings['columns'] ); ?>" /></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="muukal-buyer-showcase-button"><?php esc_html_e( 'Default button label', 'muukal-buyer-showcase' ); ?></label></th>
@@ -427,7 +427,7 @@ function muukal_buyer_showcase_shortcode( $atts = array() ) {
 		'muukal_buyer_showcase'
 	);
 
-	$columns = min( 6, max( 2, absint( $atts['columns'] ) ) );
+	$columns = min( 12, max( 2, absint( $atts['columns'] ) ) );
 	$limit   = max( 1, absint( $atts['limit'] ) );
 	$items   = array_slice( $settings['items'], 0, $limit );
 
