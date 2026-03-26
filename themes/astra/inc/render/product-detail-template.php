@@ -551,7 +551,7 @@ function muukal_product_detail_build_variants( $product, $swatches, $gallery_url
 			'color_name'         => $color_name,
 			'color_id'           => ! empty( $row['color_id'] ) ? (string) $row['color_id'] : '',
 			'dot_image'          => ! empty( $row['dot_image'] ) ? (string) $row['dot_image'] : '',
-			'thumb_image'        => ! empty( $row['main_image'] ) ? (string) $row['main_image'] : ( ! empty( $gallery[0] ) ? (string) $gallery[0] : '' ),
+			'thumb_image'        => ! empty( $row['main_image'] ) ? (string) $row['main_image'] : '',
 			'gallery'            => $gallery,
 			'link'               => isset( $row_state['link'] ) ? (string) $row_state['link'] : get_permalink( $product->get_id() ),
 			'price_html'         => $price_html,
@@ -649,6 +649,14 @@ function muukal_render_product_detail_template( $args ) {
 	$description     = muukal_product_detail_get_description_html( $product );
 	$review_count    = $product->get_review_count();
 	$client_variants = array();
+	$show_image_swatches = ! empty( $variants );
+
+	foreach ( $variants as $variant ) {
+		if ( empty( $variant['thumb_image'] ) ) {
+			$show_image_swatches = false;
+			break;
+		}
+	}
 
 	foreach ( $variants as $variant_key => $variant ) {
 		$client_variants[ $variant_key ] = array(
@@ -744,7 +752,7 @@ function muukal_render_product_detail_template( $args ) {
 						</div>
 					</div>
 
-					<div class="col-xl-4">
+					<div class="col-xl-4 muukal-details-column">
 						<div class="product-details mb-30 mt-20 pl-10 ncpd960_mb0">
 							<div class="product-details-title">
 								<div>
@@ -765,17 +773,18 @@ function muukal_render_product_detail_template( $args ) {
 							</div>
 
 							<?php if ( ! empty( $variants ) ) : ?>
-								<div class="goods-color-box mt30">
+								<div class="goods-color-box mt30<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
 									<?php foreach ( $variants as $variant_key => $variant ) : ?>
-										<?php if ( empty( $variant['thumb_image'] ) ) : ?>
-											<?php continue; ?>
-										<?php endif; ?>
 										<button
 											type="button"
-											class="ip-cspan ip-g-span<?php echo $variant_key === $default_key ? ' choose-color is-active' : ''; ?>"
+											class="ip-cspan ip-g-span<?php echo $variant_key === $default_key ? ' choose-color is-active' : ''; ?><?php echo $show_image_swatches ? ' has-image-swatch' : ' is-text-swatch'; ?>"
 											data-variant-key="<?php echo esc_attr( $variant_key ); ?>"
 										>
-											<img class="ip-g-img" src="<?php echo esc_url( $variant['thumb_image'] ); ?>" alt="<?php echo esc_attr( $variant['color_name'] ); ?>">
+											<?php if ( $show_image_swatches && ! empty( $variant['thumb_image'] ) ) : ?>
+												<img class="ip-g-img" src="<?php echo esc_url( $variant['thumb_image'] ); ?>" alt="<?php echo esc_attr( $variant['color_name'] ); ?>">
+											<?php else : ?>
+												<span class="muukal-color-chip-label"><?php echo esc_html( $variant['color_name'] ); ?></span>
+											<?php endif; ?>
 										</button>
 									<?php endforeach; ?>
 								</div>
@@ -793,11 +802,10 @@ function muukal_render_product_detail_template( $args ) {
 							</div>
 
 							<div class="product-details-action mt35">
-								<button class="btn theme-btn-w f-left add-wishlist-btn" type="button" style="width: 40%;">ADD TO WISHLIST</button>
-								<div class="muukal-product-detail-lens-trigger" style="width: 59%; float: right;">
+								<button class="btn theme-btn-w add-wishlist-btn muukal-detail-action-button" type="button">ADD TO WISHLIST</button>
+								<div class="muukal-product-detail-lens-trigger muukal-detail-action-button">
 									<?php echo $lens_shortcode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</div>
-								<div style="clear: both;"></div>
 							</div>
 
 							<div class="mt-25 fs14 promotion_box">

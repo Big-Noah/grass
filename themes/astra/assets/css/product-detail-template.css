@@ -3,12 +3,13 @@
 }
 
 .muukal-product-detail-template .container {
-	width: min(1400px, calc(100% - 30px));
+	width: min(1520px, calc(100vw - 48px));
 	margin: 0 auto;
 }
 
 .muukal-product-detail-template .container-fluid {
-	width: 100%;
+	width: min(1520px, calc(100vw - 48px));
+	margin: 0 auto;
 }
 
 .muukal-product-detail-template .row {
@@ -80,6 +81,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
+	gap: 10px;
 }
 
 .muukal-product-detail-template .lit_gpic,
@@ -94,6 +96,10 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.muukal-product-detail-template .shop-banner-area .row {
+	align-items: flex-start;
 }
 
 .muukal-product-detail-template .lit_gpic:hover,
@@ -177,6 +183,12 @@
 	cursor: pointer;
 }
 
+.muukal-product-detail-template .goods-color-box {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
 .muukal-product-detail-template .goods-color-box .choose-color {
 	border-color: #ff565c;
 }
@@ -197,9 +209,50 @@
 	object-fit: cover;
 }
 
+.muukal-product-detail-template .goods-color-box.is-text-swatches .ip-cspan {
+	min-width: 84px;
+	min-height: 42px;
+	padding: 0 16px;
+	margin: 0;
+	border-radius: 999px;
+}
+
+.muukal-product-detail-template .goods-color-box.is-text-swatches .choose-color {
+	border-color: #222;
+	background: #222;
+}
+
+.muukal-product-detail-template .goods-color-box.is-text-swatches .choose-color::after {
+	display: none;
+}
+
+.muukal-product-detail-template .muukal-color-chip-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: #444;
+}
+
+.muukal-product-detail-template .goods-color-box.is-text-swatches .choose-color .muukal-color-chip-label {
+	color: #fff;
+}
+
 .muukal-product-detail-template .goods-size,
 .muukal-product-detail-template .goods-size a {
 	font-size: 14px;
+}
+
+.muukal-product-detail-template .product-cat {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 24px;
+}
+
+.muukal-product-detail-template .goods-size {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
 }
 
 .muukal-product-detail-template .mk-price,
@@ -232,6 +285,46 @@
 
 .muukal-product-detail-template .muukal-product-detail-lens-trigger .mlr-app {
 	width: 100%;
+}
+
+.muukal-product-detail-template .product-details-action {
+	display: grid;
+	grid-template-columns: minmax(220px, 0.92fr) minmax(320px, 1.28fr);
+	gap: 14px;
+	align-items: stretch;
+}
+
+.muukal-product-detail-template .product-details-action > * {
+	min-width: 0;
+}
+
+.muukal-product-detail-template .muukal-detail-action-button,
+.muukal-product-detail-template .muukal-product-detail-lens-trigger .mlr-app,
+.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock {
+	width: 100%;
+}
+
+.muukal-product-detail-template .add-wishlist-btn,
+.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock {
+	min-height: 72px;
+}
+
+.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 14px 18px;
+	line-height: 1.2;
+	text-align: center;
+	white-space: normal;
+	gap: 4px;
+}
+
+.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock .fs14 {
+	margin-top: 0;
+	font-size: 13px;
+	line-height: 1.3;
 }
 
 .muukal-product-detail-template .promotion_head {
@@ -497,11 +590,11 @@
 
 @media (min-width: 1200px) {
 	.muukal-product-detail-template .col-xl-8 {
-		width: 66.6667%;
+		width: 56%;
 	}
 
 	.muukal-product-detail-template .col-xl-4 {
-		width: 33.3333%;
+		width: 44%;
 	}
 
 	.muukal-product-detail-template .col-xl-3 {
@@ -541,6 +634,7 @@
 	.muukal-product-detail-template .product-details-action {
 		display: grid;
 		gap: 12px;
+		grid-template-columns: 1fr;
 	}
 }
 
