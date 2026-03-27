@@ -624,11 +624,12 @@
 	color: #15357a;
 }
 
-.muukal-cart-summary__express-logo {
-	font-size: 24px;
-	font-style: italic;
-	font-weight: 700;
-	letter-spacing: -0.04em;
+.muukal-cart-summary__express-logo-image {
+	display: block;
+	width: auto;
+	max-width: 118px;
+	height: 30px;
+	object-fit: contain;
 }
 
 .muukal-cart-summary__express-button--card {

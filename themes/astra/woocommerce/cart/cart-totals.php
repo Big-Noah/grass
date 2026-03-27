@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $payments_image = get_theme_file_uri( 'assets/images/cart/muukal-payments.jpg' );
+$paypal_logo    = get_theme_file_uri( 'assets/images/cart/paypal-logo.png' );
 $subtotal_html  = WC()->cart ? WC()->cart->get_cart_subtotal() : wc_price( 0 );
 $shipping_total = WC()->cart ? (float) WC()->cart->get_shipping_total() : 0;
 $shipping_label = WC()->cart && WC()->cart->needs_shipping() ? __( 'Standard Shipping(12-21 Days)', 'astra' ) : __( 'Shipping calculated at checkout', 'astra' );
@@ -87,7 +88,7 @@ $card_url       = '#';
 
 			<div class="muukal-cart-summary__express">
 				<a class="muukal-cart-summary__express-button muukal-cart-summary__express-button--paypal" href="<?php echo esc_url( $paypal_url ); ?>">
-					<span class="muukal-cart-summary__express-logo">PayPal</span>
+					<img class="muukal-cart-summary__express-logo-image" src="<?php echo esc_url( $paypal_logo ); ?>" alt="<?php esc_attr_e( 'PayPal', 'astra' ); ?>">
 				</a>
 				<a class="muukal-cart-summary__express-button muukal-cart-summary__express-button--card" href="<?php echo esc_url( $card_url ); ?>">
 					<span class="muukal-cart-summary__express-card-icons" aria-hidden="true">
