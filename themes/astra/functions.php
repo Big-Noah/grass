@@ -270,6 +270,30 @@ function muukal_astra_locate_account_form_template( $template, $template_name ) 
 add_filter( 'woocommerce_locate_template', 'muukal_astra_locate_account_form_template', 20, 2 );
 
 /**
+ * Force WooCommerce to include the custom account templates at render time.
+ *
+ * @param string $template Resolved template path.
+ * @param string $template_name Requested template name.
+ * @return string
+ */
+function muukal_astra_force_account_templates( $template, $template_name ) {
+	$custom_templates = array(
+		'myaccount/my-account.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/my-account.php',
+		'myaccount/navigation.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/navigation.php',
+		'myaccount/form-login.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/form-login.php',
+	);
+
+	if ( ! isset( $custom_templates[ $template_name ] ) ) {
+		return $template;
+	}
+
+	$custom_template = $custom_templates[ $template_name ];
+
+	return file_exists( $custom_template ) ? $custom_template : $template;
+}
+add_filter( 'wc_get_template', 'muukal_astra_force_account_templates', 20, 2 );
+
+/**
  * Always expose registration on the My Account page.
  *
  * @return string
