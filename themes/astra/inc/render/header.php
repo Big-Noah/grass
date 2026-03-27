@@ -178,7 +178,7 @@ function muukal_render_header( $args ) {
 		$account_url = wc_get_page_permalink( 'myaccount' );
 	}
 
-	$wishlist_url = home_url( '/wishlist/' );
+	$wishlist_url = function_exists( 'muukal_wishlist_get_account_url' ) ? muukal_wishlist_get_account_url() : home_url( '/wishlist/' );
 	$cart_url     = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' );
 	$logo_id      = get_theme_mod( 'custom_logo' );
 	$logo_markup  = $logo_id ? wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'muukal-header__logo-image' ) ) : '';

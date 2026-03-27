@@ -17,6 +17,8 @@ define( 'MUUKAL_WISHLIST_URL', plugin_dir_url( __FILE__ ) );
 define( 'MUUKAL_WISHLIST_OPTION', 'muukal_wishlist_settings' );
 define( 'MUUKAL_WISHLIST_USER_META', 'muukal_wishlist_items' );
 define( 'MUUKAL_WISHLIST_COOKIE', 'muukal_wishlist_items' );
+define( 'MUUKAL_WISHLIST_ACCOUNT_ENDPOINT', 'wishlist' );
+define( 'MUUKAL_WISHLIST_VERSION_OPTION', 'muukal_wishlist_plugin_version' );
 
 /**
  * Get an asset version string.
@@ -171,6 +173,8 @@ function muukal_wishlist_activate() {
 	}
 
 	muukal_wishlist_ensure_page();
+	muukal_wishlist_add_account_endpoint();
+	update_option( MUUKAL_WISHLIST_VERSION_OPTION, MUUKAL_WISHLIST_VERSION );
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'muukal_wishlist_activate' );
@@ -184,6 +188,105 @@ function muukal_wishlist_deactivate() {
 	flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'muukal_wishlist_deactivate' );
+
+/**
+ * Register the WooCommerce account endpoint.
+ *
+ * @return void
+ */
+function muukal_wishlist_add_account_endpoint() {
+	add_rewrite_endpoint( MUUKAL_WISHLIST_ACCOUNT_ENDPOINT, EP_ROOT | EP_PAGES );
+}
+add_action( 'init', 'muukal_wishlist_add_account_endpoint' );
+
+/**
+ * Flush rewrite rules once after plugin updates.
+ *
+ * @return void
+ */
+function muukal_wishlist_maybe_upgrade() {
+	$stored_version = get_option( MUUKAL_WISHLIST_VERSION_OPTION, '' );
+
+	if ( MUUKAL_WISHLIST_VERSION === $stored_version ) {
+		return;
+	}
+
+	muukal_wishlist_ensure_page();
+	update_option( MUUKAL_WISHLIST_VERSION_OPTION, MUUKAL_WISHLIST_VERSION );
+	flush_rewrite_rules( false );
+}
+add_action( 'init', 'muukal_wishlist_maybe_upgrade', 20 );
+
+/**
+ * Add the wishlist endpoint query var.
+ *
+ * @param array<int, string> $vars Public query vars.
+ * @return array<int, string>
+ */
+function muukal_wishlist_query_vars( $vars ) {
+	$vars[] = MUUKAL_WISHLIST_ACCOUNT_ENDPOINT;
+
+	return $vars;
+}
+add_filter( 'query_vars', 'muukal_wishlist_query_vars' );
+
+/**
+ * Insert wishlist into the My Account navigation.
+ *
+ * @param array<string, string> $items Account menu items.
+ * @return array<string, string>
+ */
+function muukal_wishlist_account_menu_items( $items ) {
+	$updated = array();
+	$added   = false;
+
+	foreach ( $items as $endpoint => $label ) {
+		$updated[ $endpoint ] = $label;
+
+		if ( 'dashboard' === $endpoint ) {
+			$updated[ MUUKAL_WISHLIST_ACCOUNT_ENDPOINT ] = __( 'My Wishlist', 'muukal-wishlist' );
+			$added = true;
+		}
+	}
+
+	if ( ! $added ) {
+		$updated[ MUUKAL_WISHLIST_ACCOUNT_ENDPOINT ] = __( 'My Wishlist', 'muukal-wishlist' );
+	}
+
+	return $updated;
+}
+add_filter( 'woocommerce_account_menu_items', 'muukal_wishlist_account_menu_items' );
+
+/**
+ * Render My Account wishlist endpoint content.
+ *
+ * @return void
+ */
+function muukal_wishlist_account_content() {
+	echo do_shortcode( '[muukal_wishlist]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+add_action( 'woocommerce_account_' . MUUKAL_WISHLIST_ACCOUNT_ENDPOINT . '_endpoint', 'muukal_wishlist_account_content' );
+
+/**
+ * Get the preferred account wishlist URL.
+ *
+ * @return string
+ */
+function muukal_wishlist_get_account_url() {
+	if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
+		return wc_get_account_endpoint_url( MUUKAL_WISHLIST_ACCOUNT_ENDPOINT );
+	}
+
+	if ( function_exists( 'wc_get_page_permalink' ) ) {
+		$account_url = wc_get_page_permalink( 'myaccount' );
+
+		if ( $account_url && 'myaccount' !== $account_url ) {
+			return trailingslashit( $account_url ) . MUUKAL_WISHLIST_ACCOUNT_ENDPOINT . '/';
+		}
+	}
+
+	return muukal_wishlist_get_page_url();
+}
 
 /**
  * Return the wishlist page ID.
@@ -626,6 +729,16 @@ function muukal_wishlist_url_shortcode() {
 add_shortcode( 'muukal_wishlist_url', 'muukal_wishlist_url_shortcode' );
 
 /**
+ * Shortcode that prints the My Account wishlist URL.
+ *
+ * @return string
+ */
+function muukal_wishlist_account_url_shortcode() {
+	return esc_url( muukal_wishlist_get_account_url() );
+}
+add_shortcode( 'muukal_wishlist_account_url', 'muukal_wishlist_account_url_shortcode' );
+
+/**
  * Render wishlist page shortcode.
  *
  * @return string
@@ -783,6 +896,7 @@ function muukal_wishlist_render_admin_page() {
 			<li><code>[muukal_wishlist]</code> renders the wishlist page contents.</li>
 			<li><code>[muukal_wishlist_link label="Wishlist"]</code> outputs a link to the wishlist page.</li>
 			<li><code>[muukal_wishlist_url]</code> prints the wishlist URL only.</li>
+			<li><code>[muukal_wishlist_account_url]</code> prints the My Account wishlist URL.</li>
 			<li><code>[muukal_wishlist_count]</code> prints the current saved count.</li>
 			<li><code>[muukal_wishlist_button product_id="123"]</code> renders a manual toggle button.</li>
 		</ul>
