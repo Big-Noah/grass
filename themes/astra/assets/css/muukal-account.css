@@ -333,17 +333,18 @@
 .woocommerce-account.logged-in .entry-content > .woocommerce,
 .woocommerce-account.logged-in .muukal-account-dashboard {
 	display: grid;
-	grid-template-columns: 220px minmax(0, 1fr);
-	gap: 44px;
+	grid-template-columns: 240px minmax(0, 1fr);
+	gap: 34px;
 	align-items: start;
-	max-width: 1280px;
+	width: 85%;
+	max-width: none;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation,
 .woocommerce-account.logged-in .muukal-account-dashboard-nav {
 	margin: 0;
-	padding: 6px 28px 0 0;
-	border-right: 1px solid #e7e7e7;
+	padding: 6px 0 0 0;
+	border-right: 0;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation ul,
@@ -361,8 +362,8 @@
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation .muukal-account-nav-group {
-	margin: 0 0 10px;
-	font-size: 0.95rem;
+	margin: 0 0 12px;
+	font-size: 1.08rem;
 	font-weight: 500;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -370,16 +371,17 @@
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation .muukal-account-nav-group:not(:first-child) {
-	margin-top: 24px;
+	margin-top: 28px;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation a {
 	display: block;
-	padding: 6px 0;
-	font-size: 1rem;
+	padding: 7px 0;
+	font-size: 1.14rem;
 	font-weight: 400;
 	color: #111;
 	text-decoration: none;
+	line-height: 1.45;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-navigation a:hover,
@@ -390,15 +392,16 @@
 .woocommerce-account.logged-in .woocommerce-MyAccount-content,
 .woocommerce-account.logged-in .muukal-account-dashboard-content {
 	min-height: 480px;
-	padding: 0 0 0 10px;
+	padding: 0 0 0 34px;
+	border-left: 1px solid #e7e7e7;
 }
 
 .woocommerce-account.logged-in .muukal-account-content-title {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	margin: 0 0 28px;
-	font-size: 2rem;
+	margin: 0 0 32px;
+	font-size: 2.35rem;
 	font-weight: 400;
 	line-height: 1.05;
 	letter-spacing: -0.03em;
@@ -417,7 +420,7 @@
 .woocommerce-account.logged-in .woocommerce-MyAccount-content h2:not(.muukal-account-content-title),
 .woocommerce-account.logged-in .woocommerce-MyAccount-content h3 {
 	color: #111;
-	font-size: 1.35rem;
+	font-size: 1.6rem;
 	font-weight: 500;
 }
 
@@ -431,8 +434,8 @@
 .woocommerce-account.logged-in .woocommerce-MyAccount-content th,
 .woocommerce-account.logged-in .woocommerce-MyAccount-content address {
 	color: #333;
-	font-size: 0.98rem;
-	line-height: 1.7;
+	font-size: 1.08rem;
+	line-height: 1.8;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-content table {
@@ -444,13 +447,14 @@
 .woocommerce-account.logged-in .woocommerce-MyAccount-content table th,
 .woocommerce-account.logged-in .woocommerce-MyAccount-content table td {
 	border: 1px solid #ece6e8;
-	padding: 14px 16px;
+	padding: 16px 18px;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-content table th {
 	background: #fff7f8;
 	color: #111;
 	font-weight: 500;
+	font-size: 1.05rem;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-content .button,
@@ -463,7 +467,7 @@
 	background: #ff8c99 !important;
 	color: #fff !important;
 	box-shadow: none !important;
-	font-size: 0.92rem;
+	font-size: 1rem;
 	font-weight: 500;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -487,6 +491,7 @@
 	border: 1px solid #cfd7e0;
 	border-radius: 0;
 	background: #fff;
+	font-size: 1.02rem;
 }
 
 .woocommerce-account.logged-in .woocommerce-MyAccount-content textarea {
@@ -508,8 +513,10 @@
 		border-bottom: 1px solid #e7e7e7;
 	}
 
-	.woocommerce-account.logged-in .woocommerce-MyAccount-content {
+	.woocommerce-account.logged-in .woocommerce-MyAccount-content,
+	.woocommerce-account.logged-in .muukal-account-dashboard-content {
 		padding-left: 0;
+		border-left: 0;
 	}
 }
 
