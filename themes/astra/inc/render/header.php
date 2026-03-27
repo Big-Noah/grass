@@ -10,6 +10,153 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Check whether a menu item is inside the Shop By Color column.
+ *
+ * @param int   $menu_item_id Menu item post ID.
+ * @param array $menu_tree    Indexed menu tree.
+ * @return bool
+ */
+function muukal_header_is_shop_by_color_descendant( $menu_item_id, $menu_tree ) {
+	$current_id = (int) $menu_item_id;
+
+	while ( $current_id && isset( $menu_tree[ $current_id ] ) ) {
+		$item = $menu_tree[ $current_id ];
+
+		if ( isset( $item['title'] ) && 'shop by color' === strtolower( trim( wp_strip_all_tags( $item['title'] ) ) ) ) {
+			return true;
+		}
+
+		$current_id = isset( $item['parent'] ) ? (int) $item['parent'] : 0;
+	}
+
+	return false;
+}
+
+/**
+ * Build a lightweight tree of header menu items for contextual styling.
+ *
+ * @param stdClass $args Menu arguments.
+ * @return array<int, array<string, mixed>>
+ */
+function muukal_header_get_menu_tree( $args ) {
+	static $cache = array();
+
+	$tree           = array();
+	$cache_key      = '';
+	$menu_id        = 0;
+
+	if ( ! empty( $args->theme_location ) ) {
+		$cache_key      = 'location:' . $args->theme_location;
+		$menu_locations = get_nav_menu_locations();
+		$menu_id        = isset( $menu_locations[ $args->theme_location ] ) ? (int) $menu_locations[ $args->theme_location ] : 0;
+	} elseif ( ! empty( $args->menu ) ) {
+		$menu_object = wp_get_nav_menu_object( $args->menu );
+		$menu_id     = $menu_object ? (int) $menu_object->term_id : 0;
+		$cache_key   = 'menu:' . $menu_id;
+	}
+
+	if ( $cache_key && isset( $cache[ $cache_key ] ) ) {
+		return $cache[ $cache_key ];
+	}
+
+	if ( ! $menu_id ) {
+		if ( $cache_key ) {
+			$cache[ $cache_key ] = $tree;
+		}
+		return $tree;
+	}
+
+	$items = wp_get_nav_menu_items( $menu_id );
+
+	if ( empty( $items ) || ! is_array( $items ) ) {
+		if ( $cache_key ) {
+			$cache[ $cache_key ] = $tree;
+		}
+		return $tree;
+	}
+
+	foreach ( $items as $item ) {
+		$tree[ (int) $item->ID ] = array(
+			'title'  => $item->title,
+			'parent' => (int) $item->menu_item_parent,
+		);
+	}
+
+	if ( $cache_key ) {
+		$cache[ $cache_key ] = $tree;
+	}
+
+	return $tree;
+}
+
+/**
+ * Add contextual classes to the custom header menu.
+ *
+ * @param string[]  $classes Existing CSS classes.
+ * @param WP_Post   $item Menu item object.
+ * @param stdClass  $args Menu arguments.
+ * @param int       $depth Item depth.
+ * @return string[]
+ */
+function muukal_header_nav_menu_css_class( $classes, $item, $args, $depth ) {
+	$menu_class = ! empty( $args->menu_class ) ? ' ' . $args->menu_class . ' ' : '';
+
+	if ( false === strpos( $menu_class, ' muukal-header__menu ' ) ) {
+		return $classes;
+	}
+
+	$classes   = is_array( $classes ) ? $classes : array();
+	$menu_tree = muukal_header_get_menu_tree( $args );
+	$title     = strtolower( trim( wp_strip_all_tags( $item->title ) ) );
+
+	if ( 0 === (int) $depth && in_array( 'menu-item-has-children', $classes, true ) ) {
+		$classes[] = 'muukal-header__menu-item--mega';
+	}
+
+	if ( 1 === (int) $depth ) {
+		$classes[] = 'muukal-header__mega-column';
+
+		if ( 'shop by color' === $title ) {
+			$classes[] = 'muukal-header__mega-column--colors';
+		}
+	}
+
+	if ( 2 === (int) $depth && muukal_header_is_shop_by_color_descendant( $item->ID, $menu_tree ) ) {
+		$classes[] = 'muukal-header__color-item';
+		$classes[] = 'muukal-header__color-item--' . sanitize_html_class( sanitize_title( $title ) );
+	}
+
+	return array_values( array_unique( $classes ) );
+}
+add_filter( 'nav_menu_css_class', 'muukal_header_nav_menu_css_class', 10, 4 );
+
+/**
+ * Add contextual link attributes to the custom header menu.
+ *
+ * @param array     $atts Link attributes.
+ * @param WP_Post   $item Menu item object.
+ * @param stdClass  $args Menu arguments.
+ * @param int       $depth Item depth.
+ * @return array
+ */
+function muukal_header_nav_menu_link_attributes( $atts, $item, $args, $depth ) {
+	$menu_class = ! empty( $args->menu_class ) ? ' ' . $args->menu_class . ' ' : '';
+
+	if ( false === strpos( $menu_class, ' muukal-header__menu ' ) ) {
+		return $atts;
+	}
+
+	$menu_tree = muukal_header_get_menu_tree( $args );
+
+	if ( 2 === (int) $depth && muukal_header_is_shop_by_color_descendant( $item->ID, $menu_tree ) ) {
+		$atts['data-muukal-color-label'] = sanitize_title( wp_strip_all_tags( $item->title ) );
+	}
+
+	return $atts;
+}
+add_filter( 'nav_menu_link_attributes', 'muukal_header_nav_menu_link_attributes', 10, 4 );
+
+/**
  * Render the custom header.
  *
  * @param array $args Header arguments.
