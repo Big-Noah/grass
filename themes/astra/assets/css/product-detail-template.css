@@ -212,7 +212,28 @@
 .muukal-product-detail-template .ip-g-img {
 	width: 95px;
 	height: 95px;
-	object-fit: cover;
+	display: block;
+	object-fit: contain;
+	object-position: center;
+	background: #fff;
+	box-shadow: none;
+	filter: none;
+}
+
+.muukal-product-detail-template .ip-cspan.has-image-swatch {
+	overflow: hidden;
+}
+
+.single-product .muukal-product-detail-template img,
+.single-product .muukal-product-detail-template figure,
+.single-product .muukal-product-detail-template .woocommerce-product-gallery img,
+.single-product .muukal-product-detail-template .woocommerce-product-gallery__image,
+.single-product .muukal-product-detail-template .flex-viewport img,
+.single-product .muukal-product-detail-template .flex-control-thumbs img {
+	box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	filter: none !important;
 }
 
 .muukal-product-detail-template .goods-color-box.is-text-swatches .ip-cspan {
