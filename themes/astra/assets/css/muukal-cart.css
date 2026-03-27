@@ -319,36 +319,36 @@
 .muukal-cart-update-button,
 .muukal-cart-summary__coupon-button {
 	min-height: 46px;
-	padding: 0 22px;
-	border: 1px solid #d2d2d2;
+	padding: 0 28px;
+	border: 1px solid #999999;
 	border-radius: 0;
-	background: #fff;
-	color: #999999;
+	background: #999999;
+	color: #fff;
 	font-size: 14px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
 }
 
 .woocommerce-cart .muukal-cart-summary__coupon-button.button {
-	border-color: #d2d2d2 !important;
-	background: #fff !important;
-	color: #999999 !important;
+	border-color: #999999 !important;
+	background: #999999 !important;
+	color: #fff !important;
 }
 
 .muukal-cart-update-button:hover,
 .muukal-cart-update-button:focus,
 .muukal-cart-summary__coupon-button:hover,
 .muukal-cart-summary__coupon-button:focus {
-	background: #fff;
+	background: #000;
 	border-color: #000;
-	color: #000;
+	color: #fff;
 }
 
 .woocommerce-cart .muukal-cart-summary__coupon-button.button:hover,
 .woocommerce-cart .muukal-cart-summary__coupon-button.button:focus {
-	background: #fff !important;
+	background: #000 !important;
 	border-color: #000 !important;
-	color: #000 !important;
+	color: #fff !important;
 }
 
 .muukal-cart-sidebar {
@@ -477,7 +477,7 @@
 .muukal-cart-summary__coupon {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
-	gap: 10px;
+	gap: 0;
 	margin-top: 18px;
 }
 
@@ -486,9 +486,10 @@
 	min-height: 46px;
 	margin: 0;
 	padding: 0 14px;
-	border: 1px solid #d9cdc4;
+	border: 1px solid #e4e4e4;
 	border-radius: 0;
 	background: #fff;
+	color: #666;
 }
 
 .muukal-cart-summary__coupon .input-text:focus {
@@ -507,13 +508,13 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	padding: 12px 14px;
+	padding: 0 0 0 14px;
 	border: 1px solid #e4e4e4;
 	background: #fff;
 }
 
 .muukal-cart-summary__promo-copy {
-	color: #999999;
+	color: #222;
 	font-size: 14px;
 	font-weight: 500;
 	line-height: 1.45;
@@ -523,12 +524,13 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 56px;
-	min-height: 34px;
+	flex: 0 0 64px;
+	min-width: 64px;
+	min-height: 42px;
 	padding: 0 14px;
-	background: #fff;
-	border: 1px solid #d2d2d2;
-	color: #999999;
+	background: #999999;
+	border-left: 1px solid #999999;
+	color: #fff;
 	font-size: 13px;
 	font-weight: 700;
 	letter-spacing: 0.04em;
@@ -537,9 +539,9 @@
 
 .muukal-cart-summary__promo-action:hover,
 .muukal-cart-summary__promo-action:focus {
-	background: #fff;
+	background: #000;
 	border-color: #000;
-	color: #000;
+	color: #fff;
 }
 
 .muukal-cart-summary__checkout {
