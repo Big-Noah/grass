@@ -972,22 +972,17 @@
 			});
 		}
 
-		async function simulateSubmit() {
-			if (!validateBeforeSubmit()) {
-				return;
-			}
-			await maybeHandleProgressiveUpgrade();
-			if (!validateBeforeSubmit()) {
-				return;
-			}
-			setStatus('Generating lens payload...');
-			var body = new window.URLSearchParams();
-			body.append('action', 'muukal_lens_replica_build_payload');
-			body.append('nonce', config.nonce);
-			body.append('state', JSON.stringify({
+		function buildSubmissionState() {
+			return {
 				product: {
 					id: schema.product.id,
 					color_id: schema.product.color_id,
+					color_label: schema.product.color_label,
+					describe: schema.product.describe,
+					name: schema.product.name,
+					size: schema.product.size,
+					measurements: schema.product.measurements,
+					image_url: schema.product.image_url,
 					frame_price: schema.product.frame_price
 				},
 				usage: state.usage,
@@ -1003,7 +998,14 @@
 				power: state.power,
 				total: getGrandTotal(),
 				form: state.form
-			}));
+			};
+		}
+
+		async function postSubmissionAction(action) {
+			var body = new window.URLSearchParams();
+			body.append('action', action);
+			body.append('nonce', config.nonce);
+			body.append('state', JSON.stringify(buildSubmissionState()));
 			var response = await window.fetch(config.ajaxUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
@@ -1011,14 +1013,61 @@
 				credentials: 'same-origin'
 			});
 			var result = await response.json();
+
+			return {
+				response: response,
+				result: result
+			};
+		}
+
+		function isSummaryView() {
+			var right = root.querySelector('#lensbox_right');
+			return !!(right && right.classList.contains('col-full'));
+		}
+
+		async function simulateSubmit() {
+			if (!validateBeforeSubmit()) {
+				return;
+			}
+			await maybeHandleProgressiveUpgrade();
+			if (!validateBeforeSubmit()) {
+				return;
+			}
+			setStatus('Generating lens payload...');
+			var submission = await postSubmissionAction('muukal_lens_replica_build_payload');
+			var response = submission.response;
+			var result = submission.result;
 			if (!response.ok || !result.success) {
-				setStatus('Payload generation failed.');
+				setStatus((result && result.data && result.data.message) || 'Payload generation failed.');
 				return;
 			}
 			state.payload = result.data.payload;
 			renderPayload();
 			showSummaryView();
-			setStatus('Lens payload generated.');
+			setStatus('Review your summary, then add the item to cart.');
+		}
+
+		async function addConfiguredItemToCart() {
+			if (!validateBeforeSubmit()) {
+				return;
+			}
+			await maybeHandleProgressiveUpgrade();
+			if (!validateBeforeSubmit()) {
+				return;
+			}
+			setStatus('Adding item to cart...');
+			var submission = await postSubmissionAction('muukal_lens_replica_add_to_cart');
+			var response = submission.response;
+			var result = submission.result;
+			if (!response.ok || !result.success) {
+				setStatus((result && result.data && result.data.message) || 'Unable to add the configured item to cart.');
+				return;
+			}
+			if (result.data && result.data.redirect_url) {
+				window.location.assign(result.data.redirect_url);
+				return;
+			}
+			setStatus('Configured item added to cart.');
 		}
 
 		openButton.addEventListener('click', openOverlay);
@@ -1045,8 +1094,9 @@
 			render();
 		});
 		submitButton.addEventListener('click', function () {
-			simulateSubmit().catch(function () {
-				setStatus('Unexpected error while building payload.');
+			var action = isSummaryView() ? addConfiguredItemToCart : simulateSubmit;
+			action().catch(function () {
+				setStatus('Unexpected error while processing the cart action.');
 			});
 		});
 		editAgain.addEventListener('click', function () {

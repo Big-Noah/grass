@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Lens Replica
  * Description: Standalone Muukal lens-selector replica for testing, with PHP field schema and simulated add-to-cart payload export.
- * Version: 0.2.7
+ * Version: 0.3.0
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_LENS_REPLICA_VERSION', '0.2.7' );
+define( 'MUUKAL_LENS_REPLICA_VERSION', '0.3.0' );
 define( 'MUUKAL_LENS_REPLICA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_LENS_REPLICA_URL', plugin_dir_url( __FILE__ ) );
 
@@ -246,7 +246,7 @@ function muukal_lens_replica_shortcode( $atts = array() ) {
 							</div>
 						</div>
 						<div id="lensbox_right" class="col-12 col-xl-3 animated">
-							<div id="lens_goods_box" class="mt-20 borderd7">
+							<div id="lens_goods_box" class="mt-20">
 								<div class="lens_goods_info">
 									<div id="lens_img_v_box">
 										<?php if ( $image ) : ?>
@@ -255,8 +255,7 @@ function muukal_lens_replica_shortcode( $atts = array() ) {
 											<div id="lens_img_v" aria-hidden="true"><?php echo esc_html( substr( $product['describe'], 0, 1 ) ); ?></div>
 										<?php endif; ?>
 									</div>
-									<div class="mlr-divider"></div>
-									<div class="mt-10 pb-10 ml-10 mr-10">
+									<div class="lens_goods_actions mt-10 pb-10 ml-10 mr-10">
 										<div class="bluelight-btn bluelight-btn-full">
 											<div class="inline-left ml10">
 												<div class="inline-left mt5 mlr-badge-icon">B</div>
@@ -285,15 +284,14 @@ function muukal_lens_replica_shortcode( $atts = array() ) {
 											</div>
 										<?php endif; ?>
 									</div>
-									<div class="mt-10 ml-20 lens-line borderb-d7">
+									<div class="lens_goods_summary mt-10 ml-20 lens-line">
 										<div class="lens_goods_title" id="lens_goods_title"><?php echo esc_html( $product['describe'] ); ?></div>
 									</div>
-									<div class="ml-20 mt-10 lens-line"><span class="lens_lab">Frame Size:</span> <span id="lens_size_v"><?php echo esc_html( $product['size'] ); ?></span>&nbsp;&nbsp;<span id="lens_measurements_v"><?php echo esc_html( $product['measurements'] ); ?></span></div>
-									<div class="ml-20 lens-line"><span class="lens_lab">Frame Color:</span> <span id="lens_color_v"><?php echo esc_html( $product['color_label'] ); ?></span></div>
-									<div class="ml-20 lens-line mr-20"><span class="lens_lab">Frame Price:</span> <span class="mk-price f-right">$<span id="frame_price"><?php echo esc_html( number_format( (float) $product['frame_price'], 2, '.', '' ) ); ?></span></span></div>
-									<div class="ml-20 pb-10 borderb-d7"></div>
+									<div class="lens_goods_meta ml-20 mt-10 lens-line"><span class="lens_lab">Frame Size:</span> <span id="lens_size_v"><?php echo esc_html( $product['size'] ); ?></span>&nbsp;&nbsp;<span id="lens_measurements_v"><?php echo esc_html( $product['measurements'] ); ?></span></div>
+									<div class="lens_goods_meta ml-20 lens-line"><span class="lens_lab">Frame Color:</span> <span id="lens_color_v"><?php echo esc_html( $product['color_label'] ); ?></span></div>
+									<div class="lens_goods_meta ml-20 lens-line mr-20"><span class="lens_lab">Frame Price:</span> <span class="mk-price f-right">$<span id="frame_price"><?php echo esc_html( number_format( (float) $product['frame_price'], 2, '.', '' ) ); ?></span></span></div>
 								</div>
-								<div class="mt-20 ml-20 mr-20">
+								<div class="lens_goods_pricing mt-20 ml-20 mr-20">
 									<div id="lens_deta_info" class="mt-20">
 										<div class="lens-line" id="data_attr_1"><span class="lens_lab">Usage:</span><span id="deta_usage"></span><span class="f-right" id="deta_usage_p"></span></div>
 										<div class="lens-line" id="data_attr_2" style="display:none;"><span class="lens_lab">Lens Prism:</span><span id="deta_lenst_prism">NONE</span><span class="f-right" id="deta_lenst_prism_p"></span></div>
@@ -361,15 +359,67 @@ function muukal_lens_replica_render_schema_page() {
 	echo '</div>';
 }
 
-function muukal_lens_replica_build_payload() {
-	check_ajax_referer( 'muukal_lens_replica_build_payload', 'nonce' );
+function muukal_lens_replica_find_usage_label( $usage_options, $usage_id ) {
+	foreach ( $usage_options as $option ) {
+		if ( (int) $option['id'] === (int) $usage_id ) {
+			return isset( $option['label'] ) ? (string) $option['label'] : '';
+		}
+	}
 
-	$raw_state = isset( $_POST['state'] ) ? wp_unslash( $_POST['state'] ) : '';
-	$state     = json_decode( $raw_state, true );
-	$config    = muukal_lens_replica_get_config();
+	return '';
+}
+
+function muukal_lens_replica_build_cart_summary( $state, $config, $product, $payload ) {
+	$usage_id     = isset( $state['usage'] ) ? (int) $state['usage'] : 0;
+	$lens_type_id = isset( $state['lenstype'] ) ? (int) $state['lenstype'] : 0;
+	$color_id     = isset( $state['lenstype_color'] ) ? (int) $state['lenstype_color'] : 0;
+	$index_id     = isset( $state['lensindex'] ) ? (int) $state['lensindex'] : 0;
+	$coating_id   = isset( $state['coating'] ) ? (int) $state['coating'] : 0;
+	$form         = isset( $state['form'] ) && is_array( $state['form'] ) ? $state['form'] : array();
+	$lens_type    = isset( $config['lens_types'][ $lens_type_id ] ) ? $config['lens_types'][ $lens_type_id ] : null;
+	$lens_color   = isset( $config['lens_colors'][ $color_id ] ) ? $config['lens_colors'][ $color_id ] : null;
+	$lens_index   = isset( $config['lens_indices'][ $index_id ] ) ? $config['lens_indices'][ $index_id ] : null;
+	$coating      = isset( $config['coatings'][ $coating_id ] ) ? $config['coatings'][ $coating_id ] : null;
+	$lens_type_label = $lens_type ? (string) $lens_type['label'] : '';
+
+	if ( $lens_type_label && $lens_color && ! empty( $lens_color['label'] ) ) {
+		$lens_type_label .= ' / ' . (string) $lens_color['label'];
+	}
+
+	$summary = array(
+		'Frame Color'    => isset( $product['color_label'] ) ? sanitize_text_field( (string) $product['color_label'] ) : '',
+		'Frame Size'     => trim( implode( ' ', array_filter( array( isset( $product['size'] ) ? sanitize_text_field( (string) $product['size'] ) : '', isset( $product['measurements'] ) ? sanitize_text_field( (string) $product['measurements'] ) : '' ) ) ) ),
+		'Usage'          => muukal_lens_replica_find_usage_label( $config['usage_options'], $usage_id ),
+		'Lens Type'      => $lens_type_label,
+		'Lens Thickness' => $lens_index && ! empty( $lens_index['label'] ) ? (string) $lens_index['label'] : '',
+		'Coating'        => $coating && ! empty( $coating['label'] ) ? (string) $coating['label'] : '',
+		'Blue Light'     => ! empty( $state['bluelight'] ) ? 'Yes' : 'No',
+	);
+
+	if ( ! empty( $form['rx_name'] ) ) {
+		$summary['Prescription'] = sanitize_text_field( (string) $form['rx_name'] );
+	}
+
+	if ( isset( $state['readers'] ) && 1 === (int) $state['readers'] && ! empty( $state['power'] ) ) {
+		$summary['Reader Power'] = sanitize_text_field( (string) $state['power'] );
+	}
+
+	$summary['Lens Total'] = wc_price( max( 0, (float) $payload['cartprice'] - (float) $product['frame_price'] ) );
+
+	return array_filter(
+		$summary,
+		static function ( $value ) {
+			return '' !== trim( wp_strip_all_tags( (string) $value ) );
+		}
+	);
+}
+
+function muukal_lens_replica_prepare_submission( $raw_state ) {
+	$state  = is_array( $raw_state ) ? $raw_state : json_decode( (string) $raw_state, true );
+	$config = muukal_lens_replica_get_config();
 
 	if ( ! is_array( $state ) ) {
-		wp_send_json_error( array( 'message' => 'Invalid state payload.' ), 400 );
+		return new WP_Error( 'invalid_state', 'Invalid state payload.' );
 	}
 
 	$product = $config['product'];
@@ -386,6 +436,30 @@ function muukal_lens_replica_build_payload() {
 
 		if ( isset( $state['product']['frame_price'] ) ) {
 			$product['frame_price'] = (float) $state['product']['frame_price'];
+		}
+
+		if ( isset( $state['product']['describe'] ) ) {
+			$product['describe'] = sanitize_text_field( (string) $state['product']['describe'] );
+		}
+
+		if ( isset( $state['product']['name'] ) ) {
+			$product['name'] = sanitize_text_field( (string) $state['product']['name'] );
+		}
+
+		if ( isset( $state['product']['color_label'] ) ) {
+			$product['color_label'] = sanitize_text_field( (string) $state['product']['color_label'] );
+		}
+
+		if ( isset( $state['product']['size'] ) ) {
+			$product['size'] = sanitize_text_field( (string) $state['product']['size'] );
+		}
+
+		if ( isset( $state['product']['measurements'] ) ) {
+			$product['measurements'] = sanitize_text_field( (string) $state['product']['measurements'] );
+		}
+
+		if ( isset( $state['product']['image_url'] ) ) {
+			$product['image_url'] = esc_url_raw( (string) $state['product']['image_url'] );
 		}
 	}
 
@@ -425,7 +499,7 @@ function muukal_lens_replica_build_payload() {
 		'od_prismdir_h'  => isset( $form['od_prismdir_h'] ) ? (string) $form['od_prismdir_h'] : '0',
 		'os_prismdir_h'  => isset( $form['os_prismdir_h'] ) ? (string) $form['os_prismdir_h'] : '0',
 		'lens_comment'   => isset( $form['lens_comment'] ) ? sanitize_textarea_field( $form['lens_comment'] ) : '',
-		'rx_name'        => isset( $form['rx_name'] ) ? sanitize_text_field( $form['rx_name'] ) : '',
+		'rx_name'        => isset( $form['rx_name'] ) ? sanitize_text_field( (string) $form['rx_name'] ) : '',
 		'bluelight'      => ! empty( $state['bluelight'] ) ? 1 : 0,
 		'editlens'       => 0,
 		'cartid'         => '',
@@ -435,11 +509,32 @@ function muukal_lens_replica_build_payload() {
 		'power'          => isset( $state['power'] ) ? (string) $state['power'] : '0',
 	);
 
+	return array(
+		'state'   => $state,
+		'config'  => $config,
+		'product' => $product,
+		'form'    => $form,
+		'payload' => $payload,
+		'summary' => muukal_lens_replica_build_cart_summary( $state, $config, $product, $payload ),
+	);
+}
+
+function muukal_lens_replica_build_payload() {
+	check_ajax_referer( 'muukal_lens_replica_build_payload', 'nonce' );
+
+	$raw_state = isset( $_POST['state'] ) ? wp_unslash( $_POST['state'] ) : '';
+	$prepared  = muukal_lens_replica_prepare_submission( $raw_state );
+
+	if ( is_wp_error( $prepared ) ) {
+		wp_send_json_error( array( 'message' => $prepared->get_error_message() ), 400 );
+	}
+
 	wp_send_json_success(
 		array(
 			'message'        => 'Lens payload generated.',
-			'payload'        => $payload,
-			'payload_fields' => $config['payload_fields'],
+			'payload'        => $prepared['payload'],
+			'summary'        => $prepared['summary'],
+			'payload_fields' => $prepared['config']['payload_fields'],
 			'response_mock'  => array(
 				'code'    => 1,
 				'info'    => 'Simulated success',
@@ -450,3 +545,121 @@ function muukal_lens_replica_build_payload() {
 }
 add_action( 'wp_ajax_muukal_lens_replica_build_payload', 'muukal_lens_replica_build_payload' );
 add_action( 'wp_ajax_nopriv_muukal_lens_replica_build_payload', 'muukal_lens_replica_build_payload' );
+
+function muukal_lens_replica_add_to_cart() {
+	check_ajax_referer( 'muukal_lens_replica_build_payload', 'nonce' );
+
+	if ( ! function_exists( 'WC' ) || ! function_exists( 'wc_get_cart_url' ) ) {
+		wp_send_json_error( array( 'message' => 'WooCommerce cart is not available.' ), 500 );
+	}
+
+	$raw_state = isset( $_POST['state'] ) ? wp_unslash( $_POST['state'] ) : '';
+	$prepared  = muukal_lens_replica_prepare_submission( $raw_state );
+
+	if ( is_wp_error( $prepared ) ) {
+		wp_send_json_error( array( 'message' => $prepared->get_error_message() ), 400 );
+	}
+
+	$product_id = isset( $prepared['payload']['goodsid'] ) ? (int) $prepared['payload']['goodsid'] : 0;
+	$product    = function_exists( 'wc_get_product' ) ? wc_get_product( $product_id ) : null;
+
+	if ( ! $product_id || ! $product instanceof WC_Product ) {
+		wp_send_json_error( array( 'message' => 'Product is not available.' ), 404 );
+	}
+
+	if ( ! $product->is_purchasable() ) {
+		wp_send_json_error( array( 'message' => 'This product cannot be purchased right now.' ), 400 );
+	}
+
+	if ( function_exists( 'wc_load_cart' ) ) {
+		wc_load_cart();
+	}
+
+	if ( ! WC()->cart ) {
+		wp_send_json_error( array( 'message' => 'Cart session could not be initialized.' ), 500 );
+	}
+
+	if ( WC()->session && method_exists( WC()->session, 'set_customer_session_cookie' ) ) {
+		WC()->session->set_customer_session_cookie( true );
+	}
+
+	$cart_item_data = array(
+		'muukal_lens_replica'      => array(
+			'payload'     => $prepared['payload'],
+			'summary'     => $prepared['summary'],
+			'cartprice'   => (float) $prepared['payload']['cartprice'],
+			'frame_price' => (float) $prepared['product']['frame_price'],
+		),
+		'muukal_lens_replica_key'  => wp_generate_uuid4(),
+	);
+
+	$cart_item_key = WC()->cart->add_to_cart( $product_id, 1, 0, array(), $cart_item_data );
+
+	if ( ! $cart_item_key ) {
+		wp_send_json_error( array( 'message' => 'Unable to add the configured item to cart.' ), 500 );
+	}
+
+	wp_send_json_success(
+		array(
+			'message'       => 'Configured item added to cart.',
+			'cart_item_key' => $cart_item_key,
+			'redirect_url'  => wc_get_cart_url(),
+		)
+	);
+}
+add_action( 'wp_ajax_muukal_lens_replica_add_to_cart', 'muukal_lens_replica_add_to_cart' );
+add_action( 'wp_ajax_nopriv_muukal_lens_replica_add_to_cart', 'muukal_lens_replica_add_to_cart' );
+
+function muukal_lens_replica_apply_cart_item_price( $cart ) {
+	if ( ! $cart instanceof WC_Cart ) {
+		return;
+	}
+
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
+
+	foreach ( $cart->get_cart() as $cart_item ) {
+		if ( empty( $cart_item['muukal_lens_replica']['cartprice'] ) || empty( $cart_item['data'] ) || ! is_object( $cart_item['data'] ) ) {
+			continue;
+		}
+
+		$cart_item['data']->set_price( (float) $cart_item['muukal_lens_replica']['cartprice'] );
+	}
+}
+add_action( 'woocommerce_before_calculate_totals', 'muukal_lens_replica_apply_cart_item_price' );
+
+function muukal_lens_replica_render_cart_item_data( $item_data, $cart_item ) {
+	if ( empty( $cart_item['muukal_lens_replica']['summary'] ) || ! is_array( $cart_item['muukal_lens_replica']['summary'] ) ) {
+		return $item_data;
+	}
+
+	foreach ( $cart_item['muukal_lens_replica']['summary'] as $label => $value ) {
+		$item_data[] = array(
+			'name'    => wc_clean( (string) $label ),
+			'value'   => wp_kses_post( (string) $value ),
+			'display' => wp_kses_post( (string) $value ),
+		);
+	}
+
+	return $item_data;
+}
+add_filter( 'woocommerce_get_item_data', 'muukal_lens_replica_render_cart_item_data', 10, 2 );
+
+function muukal_lens_replica_add_order_item_meta( $item, $cart_item_key, $values, $order ) {
+	if ( empty( $values['muukal_lens_replica'] ) || ! is_array( $values['muukal_lens_replica'] ) ) {
+		return;
+	}
+
+	$summary = isset( $values['muukal_lens_replica']['summary'] ) && is_array( $values['muukal_lens_replica']['summary'] ) ? $values['muukal_lens_replica']['summary'] : array();
+	$payload = isset( $values['muukal_lens_replica']['payload'] ) && is_array( $values['muukal_lens_replica']['payload'] ) ? $values['muukal_lens_replica']['payload'] : array();
+
+	foreach ( $summary as $label => $value ) {
+		$item->add_meta_data( wc_clean( (string) $label ), wp_kses_post( (string) $value ), true );
+	}
+
+	if ( ! empty( $payload ) ) {
+		$item->add_meta_data( '_muukal_lens_payload', wp_json_encode( $payload ), true );
+	}
+}
+add_action( 'woocommerce_checkout_create_order_line_item', 'muukal_lens_replica_add_order_item_meta', 10, 4 );

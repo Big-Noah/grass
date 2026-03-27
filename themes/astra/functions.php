@@ -212,3 +212,36 @@ require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-loop-item-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-loop-item-price-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-filter-archive-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-detail-template-shortcode.php';
+
+/**
+ * Enqueue the Muukal-inspired cart styling on the classic WooCommerce cart page.
+ */
+function muukal_astra_enqueue_cart_assets() {
+	if ( ! function_exists( 'is_cart' ) || ! is_cart() ) {
+		return;
+	}
+
+	$relative_path = 'assets/css/muukal-cart.css';
+	$absolute_path = ASTRA_THEME_DIR . $relative_path;
+	$version       = file_exists( $absolute_path ) ? (string) filemtime( $absolute_path ) : ASTRA_THEME_VERSION;
+
+	wp_enqueue_style(
+		'astra-muukal-cart',
+		ASTRA_THEME_URI . $relative_path,
+		array(),
+		$version
+	);
+}
+add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_cart_assets', 40 );
+
+/**
+ * Render PayPal express buttons in a dedicated hook so the custom cart summary
+ * can place them below the main checkout CTA.
+ *
+ * @param string $hook Default PayPal hook location.
+ * @return string
+ */
+function muukal_astra_paypal_cart_button_hook( $hook ) {
+	return 'muukal_astra_cart_paypal_buttons';
+}
+add_filter( 'woocommerce_paypal_payments_proceed_to_checkout_button_renderer_hook', 'muukal_astra_paypal_cart_button_hook' );
