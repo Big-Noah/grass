@@ -8,27 +8,33 @@
 
 .muukal-loop-item-price .pro-price {
 	gap: 8px;
-	font-size: 17px;
+	font-size: 15px;
 	line-height: 1.1;
 }
 
-.muukal-loop-item-price .o_price {
-	font-size: 12px;
+.muukal-loop-item-price .o_price,
+.muukal-loop-item-price .o_price .amount,
+.muukal-loop-item-price .o_price .woocommerce-Price-currencySymbol {
+	font-size: 11px;
 }
 
-.muukal-loop-item-price .g-price {
+.muukal-loop-item-price .g-price,
+.muukal-loop-item-price .g-price .amount,
+.muukal-loop-item-price .g-price .woocommerce-Price-currencySymbol {
 	color: #d92d20;
-	font-size: 20px;
+	font-size: 17px;
 	font-weight: 600;
 	letter-spacing: -0.02em;
 }
 
 @media (max-width: 767px) {
 	.muukal-loop-item-price .pro-price {
-		font-size: 16px;
+		font-size: 14px;
 	}
 
-	.muukal-loop-item-price .g-price {
-		font-size: 18px;
+	.muukal-loop-item-price .g-price,
+	.muukal-loop-item-price .g-price .amount,
+	.muukal-loop-item-price .g-price .woocommerce-Price-currencySymbol {
+		font-size: 16px;
 	}
 }

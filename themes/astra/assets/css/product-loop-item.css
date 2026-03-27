@@ -32,21 +32,21 @@
 	background:
 		radial-gradient(circle at top, rgba(244, 247, 251, 0.92), rgba(255, 255, 255, 0) 48%),
 		#fff;
-	aspect-ratio: 2 / 1;
+	aspect-ratio: 1.7 / 1;
 }
 
 .muukal-loop-item .muukal-product-image,
 .muukal-loop-item .fir_pimg,
 .muukal-loop-item .sec_pimg {
 	position: absolute;
-	inset: 6px 8px 0;
+	inset: 0;
 	display: block;
-	width: calc(100% - 16px);
-	height: calc(100% - 6px);
+	width: 100%;
+	height: 100%;
 	max-width: none;
 	object-fit: contain !important;
 	object-position: center center !important;
-	transform: scale(1.06);
+	transform: scale(1.22);
 	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
@@ -65,13 +65,13 @@
 .muukal-loop-item .product-wrapper:hover .muukal-product-image-primary,
 .muukal-loop-item .product-wrapper:hover .fir_pimg {
 	opacity: 0;
-	transform: scale(1.1);
+	transform: scale(1.26);
 }
 
 .muukal-loop-item .product-wrapper:hover .muukal-product-image-secondary,
 .muukal-loop-item .product-wrapper:hover .sec_pimg {
 	opacity: 1;
-	transform: scale(1.1);
+	transform: scale(1.26);
 }
 
 .muukal-loop-item .muukal-card-wishlist {
@@ -311,6 +311,16 @@
 }
 
 @media (max-width: 767px) {
+	.muukal-loop-item .product-img {
+		aspect-ratio: 1.55 / 1;
+	}
+
+	.muukal-loop-item .muukal-product-image,
+	.muukal-loop-item .fir_pimg,
+	.muukal-loop-item .sec_pimg {
+		transform: scale(1.14);
+	}
+
 	.muukal-loop-item .product-content {
 		padding: 12px;
 	}
