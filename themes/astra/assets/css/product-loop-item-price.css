@@ -8,27 +8,27 @@
 
 .muukal-loop-item-price .pro-price {
 	gap: 8px;
-	font-size: 22px;
+	font-size: 17px;
 	line-height: 1.1;
 }
 
 .muukal-loop-item-price .o_price {
-	font-size: 14px;
+	font-size: 12px;
 }
 
 .muukal-loop-item-price .g-price {
 	color: #d92d20;
-	font-size: 28px;
-	font-weight: 700;
+	font-size: 20px;
+	font-weight: 600;
 	letter-spacing: -0.02em;
 }
 
 @media (max-width: 767px) {
 	.muukal-loop-item-price .pro-price {
-		font-size: 20px;
+		font-size: 16px;
 	}
 
 	.muukal-loop-item-price .g-price {
-		font-size: 24px;
+		font-size: 18px;
 	}
 }
