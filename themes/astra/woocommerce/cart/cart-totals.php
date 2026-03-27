@@ -100,10 +100,6 @@ $card_url       = '#';
 				</a>
 			</div>
 
-			<div class="muukal-cart-summary__paypal-fallback">
-				<img src="<?php echo esc_url( $payments_image ); ?>" alt="<?php esc_attr_e( 'PayPal and accepted payment methods', 'astra' ); ?>">
-			</div>
-
 			<ul class="muukal-cart-summary__benefits">
 				<li><?php esc_html_e( 'Free standard shipping on orders over $65.00', 'astra' ); ?></li>
 				<li><?php esc_html_e( '100% Money Back Guaranteed', 'astra' ); ?></li>
