@@ -65,7 +65,7 @@
 .muukal-header__utilities {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .muukal-header__utilities--top {
@@ -80,6 +80,17 @@
   height: 20px;
   line-height: 1;
   position: relative;
+}
+
+.muukal-header__action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  color: inherit;
+  text-decoration: none;
 }
 
 .muukal-header__main {
@@ -342,7 +353,8 @@
 }
 
 .muukal-header__search-icon,
-.muukal-header__hamburger {
+.muukal-header__hamburger,
+.muukal-header__action-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -351,24 +363,25 @@
   line-height: 1;
 }
 
-.muukal-header__hamburger {
+.muukal-header__hamburger,
+.muukal-header__action-icon {
   position: relative;
 }
 
 .muukal-header__count-badge {
   position: absolute;
-  top: -9px;
-  right: -11px;
+  top: -8px;
+  right: -10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   border-radius: 999px;
   background: #ff565c;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 2px 8px rgba(255, 86, 92, 0.25);
@@ -389,7 +402,8 @@
 }
 
 .muukal-header__utility-icon svg,
-.muukal-header__hamburger svg {
+.muukal-header__hamburger svg,
+.muukal-header__action-icon svg {
   width: 18px;
   height: 18px;
 }
@@ -543,7 +557,8 @@
   }
 
   .muukal-header__search-toggle,
-  .muukal-header__hamburger {
+  .muukal-header__hamburger,
+  .muukal-header__action-icon {
     display: none;
   }
 
