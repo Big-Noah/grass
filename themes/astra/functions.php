@@ -253,11 +253,17 @@ add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_account_assets', 40 );
  * @return string
  */
 function muukal_astra_locate_account_form_template( $template, $template_name ) {
-	if ( 'myaccount/form-login.php' !== $template_name ) {
+	$custom_templates = array(
+		'myaccount/form-login.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/form-login.php',
+		'myaccount/my-account.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/my-account.php',
+		'myaccount/navigation.php' => ASTRA_THEME_DIR . 'woocommerce/myaccount/navigation.php',
+	);
+
+	if ( ! isset( $custom_templates[ $template_name ] ) ) {
 		return $template;
 	}
 
-	$custom_template = ASTRA_THEME_DIR . 'woocommerce/myaccount/form-login.php';
+	$custom_template = $custom_templates[ $template_name ];
 
 	return file_exists( $custom_template ) ? $custom_template : $template;
 }
@@ -341,6 +347,42 @@ function muukal_astra_render_account_register_note() {
 	<?php
 }
 add_action( 'woocommerce_register_form_end', 'muukal_astra_render_account_register_note', 30 );
+
+/**
+ * Return grouped labels for the account navigation sidebar.
+ *
+ * @return array<string,string>
+ */
+function muukal_astra_account_nav_groups() {
+	return array(
+		'orders'           => __( 'My Order', 'astra' ),
+		'downloads'        => __( 'My Order', 'astra' ),
+		'dashboard'        => __( 'My Account', 'astra' ),
+		'edit-account'     => __( 'My Account', 'astra' ),
+		'edit-address'     => __( 'My Account', 'astra' ),
+		'payment-methods'  => __( 'My Account', 'astra' ),
+		'customer-logout'  => __( 'Sign Out', 'astra' ),
+	);
+}
+
+/**
+ * Get the current account page title.
+ *
+ * @return string
+ */
+function muukal_astra_get_account_content_title() {
+	if ( ! function_exists( 'wc_get_account_menu_items' ) ) {
+		return '';
+	}
+
+	foreach ( wc_get_account_menu_items() as $endpoint => $label ) {
+		if ( wc_is_current_account_menu_item( $endpoint ) ) {
+			return $label;
+		}
+	}
+
+	return __( 'My Account', 'astra' );
+}
 
 /**
  * Output first name and last name fields on the account registration form.
