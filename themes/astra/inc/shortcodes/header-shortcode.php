@@ -26,12 +26,33 @@ function muukal_header_register_assets() {
 	wp_register_script(
 		'muukal-header',
 		ASTRA_THEME_URI . 'assets/js/header.js',
-		array(),
+		array( 'jquery' ),
 		ASTRA_THEME_VERSION,
 		true
 	);
 }
 add_action( 'wp_enqueue_scripts', 'muukal_header_register_assets' );
+
+/**
+ * Return the latest cart count for header badges.
+ *
+ * @return void
+ */
+function muukal_header_cart_count_ajax() {
+	$count = 0;
+
+	if ( function_exists( 'WC' ) && WC()->cart ) {
+		$count = (int) WC()->cart->get_cart_contents_count();
+	}
+
+	wp_send_json_success(
+		array(
+			'count' => $count,
+		)
+	);
+}
+add_action( 'wp_ajax_muukal_header_cart_count', 'muukal_header_cart_count_ajax' );
+add_action( 'wp_ajax_nopriv_muukal_header_cart_count', 'muukal_header_cart_count_ajax' );
 
 /**
  * Render the header shortcode.
@@ -55,6 +76,13 @@ function muukal_header_shortcode( $atts = array() ) {
 
 	wp_enqueue_style( 'muukal-header' );
 	wp_enqueue_script( 'muukal-header' );
+	wp_localize_script(
+		'muukal-header',
+		'muukalHeader',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+		)
+	);
 
 	return muukal_render_header( $atts );
 }

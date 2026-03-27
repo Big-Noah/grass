@@ -79,6 +79,7 @@
   width: 20px;
   height: 20px;
   line-height: 1;
+  position: relative;
 }
 
 .muukal-header__main {
@@ -348,6 +349,33 @@
   width: 20px;
   height: 20px;
   line-height: 1;
+}
+
+.muukal-header__hamburger {
+  position: relative;
+}
+
+.muukal-header__count-badge {
+  position: absolute;
+  top: -9px;
+  right: -11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ff565c;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(255, 86, 92, 0.25);
+}
+
+.muukal-header__count-badge.is-empty {
+  display: none;
 }
 
 .muukal-header svg {

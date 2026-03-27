@@ -10,6 +10,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get current wishlist count.
+ *
+ * @return int
+ */
+function muukal_header_get_wishlist_count() {
+	if ( function_exists( 'muukal_wishlist_get_items' ) ) {
+		return count( muukal_wishlist_get_items() );
+	}
+
+	return 0;
+}
+
+/**
+ * Get current cart count.
+ *
+ * @return int
+ */
+function muukal_header_get_cart_count() {
+	if ( function_exists( 'WC' ) && WC()->cart ) {
+		return (int) WC()->cart->get_cart_contents_count();
+	}
+
+	return 0;
+}
+
+/**
  * Check whether a menu item is inside the Shop By Color column.
  *
  * @param int   $menu_item_id Menu item post ID.
@@ -180,6 +206,8 @@ function muukal_render_header( $args ) {
 
 	$wishlist_url = function_exists( 'muukal_wishlist_get_account_url' ) ? muukal_wishlist_get_account_url() : home_url( '/wishlist/' );
 	$cart_url     = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' );
+	$wishlist_count = muukal_header_get_wishlist_count();
+	$cart_count     = muukal_header_get_cart_count();
 	$logo_id      = get_theme_mod( 'custom_logo' );
 	$logo_markup  = $logo_id ? wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'muukal-header__logo-image' ) ) : '';
 	$promo_icon   = '<span class="muukal-header__promo-icon" aria-hidden="true"></span>';
@@ -200,9 +228,11 @@ function muukal_render_header( $args ) {
 					<a class="muukal-header__utility-link" href="<?php echo esc_url( $account_url ); ?>"><?php echo esc_html( $account_label ); ?></a>
 					<a class="muukal-header__utility-icon" href="<?php echo esc_url( $wishlist_url ); ?>" aria-label="<?php esc_attr_e( 'Wishlist', 'astra' ); ?>">
 						<?php echo $heart_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="muukal-header__count-badge<?php echo $wishlist_count > 0 ? '' : ' is-empty'; ?>" data-muukal-wishlist-count><?php echo esc_html( (string) $wishlist_count ); ?></span>
 					</a>
 					<a class="muukal-header__utility-icon" href="<?php echo esc_url( $cart_url ); ?>" aria-label="<?php esc_attr_e( 'Cart', 'astra' ); ?>">
 						<?php echo $cart_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="muukal-header__count-badge<?php echo $cart_count > 0 ? '' : ' is-empty'; ?>" data-muukal-cart-count><?php echo esc_html( (string) $cart_count ); ?></span>
 					</a>
 				</div>
 			</div>
@@ -247,9 +277,11 @@ function muukal_render_header( $args ) {
 					</button>
 					<a class="muukal-header__hamburger" href="<?php echo esc_url( $wishlist_url ); ?>" aria-label="<?php esc_attr_e( 'Wishlist', 'astra' ); ?>">
 						<?php echo $heart_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="muukal-header__count-badge<?php echo $wishlist_count > 0 ? '' : ' is-empty'; ?>" data-muukal-wishlist-count><?php echo esc_html( (string) $wishlist_count ); ?></span>
 					</a>
 					<a class="muukal-header__hamburger" href="<?php echo esc_url( $cart_url ); ?>" aria-label="<?php esc_attr_e( 'Cart', 'astra' ); ?>">
 						<?php echo $cart_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="muukal-header__count-badge<?php echo $cart_count > 0 ? '' : ' is-empty'; ?>" data-muukal-cart-count><?php echo esc_html( (string) $cart_count ); ?></span>
 					</a>
 					<button class="muukal-header__mobile-toggle" type="button" data-muukal-menu-toggle aria-expanded="false" aria-controls="muukal-header-mobile-menu">
 						<span class="screen-reader-text"><?php echo esc_html( $mobile_label ); ?></span>

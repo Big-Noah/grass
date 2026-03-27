@@ -1,4 +1,62 @@
 (function () {
+  function setCount(nodes, count) {
+    Array.prototype.forEach.call(nodes, function (node) {
+      node.textContent = String(count);
+      node.classList.toggle('is-empty', !count);
+    });
+  }
+
+  function updateWishlistBadges() {
+    var wishlistBadges = document.querySelectorAll('[data-muukal-wishlist-count]');
+    if (!wishlistBadges.length) {
+      return;
+    }
+
+    var count = 0;
+    var wishlistCountNode = document.querySelector('.muukal-wishlist-count[data-muukal-wishlist-count]');
+    if (wishlistCountNode) {
+      count = Number(wishlistCountNode.textContent || 0);
+    } else {
+      Array.prototype.forEach.call(wishlistBadges, function (badge) {
+        count = Math.max(count, Number(badge.textContent || 0));
+      });
+    }
+
+    setCount(wishlistBadges, count);
+  }
+
+  function refreshCartBadges() {
+    var config = window.muukalHeader || null;
+    var badges = document.querySelectorAll('[data-muukal-cart-count]');
+
+    if (!config || !config.ajaxUrl || !badges.length) {
+      return;
+    }
+
+    var body = new URLSearchParams();
+    body.set('action', 'muukal_header_cart_count');
+
+    window.fetch(config.ajaxUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      body: body.toString()
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (payload) {
+        if (!payload || !payload.success || !payload.data) {
+          return;
+        }
+
+        setCount(badges, Number(payload.data.count || 0));
+      })
+      .catch(function () {});
+  }
+
   function togglePanel(button, panel, expanded) {
     button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     panel.hidden = !expanded;
@@ -100,5 +158,18 @@
 
     syncScrollState();
     window.addEventListener('scroll', syncScrollState, { passive: true });
+
+    updateWishlistBadges();
+    refreshCartBadges();
+
+    document.body.addEventListener('click', function () {
+      window.setTimeout(updateWishlistBadges, 150);
+    });
+
+    if (window.jQuery) {
+      window.jQuery(document.body).on('added_to_cart removed_from_cart wc_fragments_refreshed updated_wc_div', function () {
+        refreshCartBadges();
+      });
+    }
   });
 })();
