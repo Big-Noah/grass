@@ -151,14 +151,16 @@
 }
 
 .woocommerce-account .muukal-account-form .show-password-input {
-	top: 48px;
+	top: 50%;
 	right: 14px;
+	transform: translateY(-50%);
 }
 
 .woocommerce-account .woocommerce-form-login .show-password-input,
 .woocommerce-account .woocommerce-form-register .show-password-input {
-	top: 48px;
+	top: 50%;
 	right: 14px;
+	transform: translateY(-50%);
 }
 
 .woocommerce-account .muukal-account-form .woocommerce-form-login__rememberme {
