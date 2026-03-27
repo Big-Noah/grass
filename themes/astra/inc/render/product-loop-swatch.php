@@ -10,15 +10,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Normalize a stored image URL to the original attachment URL when possible.
+ *
+ * @param string $image_url      Current image URL.
+ * @param int    $attachment_id  Optional attachment ID.
+ * @return string
+ */
+function muukal_loop_swatch_normalize_image_url( $image_url, $attachment_id = 0 ) {
+	$image_url = is_string( $image_url ) ? trim( $image_url ) : '';
+
+	if ( '' === $image_url ) {
+		return '';
+	}
+
+	$attachment_id = absint( $attachment_id );
+
+	if ( ! $attachment_id && function_exists( 'attachment_url_to_postid' ) ) {
+		$attachment_id = attachment_url_to_postid( $image_url );
+	}
+
+	if ( $attachment_id ) {
+		$full_url = wp_get_attachment_image_url( $attachment_id, 'full' );
+
+		if ( $full_url ) {
+			return $full_url;
+		}
+	}
+
+	return $image_url;
+}
+
+/**
  * Build a fallback swatch row from the current product.
  *
  * @param WC_Product $product Product object.
  * @return array<string, string>
  */
 function muukal_loop_swatch_build_fallback_row( $product ) {
-	$main_image      = wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' );
+	$main_image      = muukal_loop_swatch_normalize_image_url( wp_get_attachment_image_url( $product->get_image_id(), 'full' ), $product->get_image_id() );
 	$gallery_ids     = $product->get_gallery_image_ids();
-	$secondary_image = ! empty( $gallery_ids[0] ) ? wp_get_attachment_image_url( $gallery_ids[0], 'woocommerce_thumbnail' ) : $main_image;
+	$secondary_image = ! empty( $gallery_ids[0] ) ? muukal_loop_swatch_normalize_image_url( wp_get_attachment_image_url( $gallery_ids[0], 'full' ), $gallery_ids[0] ) : $main_image;
 
 	return array(
 		'color_name'      => '',
@@ -79,8 +110,8 @@ function muukal_loop_swatch_build_row_state( $product, $row, $fallback_row ) {
 	);
 
 	$product_url = get_permalink( $product->get_id() );
-	$main_image  = ! empty( $row['main_image'] ) ? $row['main_image'] : $fallback_row['main_image'];
-	$sec_image   = ! empty( $row['secondary_image'] ) ? $row['secondary_image'] : $main_image;
+	$main_image  = ! empty( $row['main_image'] ) ? muukal_loop_swatch_normalize_image_url( $row['main_image'] ) : $fallback_row['main_image'];
+	$sec_image   = ! empty( $row['secondary_image'] ) ? muukal_loop_swatch_normalize_image_url( $row['secondary_image'] ) : $main_image;
 	$price       = '' !== $row['price'] ? $row['price'] : $fallback_row['price'];
 	$origin      = '' !== $row['original_price'] ? $row['original_price'] : $fallback_row['original_price'];
 	$discount    = 0;
