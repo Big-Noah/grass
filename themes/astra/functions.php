@@ -235,6 +235,24 @@ function muukal_astra_enqueue_account_assets() {
 add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_account_assets', 40 );
 
 /**
+ * Force WooCommerce to use the custom account form template from the theme.
+ *
+ * @param string $template Resolved template path.
+ * @param string $template_name Requested template name.
+ * @return string
+ */
+function muukal_astra_locate_account_form_template( $template, $template_name ) {
+	if ( 'myaccount/form-login.php' !== $template_name ) {
+		return $template;
+	}
+
+	$custom_template = ASTRA_THEME_DIR . 'woocommerce/myaccount/form-login.php';
+
+	return file_exists( $custom_template ) ? $custom_template : $template;
+}
+add_filter( 'woocommerce_locate_template', 'muukal_astra_locate_account_form_template', 20, 2 );
+
+/**
  * Always expose registration on the My Account page.
  *
  * @return string
@@ -253,6 +271,14 @@ function muukal_astra_disable_generated_account_password() {
 	return 'no';
 }
 add_filter( 'pre_option_woocommerce_registration_generate_password', 'muukal_astra_disable_generated_account_password' );
+
+/**
+ * Remove WooCommerce's default privacy text so the custom note can take its place.
+ */
+function muukal_astra_remove_default_register_privacy_text() {
+	remove_action( 'woocommerce_register_form', 'wc_registration_privacy_policy_text', 20 );
+}
+add_action( 'init', 'muukal_astra_remove_default_register_privacy_text' );
 
 /**
  * Output first name and last name fields on the account registration form.
