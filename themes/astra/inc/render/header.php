@@ -215,6 +215,20 @@ function muukal_render_header( $args ) {
 	$account_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.2" r="3.2"></circle><path d="M5 19c1.9-3 4.3-4.5 7-4.5s5.1 1.5 7 4.5"></path></svg>';
 	$heart_icon   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.35-9.18-8.18C.92 9.87 2.08 5.88 5.86 5.2c2.07-.37 3.74.57 4.94 2.01 1.2-1.44 2.87-2.38 4.94-2.01 3.78.68 4.94 4.67 3.04 7.62C18.7 16.65 12 21 12 21z"></path></svg>';
 	$cart_icon    = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.76L21 7H7"></path></svg>';
+	$social_icons = array(
+		array(
+			'label' => 'Facebook',
+			'icon'  => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.36 21v-7.66h2.58l.39-2.98h-2.97V8.46c0-.86.24-1.45 1.47-1.45H16.5V4.34c-.29-.04-1.27-.12-2.42-.12-2.39 0-4.03 1.46-4.03 4.14v2.3H7.34v2.98h2.71V21h3.31z"/></svg>',
+		),
+		array(
+			'label' => 'Instagram',
+			'icon'  => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 3h8.4A4.8 4.8 0 0 1 21 7.8v8.4a4.8 4.8 0 0 1-4.8 4.8H7.8A4.8 4.8 0 0 1 3 16.2V7.8A4.8 4.8 0 0 1 7.8 3zm0 1.8A3 3 0 0 0 4.8 7.8v8.4a3 3 0 0 0 3 3h8.4a3 3 0 0 0 3-3V7.8a3 3 0 0 0-3-3H7.8zm8.85 1.35a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1zM12 7.2A4.8 4.8 0 1 1 7.2 12 4.8 4.8 0 0 1 12 7.2zm0 1.8A3 3 0 1 0 15 12a3 3 0 0 0-3-3z"/></svg>',
+		),
+		array(
+			'label' => 'Pinterest',
+			'icon'  => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.42 3C7.38 3 4 6.25 4 10.59c0 2.66 1.49 5.97 3.88 7.03.36.16.55.09.63-.25.06-.26.38-1.5.49-1.94.04-.17.02-.32-.11-.48-.66-.81-1.19-2.29-1.19-3.67 0-3.54 2.67-6.97 7.22-6.97 3.93 0 6.68 2.68 6.68 5.89 0 4.02-2.03 6.81-4.67 6.81-1.46 0-2.56-1.21-2.21-2.69.42-1.76 1.24-3.66 1.24-4.93 0-1.14-.61-2.1-1.88-2.1-1.49 0-2.68 1.54-2.68 3.61 0 1.32.45 2.22.45 2.22l-1.8 7.62c-.28 1.18-.04 2.75-.01 2.9.02.09.12.12.18.05.09-.11 1.18-1.46 1.54-2.64.1-.34.53-2.05.8-3.12.42.79 1.66 1.46 2.98 1.46 3.92 0 6.75-3.61 6.75-8.09C20.8 6.29 17.31 3 12.42 3z"/></svg>',
+		),
+	);
 
 	ob_start();
 	?>
@@ -227,6 +241,13 @@ function muukal_render_header( $args ) {
 				</a>
 				<div class="muukal-header__utilities muukal-header__utilities--top">
 					<a class="muukal-header__utility-link" href="<?php echo esc_url( $account_url ); ?>"><?php echo esc_html( $account_label ); ?></a>
+					<div class="muukal-header__socials" aria-label="<?php esc_attr_e( 'Social links', 'astra' ); ?>">
+						<?php foreach ( $social_icons as $social_icon ) : ?>
+							<a class="muukal-header__social-link" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( $social_icon['label'] ); ?>">
+								<?php echo $social_icon['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</a>
+						<?php endforeach; ?>
+					</div>
 				</div>
 			</div>
 		</div>

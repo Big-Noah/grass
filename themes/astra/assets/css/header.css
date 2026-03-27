@@ -72,6 +72,38 @@
   font-size: 14px;
 }
 
+.muukal-header__socials {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: 4px;
+}
+
+.muukal-header__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #2d2d2d;
+  text-decoration: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.muukal-header__social-link:hover,
+.muukal-header__social-link:focus {
+  color: var(--muukal-accent);
+  opacity: 1;
+}
+
+.muukal-header__social-link svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  stroke: none;
+}
+
 .muukal-header__utility-icon {
   display: inline-flex;
   align-items: center;
@@ -636,6 +668,10 @@
   }
 
   .muukal-header__utilities--top {
+    display: none;
+  }
+
+  .muukal-header__socials {
     display: none;
   }
 
