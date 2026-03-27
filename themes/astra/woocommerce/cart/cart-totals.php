@@ -12,7 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $payments_image = get_theme_file_uri( 'assets/images/cart/muukal-payments.jpg' );
-$paypal_logo    = get_theme_file_uri( 'assets/images/cart/paypal-logo.png' );
+$paypal_logo    = get_theme_file_uri( 'assets/images/cart/paypal-wordmark.png' );
 $subtotal_html  = WC()->cart ? WC()->cart->get_cart_subtotal() : wc_price( 0 );
 $shipping_total = WC()->cart ? (float) WC()->cart->get_shipping_total() : 0;
 $shipping_label = WC()->cart && WC()->cart->needs_shipping() ? __( 'Standard Shipping(12-21 Days)', 'astra' ) : __( 'Shipping calculated at checkout', 'astra' );
