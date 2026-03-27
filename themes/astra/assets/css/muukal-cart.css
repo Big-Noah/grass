@@ -1,7 +1,5 @@
 .woocommerce-cart .site-content {
-	background:
-		radial-gradient(circle at top right, rgba(255, 92, 92, 0.08), transparent 22rem),
-		linear-gradient(180deg, #fffaf7 0%, #fff 20rem);
+	background: #fff;
 }
 
 .woocommerce-cart .ast-container {
@@ -161,7 +159,7 @@
 	aspect-ratio: 1 / 1;
 	padding: 14px;
 	overflow: hidden;
-	background: linear-gradient(180deg, #fffdfb 0%, #fff7f3 100%);
+	background: #fff;
 }
 
 .muukal-cart-card__media a {
@@ -322,10 +320,10 @@
 .muukal-cart-summary__coupon-button {
 	min-height: 46px;
 	padding: 0 22px;
-	border: 1px solid #bfb5ad;
+	border: 1px solid #d2d2d2;
 	border-radius: 0;
-	background: #8f8b88;
-	color: #fff;
+	background: #fff;
+	color: #999999;
 	font-size: 14px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
@@ -335,9 +333,9 @@
 .muukal-cart-update-button:focus,
 .muukal-cart-summary__coupon-button:hover,
 .muukal-cart-summary__coupon-button:focus {
-	background: #7e7a77;
-	border-color: #7e7a77;
-	color: #fff;
+	background: #fff;
+	border-color: #000;
+	color: #000;
 }
 
 .muukal-cart-sidebar {
@@ -481,7 +479,7 @@
 }
 
 .muukal-cart-summary__coupon .input-text:focus {
-	border-color: #ff5c5c;
+	border-color: #999999;
 	outline: 0;
 }
 
@@ -497,12 +495,12 @@
 	justify-content: space-between;
 	gap: 16px;
 	padding: 12px 14px;
-	border: 1px solid #f0d4d9;
-	background: linear-gradient(180deg, #fff7f8 0%, #fff 100%);
+	border: 1px solid #e4e4e4;
+	background: #fff;
 }
 
 .muukal-cart-summary__promo-copy {
-	color: #3e3834;
+	color: #999999;
 	font-size: 14px;
 	font-weight: 500;
 	line-height: 1.45;
@@ -515,8 +513,9 @@
 	min-width: 56px;
 	min-height: 34px;
 	padding: 0 14px;
-	background: #ff7f90;
-	color: #fff;
+	background: #fff;
+	border: 1px solid #d2d2d2;
+	color: #999999;
 	font-size: 13px;
 	font-weight: 700;
 	letter-spacing: 0.04em;
@@ -525,8 +524,9 @@
 
 .muukal-cart-summary__promo-action:hover,
 .muukal-cart-summary__promo-action:focus {
-	background: #ff6d81;
-	color: #fff;
+	background: #fff;
+	border-color: #000;
+	color: #000;
 }
 
 .muukal-cart-summary__checkout {
