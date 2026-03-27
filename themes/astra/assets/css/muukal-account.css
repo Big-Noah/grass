@@ -330,6 +330,178 @@
 	width: auto;
 }
 
+.woocommerce-account.logged-in .entry-content > .woocommerce {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	gap: 44px;
+	align-items: start;
+	max-width: 1280px;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation {
+	margin: 0;
+	padding: 6px 28px 0 0;
+	border-right: 1px solid #e7e7e7;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation .muukal-account-nav-group {
+	margin: 0 0 10px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #ff7f90;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation .muukal-account-nav-group:not(:first-child) {
+	margin-top: 24px;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation a {
+	display: block;
+	padding: 6px 0;
+	font-size: 1rem;
+	font-weight: 400;
+	color: #111;
+	text-decoration: none;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation a:hover,
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation .is-active a {
+	color: #ff7f90;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content {
+	min-height: 480px;
+	padding: 0 0 0 10px;
+}
+
+.woocommerce-account.logged-in .muukal-account-content-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 28px;
+	font-size: 2rem;
+	font-weight: 400;
+	line-height: 1.05;
+	letter-spacing: -0.03em;
+	color: #111;
+	text-transform: uppercase;
+}
+
+.woocommerce-account.logged-in .muukal-account-content-title::before {
+	content: "";
+	width: 4px;
+	height: 26px;
+	background: #ff7f90;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content h2:not(.muukal-account-content-title),
+.woocommerce-account.logged-in .woocommerce-MyAccount-content h3 {
+	color: #111;
+	font-size: 1.35rem;
+	font-weight: 500;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content p,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content li,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content td,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content th,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content address {
+	color: #333;
+	font-size: 0.98rem;
+	line-height: 1.7;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content table {
+	border: 1px solid #ece6e8;
+	border-collapse: collapse;
+	background: #fff;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content table th,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content table td {
+	border: 1px solid #ece6e8;
+	padding: 14px 16px;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content table th {
+	background: #fff7f8;
+	color: #111;
+	font-weight: 500;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content .button,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content .woocommerce-Button,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content button {
+	min-height: 44px;
+	padding: 12px 20px;
+	border: 1px solid #ff7f90 !important;
+	border-radius: 0 !important;
+	background: #ff8c99 !important;
+	color: #fff !important;
+	box-shadow: none !important;
+	font-size: 0.92rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content .button:hover,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content .woocommerce-Button:hover,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content button:hover {
+	background: #ff7d8d !important;
+	color: #fff !important;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content input[type='text'],
+.woocommerce-account.logged-in .woocommerce-MyAccount-content input[type='email'],
+.woocommerce-account.logged-in .woocommerce-MyAccount-content input[type='password'],
+.woocommerce-account.logged-in .woocommerce-MyAccount-content input[type='tel'],
+.woocommerce-account.logged-in .woocommerce-MyAccount-content select,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content textarea {
+	min-height: 46px;
+	padding: 0 14px;
+	border: 1px solid #cfd7e0;
+	border-radius: 0;
+	background: #fff;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-content textarea {
+	min-height: 140px;
+	padding-top: 12px;
+}
+
+@media (max-width: 921px) {
+	.woocommerce-account.logged-in .entry-content > .woocommerce {
+		grid-template-columns: 1fr;
+		gap: 28px;
+	}
+
+	.woocommerce-account.logged-in .woocommerce-MyAccount-navigation {
+		padding-right: 0;
+		padding-bottom: 22px;
+		border-right: 0;
+		border-bottom: 1px solid #e7e7e7;
+	}
+
+	.woocommerce-account.logged-in .woocommerce-MyAccount-content {
+		padding-left: 0;
+	}
+}
+
 @media (max-width: 921px) {
 	.woocommerce-account #customer_login {
 		grid-template-columns: 1fr;
