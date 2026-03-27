@@ -329,10 +329,23 @@
 	letter-spacing: 0.01em;
 }
 
+.muukal-cart-summary__coupon-button.button {
+	border-color: #d2d2d2;
+	background: #fff;
+	color: #999999;
+}
+
 .muukal-cart-update-button:hover,
 .muukal-cart-update-button:focus,
 .muukal-cart-summary__coupon-button:hover,
 .muukal-cart-summary__coupon-button:focus {
+	background: #fff;
+	border-color: #000;
+	color: #000;
+}
+
+.muukal-cart-summary__coupon-button.button:hover,
+.muukal-cart-summary__coupon-button.button:focus {
 	background: #fff;
 	border-color: #000;
 	color: #000;
