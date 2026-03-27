@@ -3,6 +3,12 @@
 	padding-bottom: 56px;
 }
 
+.woocommerce-account .ast-container {
+	max-width: 100%;
+	padding-left: 0;
+	padding-right: 0;
+}
+
 .woocommerce-account .entry-header {
 	display: none;
 }
@@ -330,13 +336,18 @@
 	width: auto;
 }
 
-.woocommerce-account.logged-in .entry-content > .woocommerce,
+.woocommerce-account.logged-in .entry-content > .woocommerce {
+	width: 85%;
+	max-width: none;
+	margin: 0 auto;
+}
+
 .woocommerce-account.logged-in .muukal-account-dashboard {
 	display: grid;
 	grid-template-columns: 240px minmax(0, 1fr);
 	gap: 34px;
 	align-items: start;
-	width: 85%;
+	width: 100%;
 	max-width: none;
 }
 
@@ -503,7 +514,10 @@
 }
 
 @media (max-width: 921px) {
-	.woocommerce-account.logged-in .entry-content > .woocommerce,
+	.woocommerce-account.logged-in .entry-content > .woocommerce {
+		width: calc(100% - 32px);
+	}
+
 	.woocommerce-account.logged-in .muukal-account-dashboard {
 		grid-template-columns: 1fr;
 		gap: 28px;
