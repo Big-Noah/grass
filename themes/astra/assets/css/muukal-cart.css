@@ -341,8 +341,7 @@
 }
 
 .muukal-cart-sidebar {
-	position: sticky;
-	top: 24px;
+	position: static;
 }
 
 .muukal-cart-totals {
