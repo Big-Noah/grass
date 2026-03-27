@@ -1,0 +1,201 @@
+.woocommerce-account .site-main {
+	padding-top: 28px;
+	padding-bottom: 56px;
+}
+
+.woocommerce-account .entry-header {
+	display: none;
+}
+
+.woocommerce-account .entry-content > .woocommerce {
+	max-width: 1180px;
+	margin: 0 auto;
+}
+
+.woocommerce-account .muukal-account-shell {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 56px;
+	align-items: start;
+}
+
+.woocommerce-account .muukal-account-panel {
+	min-width: 0;
+}
+
+.woocommerce-account .muukal-account-panel--register {
+	padding-left: 56px;
+	border-left: 1px solid #e4e4e4;
+}
+
+.woocommerce-account .muukal-account-title {
+	margin: 0 0 28px;
+	font-size: 2.75rem;
+	font-weight: 400;
+	line-height: 1.05;
+	color: #111;
+	letter-spacing: -0.03em;
+}
+
+.woocommerce-account .muukal-account-form {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+.woocommerce-account .muukal-account-form .form-row {
+	margin-bottom: 24px;
+}
+
+.woocommerce-account .muukal-account-form label {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 15px;
+	font-weight: 400;
+	color: #6a6f76;
+}
+
+.woocommerce-account .muukal-account-form .required {
+	color: inherit;
+}
+
+.woocommerce-account .muukal-account-form .input-text {
+	height: 46px;
+	padding: 0 14px;
+	border: 1px solid #cfd7e0;
+	border-radius: 0;
+	background: #fff;
+	font-size: 15px;
+	color: #1f2933;
+}
+
+.woocommerce-account .muukal-account-form .input-text::placeholder {
+	color: #8d96a0;
+}
+
+.woocommerce-account .muukal-account-form .input-text:focus {
+	border-color: #f88996;
+	outline: none;
+}
+
+.woocommerce-account .muukal-account-form .show-password-input {
+	top: 48px;
+	right: 14px;
+}
+
+.woocommerce-account .muukal-account-form .woocommerce-form-login__rememberme {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 15px;
+	color: #5f6670;
+}
+
+.woocommerce-account .muukal-account-form input[type='checkbox'] {
+	width: 18px;
+	height: 18px;
+	accent-color: #ff7f90;
+}
+
+.woocommerce-account .muukal-account-actions {
+	margin-top: 34px;
+}
+
+.woocommerce-account .muukal-account-form button.button,
+.woocommerce-account .muukal-account-form .button {
+	width: 100%;
+	min-height: 48px;
+	padding: 13px 18px;
+	border: 1px solid #ff7f90;
+	border-radius: 0;
+	box-shadow: none;
+	font-size: 15px;
+	font-weight: 500;
+	line-height: 1.2;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.woocommerce-account .muukal-account-form .woocommerce-form-login__submit {
+	background: #ff8c99;
+	color: #fff;
+}
+
+.woocommerce-account .muukal-account-form .woocommerce-form-login__submit:hover,
+.woocommerce-account .muukal-account-form .woocommerce-form-login__submit:focus {
+	background: #ff7d8d;
+	color: #fff;
+}
+
+.woocommerce-account .muukal-account-form .woocommerce-form-register__submit {
+	background: #fff;
+	color: #ff5a67;
+}
+
+.woocommerce-account .muukal-account-form .woocommerce-form-register__submit:hover,
+.woocommerce-account .muukal-account-form .woocommerce-form-register__submit:focus {
+	background: #fff5f7;
+	color: #ff4655;
+}
+
+.woocommerce-account .muukal-account-form .lost_password {
+	margin: 18px 0 0;
+	text-align: center;
+}
+
+.woocommerce-account .muukal-account-form .lost_password a {
+	font-size: 14px;
+	color: #111;
+	text-decoration: underline;
+}
+
+.woocommerce-account .muukal-account-register-note,
+.woocommerce-account .muukal-account-register-subnote {
+	margin: 18px 0 0;
+	font-size: 13px;
+	line-height: 1.75;
+	text-align: center;
+	color: #808792;
+}
+
+.woocommerce-account .muukal-account-register-subnote {
+	margin-top: 4px;
+}
+
+.woocommerce-account .muukal-account-register-note a,
+.woocommerce-account .muukal-account-register-subnote a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.woocommerce-account .woocommerce-error,
+.woocommerce-account .woocommerce-info,
+.woocommerce-account .woocommerce-message {
+	max-width: 1180px;
+	margin: 0 auto 24px;
+}
+
+.woocommerce-account.logged-in .woocommerce-MyAccount-navigation,
+.woocommerce-account.logged-in .woocommerce-MyAccount-content {
+	float: none;
+	width: auto;
+}
+
+@media (max-width: 921px) {
+	.woocommerce-account .muukal-account-shell {
+		grid-template-columns: 1fr;
+		gap: 42px;
+	}
+
+	.woocommerce-account .muukal-account-panel--register {
+		padding-left: 0;
+		padding-top: 40px;
+		border-left: 0;
+		border-top: 1px solid #e4e4e4;
+	}
+
+	.woocommerce-account .muukal-account-title {
+		font-size: 2.2rem;
+	}
+}

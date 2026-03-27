@@ -214,6 +214,104 @@ require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-filter-archive-shortcode.
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-detail-template-shortcode.php';
 
 /**
+ * Enqueue custom account page styling for the WooCommerce My Account page.
+ */
+function muukal_astra_enqueue_account_assets() {
+	if ( ! function_exists( 'is_account_page' ) || ! is_account_page() ) {
+		return;
+	}
+
+	$relative_path = 'assets/css/muukal-account.css';
+	$absolute_path = ASTRA_THEME_DIR . $relative_path;
+	$version       = file_exists( $absolute_path ) ? (string) filemtime( $absolute_path ) : ASTRA_THEME_VERSION;
+
+	wp_enqueue_style(
+		'astra-muukal-account',
+		ASTRA_THEME_URI . $relative_path,
+		array(),
+		$version
+	);
+}
+add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_account_assets', 40 );
+
+/**
+ * Always expose registration on the My Account page.
+ *
+ * @return string
+ */
+function muukal_astra_enable_myaccount_registration() {
+	return 'yes';
+}
+add_filter( 'pre_option_woocommerce_enable_myaccount_registration', 'muukal_astra_enable_myaccount_registration' );
+
+/**
+ * Require customers to create their own password during registration.
+ *
+ * @return string
+ */
+function muukal_astra_disable_generated_account_password() {
+	return 'no';
+}
+add_filter( 'pre_option_woocommerce_registration_generate_password', 'muukal_astra_disable_generated_account_password' );
+
+/**
+ * Output first name and last name fields on the account registration form.
+ */
+function muukal_astra_render_account_register_name_fields() {
+	$first_name = isset( $_POST['billing_first_name'] ) ? wc_clean( wp_unslash( $_POST['billing_first_name'] ) ) : '';
+	$last_name  = isset( $_POST['billing_last_name'] ) ? wc_clean( wp_unslash( $_POST['billing_last_name'] ) ) : '';
+	?>
+	<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+		<label for="reg_billing_first_name"><?php esc_html_e( 'First Name', 'astra' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+		<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_first_name" id="reg_billing_first_name" autocomplete="given-name" value="<?php echo esc_attr( $first_name ); ?>" required />
+	</p>
+	<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+		<label for="reg_billing_last_name"><?php esc_html_e( 'Last Name', 'astra' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+		<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_last_name" id="reg_billing_last_name" autocomplete="family-name" value="<?php echo esc_attr( $last_name ); ?>" required />
+	</p>
+	<?php
+}
+add_action( 'woocommerce_register_form_start', 'muukal_astra_render_account_register_name_fields' );
+
+/**
+ * Validate the custom registration fields.
+ *
+ * @param string   $username Username being registered.
+ * @param string   $email Email being registered.
+ * @param WP_Error $errors Validation errors.
+ */
+function muukal_astra_validate_account_register_name_fields( $username, $email, $errors ) {
+	if ( empty( $_POST['billing_first_name'] ) ) {
+		$errors->add( 'billing_first_name_error', __( 'First name is required.', 'astra' ) );
+	}
+
+	if ( empty( $_POST['billing_last_name'] ) ) {
+		$errors->add( 'billing_last_name_error', __( 'Last name is required.', 'astra' ) );
+	}
+}
+add_action( 'woocommerce_register_post', 'muukal_astra_validate_account_register_name_fields', 10, 3 );
+
+/**
+ * Persist custom account registration fields to the customer profile.
+ *
+ * @param int $customer_id Newly created customer ID.
+ */
+function muukal_astra_save_account_register_name_fields( $customer_id ) {
+	if ( ! empty( $_POST['billing_first_name'] ) ) {
+		$first_name = wc_clean( wp_unslash( $_POST['billing_first_name'] ) );
+		update_user_meta( $customer_id, 'first_name', $first_name );
+		update_user_meta( $customer_id, 'billing_first_name', $first_name );
+	}
+
+	if ( ! empty( $_POST['billing_last_name'] ) ) {
+		$last_name = wc_clean( wp_unslash( $_POST['billing_last_name'] ) );
+		update_user_meta( $customer_id, 'last_name', $last_name );
+		update_user_meta( $customer_id, 'billing_last_name', $last_name );
+	}
+}
+add_action( 'woocommerce_created_customer', 'muukal_astra_save_account_register_name_fields' );
+
+/**
  * Enqueue the Muukal-inspired cart styling on the classic WooCommerce cart page.
  */
 function muukal_astra_enqueue_cart_assets() {
