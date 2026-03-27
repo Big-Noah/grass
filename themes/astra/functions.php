@@ -221,15 +221,26 @@ function muukal_astra_enqueue_account_assets() {
 		return;
 	}
 
-	$relative_path = 'assets/css/muukal-account.css';
-	$absolute_path = ASTRA_THEME_DIR . $relative_path;
-	$version       = file_exists( $absolute_path ) ? (string) filemtime( $absolute_path ) : ASTRA_THEME_VERSION;
+	$style_relative_path  = 'assets/css/muukal-account.css';
+	$style_absolute_path  = ASTRA_THEME_DIR . $style_relative_path;
+	$style_version        = file_exists( $style_absolute_path ) ? (string) filemtime( $style_absolute_path ) : ASTRA_THEME_VERSION;
+	$script_relative_path = 'assets/js/muukal-account.js';
+	$script_absolute_path = ASTRA_THEME_DIR . $script_relative_path;
+	$script_version       = file_exists( $script_absolute_path ) ? (string) filemtime( $script_absolute_path ) : ASTRA_THEME_VERSION;
 
 	wp_enqueue_style(
 		'astra-muukal-account',
-		ASTRA_THEME_URI . $relative_path,
+		ASTRA_THEME_URI . $style_relative_path,
 		array(),
-		$version
+		$style_version
+	);
+
+	wp_enqueue_script(
+		'astra-muukal-account',
+		ASTRA_THEME_URI . $script_relative_path,
+		array(),
+		$script_version,
+		true
 	);
 }
 add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_account_assets', 40 );
@@ -279,6 +290,57 @@ function muukal_astra_remove_default_register_privacy_text() {
 	remove_action( 'woocommerce_register_form', 'wc_registration_privacy_policy_text', 20 );
 }
 add_action( 'init', 'muukal_astra_remove_default_register_privacy_text' );
+
+/**
+ * Tune account page copy to match the desired login/register layout.
+ *
+ * @param string $translated_text Translated string.
+ * @param string $text Original string.
+ * @param string $domain Text domain.
+ * @return string
+ */
+function muukal_astra_customize_account_copy( $translated_text, $text, $domain ) {
+	if ( is_admin() || ! function_exists( 'is_account_page' ) || ! is_account_page() || is_user_logged_in() ) {
+		return $translated_text;
+	}
+
+	$replacements = array(
+		'Login'                     => 'Sign In',
+		'Register'                  => 'Create Account',
+		'Log in'                    => 'Login',
+		'Lost your password?'       => 'Forgot your password?',
+		'Username or email address' => 'Email Address',
+		'Remember me'               => 'Remember Me',
+		'Email address'             => 'Email Address',
+	);
+
+	return isset( $replacements[ $text ] ) ? $replacements[ $text ] : $translated_text;
+}
+add_filter( 'gettext', 'muukal_astra_customize_account_copy', 20, 3 );
+
+/**
+ * Add custom registration helper copy under the registration button.
+ */
+function muukal_astra_render_account_register_note() {
+	if ( is_user_logged_in() ) {
+		return;
+	}
+
+	$privacy_policy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
+	?>
+	<p class="muukal-account-register-note">
+		<?php esc_html_e( 'By signing up, you agree to receive marketing emails and to our privacy policy.', 'astra' ); ?>
+	</p>
+	<p class="muukal-account-register-subnote">
+		<?php if ( $privacy_policy_url ) : ?>
+			<?php printf( wp_kses_post( __( 'You may unsubscribe at any time. Visit our <a href="%s">Privacy Policy here</a>.', 'astra' ) ), esc_url( $privacy_policy_url ) ); ?>
+		<?php else : ?>
+			<?php esc_html_e( 'You may unsubscribe at any time.', 'astra' ); ?>
+		<?php endif; ?>
+	</p>
+	<?php
+}
+add_action( 'woocommerce_register_form_end', 'muukal_astra_render_account_register_note', 30 );
 
 /**
  * Output first name and last name fields on the account registration form.
