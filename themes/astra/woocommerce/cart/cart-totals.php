@@ -88,7 +88,7 @@ $card_url       = '#';
 
 			<div class="muukal-cart-summary__express">
 				<a class="muukal-cart-summary__express-button muukal-cart-summary__express-button--paypal" href="<?php echo esc_url( $paypal_url ); ?>">
-					<img class="muukal-cart-summary__express-logo-image" src="<?php echo esc_url( $paypal_logo ); ?>" alt="<?php esc_attr_e( 'PayPal', 'astra' ); ?>">
+					<img class="muukal-cart-summary__express-logo-image" src="<?php echo esc_url( $paypal_logo ); ?>" alt="<?php esc_attr_e( 'PayPal', 'astra' ); ?>" width="104" height="28" style="width:104px;height:auto;max-width:104px;">
 				</a>
 				<a class="muukal-cart-summary__express-button muukal-cart-summary__express-button--card" href="<?php echo esc_url( $card_url ); ?>">
 					<span class="muukal-cart-summary__express-card-icons" aria-hidden="true">
