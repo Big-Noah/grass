@@ -305,7 +305,22 @@
 	-webkit-appearance: none;
 	appearance: none;
 	background: transparent;
+	border: 0;
+	outline: none;
+	box-shadow: none;
 	pointer-events: none;
+}
+
+.muukal-price-range:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+.muukal-price-range::-webkit-slider-runnable-track {
+	height: 3px;
+	background: transparent;
+	border: 0;
+	box-shadow: none;
 }
 
 .muukal-price-range::-webkit-slider-thumb {
@@ -332,6 +347,12 @@
 
 .muukal-price-range::-moz-range-track {
 	background: transparent;
+	border: 0;
+	box-shadow: none;
+}
+
+.muukal-price-range::-moz-focus-outer {
+	border: 0;
 }
 
 .muukal-filter-price-panel {
