@@ -88,7 +88,7 @@
 }
 
 .muukal-filter-toolbar {
-	padding: 14px 0 16px;
+	padding: 18px 0 20px;
 	border-top: 1px solid #ececec;
 	border-bottom: 1px solid #ececec;
 }
@@ -97,7 +97,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 24px;
+	column-gap: 34px;
+	row-gap: 18px;
 }
 
 .muukal-filter-item {
@@ -108,6 +109,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 10px;
+	min-height: 28px;
 	padding: 0;
 	border: 0;
 	background: transparent;
@@ -123,6 +125,19 @@
 .muukal-filter-item > .dropdown-toggle:hover,
 .muukal-filter-item > .dropdown-toggle:focus {
 	color: #ff565c;
+}
+
+.muukal-filter-item > .dropdown-toggle:focus,
+.muukal-filter-item > .dropdown-toggle:focus-visible,
+.muukal-filter-item > .dropdown-toggle:active,
+.muukal-filter-item > .dropdown-toggle *:focus,
+.muukal-filter-item > .dropdown-toggle *:focus-visible,
+.filter-icon:focus,
+.filter-icon:focus-visible,
+.muukal-filter-option:focus,
+.muukal-filter-option:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
 }
 
 .muukal-filter-item > .dropdown-toggle.filter-nav-choose {
@@ -181,11 +196,15 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 6px 0;
+	padding: 8px 0;
 	color: #111;
 	font-size: 14px;
 	line-height: 1.45;
 	cursor: pointer;
+}
+
+.filter-icon:hover {
+	color: #ff565c;
 }
 
 .muukal-filter-check {
@@ -478,6 +497,13 @@
 	border: 1px solid #e7edf3;
 	background: #fff;
 	text-align: center;
+}
+
+@media (max-width: 768px) {
+	.muukal-filter-groups {
+		column-gap: 24px;
+		row-gap: 14px;
+	}
 }
 
 @media (max-width: 1024px) {
