@@ -270,6 +270,198 @@ function muukal_astra_locate_account_form_template( $template, $template_name ) 
 add_filter( 'woocommerce_locate_template', 'muukal_astra_locate_account_form_template', 20, 2 );
 
 /**
+ * Build a product category term context for the subcategory pills shortcode.
+ *
+ * @param array $atts Shortcode attributes.
+ * @return WP_Term|null
+ */
+function muukal_astra_get_subcategory_pills_parent_term( $atts ) {
+	$taxonomy = 'product_cat';
+
+	if ( ! empty( $atts['parent_id'] ) ) {
+		$term = get_term( (int) $atts['parent_id'], $taxonomy );
+		return ( $term instanceof WP_Term && ! is_wp_error( $term ) ) ? $term : null;
+	}
+
+	if ( ! empty( $atts['parent_slug'] ) ) {
+		$term = get_term_by( 'slug', sanitize_title( $atts['parent_slug'] ), $taxonomy );
+		return ( $term instanceof WP_Term && ! is_wp_error( $term ) ) ? $term : null;
+	}
+
+	$queried_object = get_queried_object();
+
+	if ( $queried_object instanceof WP_Term && $taxonomy === $queried_object->taxonomy ) {
+		return $queried_object;
+	}
+
+	return null;
+}
+
+/**
+ * Return the shared inline style for the product subcategory pills.
+ *
+ * @return string
+ */
+function muukal_astra_get_subcategory_pills_styles() {
+	return '
+	.muukal-subcategory-pills {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 14px;
+		align-items: center;
+	}
+
+	.muukal-subcategory-pills__item {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 46px;
+		padding: 10px 22px;
+		border: 1px solid #ff6a73;
+		border-radius: 999px;
+		background: #ffffff;
+		color: #202020;
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 1.2;
+		text-decoration: none;
+		transition: transform .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, background-color .18s ease;
+	}
+
+	.muukal-subcategory-pills__item:hover,
+	.muukal-subcategory-pills__item:focus {
+		color: #ff565c;
+		border-color: #ff565c;
+		box-shadow: 0 10px 22px rgba(255, 86, 92, 0.12);
+		transform: translateY(-1px);
+		outline: none;
+	}
+
+	.muukal-subcategory-pills__item--active {
+		border-color: #ff565c;
+		color: #ff565c;
+		box-shadow: 0 8px 18px rgba(255, 86, 92, 0.1);
+	}
+
+	.muukal-subcategory-pills__item--accent {
+		border-color: #a855f7;
+		color: #7c3aed;
+	}
+
+	.muukal-subcategory-pills__item--accent:hover,
+	.muukal-subcategory-pills__item--accent:focus {
+		border-color: #9333ea;
+		color: #6d28d9;
+		box-shadow: 0 10px 22px rgba(147, 51, 234, 0.14);
+	}
+
+	@media (max-width: 767px) {
+		.muukal-subcategory-pills {
+			gap: 10px;
+		}
+
+		.muukal-subcategory-pills__item {
+			min-height: 40px;
+			padding: 8px 16px;
+			font-size: 14px;
+		}
+	}';
+}
+
+/**
+ * Render child product categories as pill links.
+ *
+ * Shortcode examples:
+ * [muukal_subcategory_pills]
+ * [muukal_subcategory_pills include_view_all="yes" promotions_label="Current Promotions" promotions_url="/sale/"]
+ * [muukal_subcategory_pills parent_slug="women-eyeglasses"]
+ *
+ * @param array $atts Shortcode attributes.
+ * @return string
+ */
+function muukal_astra_render_subcategory_pills_shortcode( $atts ) {
+	if ( ! taxonomy_exists( 'product_cat' ) ) {
+		return '';
+	}
+
+	$atts = shortcode_atts(
+		array(
+			'parent_id'         => '',
+			'parent_slug'       => '',
+			'hide_empty'        => 'false',
+			'include_view_all'  => 'true',
+			'view_all_label'    => 'View All',
+			'promotions_label'  => '',
+			'promotions_url'    => '',
+			'class'             => '',
+		),
+		(array) $atts,
+		'muukal_subcategory_pills'
+	);
+
+	$parent_term = muukal_astra_get_subcategory_pills_parent_term( $atts );
+
+	if ( ! $parent_term ) {
+		return '';
+	}
+
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'product_cat',
+			'parent'     => (int) $parent_term->term_id,
+			'hide_empty' => filter_var( $atts['hide_empty'], FILTER_VALIDATE_BOOLEAN ),
+			'orderby'    => 'name',
+			'order'      => 'ASC',
+		)
+	);
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return '';
+	}
+
+	$queried_object    = get_queried_object();
+	$current_term_id   = ( $queried_object instanceof WP_Term && 'product_cat' === $queried_object->taxonomy ) ? (int) $queried_object->term_id : 0;
+	$wrapper_classes   = trim( 'muukal-subcategory-pills ' . sanitize_html_class( $atts['class'] ) );
+	$include_view_all  = filter_var( $atts['include_view_all'], FILTER_VALIDATE_BOOLEAN );
+	$promotions_label  = trim( (string) $atts['promotions_label'] );
+	$promotions_url    = trim( (string) $atts['promotions_url'] );
+	$styles            = muukal_astra_get_subcategory_pills_styles();
+
+	ob_start();
+	?>
+	<style><?php echo $styles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
+	<div class="<?php echo esc_attr( $wrapper_classes ); ?>">
+		<?php foreach ( $terms as $term ) : ?>
+			<?php
+			$item_classes = 'muukal-subcategory-pills__item';
+			if ( $current_term_id === (int) $term->term_id ) {
+				$item_classes .= ' muukal-subcategory-pills__item--active';
+			}
+			?>
+			<a class="<?php echo esc_attr( $item_classes ); ?>" href="<?php echo esc_url( get_term_link( $term ) ); ?>">
+				<?php echo esc_html( $term->name ); ?>
+			</a>
+		<?php endforeach; ?>
+
+		<?php if ( $include_view_all ) : ?>
+			<a class="muukal-subcategory-pills__item" href="<?php echo esc_url( get_term_link( $parent_term ) ); ?>">
+				<?php echo esc_html( $atts['view_all_label'] ); ?>
+			</a>
+		<?php endif; ?>
+
+		<?php if ( $promotions_label && $promotions_url ) : ?>
+			<a class="muukal-subcategory-pills__item muukal-subcategory-pills__item--accent" href="<?php echo esc_url( $promotions_url ); ?>">
+				<?php echo esc_html( $promotions_label ); ?>
+			</a>
+		<?php endif; ?>
+	</div>
+	<?php
+
+	return (string) ob_get_clean();
+}
+add_shortcode( 'muukal_subcategory_pills', 'muukal_astra_render_subcategory_pills_shortcode' );
+
+/**
  * Force WooCommerce to use the custom checkout templates from the theme.
  *
  * @param string $template Resolved template path.
