@@ -418,11 +418,12 @@ function muukal_product_shipping_options_get_icon_svg( $icon ) {
 function muukal_product_shipping_options_shortcode( $atts = array() ) {
 	$atts = shortcode_atts(
 		array(
-			'product_id'   => '',
-			'title'        => 'Shipping Options',
-			'free_text'    => 'FREE',
-			'currency_hint'=> '',
-			'class'        => '',
+			'product_id'      => '',
+			'title'           => 'Shipping Options',
+			'free_text'       => 'FREE',
+			'currency_hint'   => '',
+			'class'           => '',
+			'selected_label'  => '',
 		),
 		$atts,
 		'muukal_product_shipping_options'
@@ -442,6 +443,7 @@ function muukal_product_shipping_options_shortcode( $atts = array() ) {
 
 	$instance = 'muukal-shipping-options-' . wp_generate_uuid4();
 	$classes  = array( 'muukal-shipping-options' );
+	$group_label = '' !== trim( $atts['title'] ) ? $atts['title'] : 'Shipping Options';
 
 	if ( '' !== trim( $atts['class'] ) ) {
 		$extra_classes = preg_split( '/\s+/', trim( $atts['class'] ) );
@@ -462,7 +464,7 @@ function muukal_product_shipping_options_shortcode( $atts = array() ) {
 			<h3 class="muukal-shipping-options__title"><?php echo esc_html( $atts['title'] ); ?></h3>
 		<?php endif; ?>
 
-		<div class="muukal-shipping-options__list" role="radiogroup" aria-label="<?php echo esc_attr( $atts['title'] ); ?>">
+		<div class="muukal-shipping-options__list" role="radiogroup" aria-label="<?php echo esc_attr( $group_label ); ?>">
 			<?php foreach ( $options as $index => $option ) : ?>
 				<?php
 				$is_default   = ! empty( $option['is_default'] ) || 0 === $index;
@@ -471,6 +473,9 @@ function muukal_product_shipping_options_shortcode( $atts = array() ) {
 				$description  = trim( $option['description'] );
 				$eta          = trim( $option['eta'] );
 				$hint         = trim( $atts['currency_hint'] );
+				$is_selected  = '' !== trim( $atts['selected_label'] )
+					? trim( $atts['selected_label'] ) === $option['label']
+					: $is_default;
 				?>
 				<label class="muukal-shipping-options__card">
 					<input
@@ -479,7 +484,7 @@ function muukal_product_shipping_options_shortcode( $atts = array() ) {
 						value="<?php echo esc_attr( $option['label'] ); ?>"
 						data-price="<?php echo esc_attr( $option['price'] ); ?>"
 						data-product-id="<?php echo esc_attr( $product_id ); ?>"
-						<?php checked( $is_default ); ?>
+						<?php checked( $is_selected ); ?>
 					/>
 					<span class="muukal-shipping-options__card-inner" id="<?php echo esc_attr( $option_id ); ?>">
 						<span class="muukal-shipping-options__icon" aria-hidden="true"><?php echo wp_kses( muukal_product_shipping_options_get_icon_svg( $option['icon'] ), array( 'svg' => array( 'viewBox' => true, 'aria-hidden' => true ), 'path' => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true ), 'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ) ) ); ?></span>

@@ -497,3 +497,370 @@ function muukal_astra_paypal_cart_button_hook( $hook ) {
 	return 'muukal_astra_cart_paypal_buttons';
 }
 add_filter( 'woocommerce_paypal_payments_proceed_to_checkout_button_renderer_hook', 'muukal_astra_paypal_cart_button_hook' );
+
+/**
+ * Get a cache-busting asset version for theme files.
+ *
+ * @param string $relative_path Relative path inside the theme.
+ * @return string
+ */
+function muukal_astra_asset_version( $relative_path ) {
+	$absolute_path = ASTRA_THEME_DIR . ltrim( $relative_path, '/\\' );
+
+	if ( file_exists( $absolute_path ) ) {
+		$modified = filemtime( $absolute_path );
+
+		if ( false !== $modified ) {
+			return (string) $modified;
+		}
+	}
+
+	return ASTRA_THEME_VERSION;
+}
+
+/**
+ * Enqueue the custom Muukal checkout assets.
+ */
+function muukal_astra_enqueue_checkout_assets() {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) ) {
+		return;
+	}
+
+	$style_path = 'assets/css/muukal-checkout.css';
+	$script_path = 'assets/js/unminified/muukal-checkout.js';
+
+	wp_enqueue_style(
+		'astra-muukal-checkout',
+		ASTRA_THEME_URI . $style_path,
+		array(),
+		muukal_astra_asset_version( $style_path )
+	);
+
+	wp_enqueue_script(
+		'astra-muukal-checkout',
+		ASTRA_THEME_URI . $script_path,
+		array( 'jquery', 'wc-checkout' ),
+		muukal_astra_asset_version( $script_path ),
+		true
+	);
+
+	wp_localize_script(
+		'astra-muukal-checkout',
+		'muukalCheckoutConfig',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'muukal_checkout_shipping_option' ),
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_checkout_assets', 40 );
+
+/**
+ * Remove the default checkout coupon toggle because the custom layout renders
+ * its own inline coupon field.
+ */
+function muukal_astra_prepare_checkout_hooks() {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) ) {
+		return;
+	}
+
+	remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+}
+add_action( 'wp', 'muukal_astra_prepare_checkout_hooks' );
+
+/**
+ * Get the first cart product ID to drive the custom shipping selector.
+ *
+ * @return int
+ */
+function muukal_astra_get_checkout_shipping_product_id() {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return 0;
+	}
+
+	foreach ( WC()->cart->get_cart() as $cart_item ) {
+		if ( empty( $cart_item['product_id'] ) ) {
+			continue;
+		}
+
+		return (int) $cart_item['product_id'];
+	}
+
+	return 0;
+}
+
+/**
+ * Get the default custom shipping option for the first cart product.
+ *
+ * @return array<string, string>
+ */
+function muukal_astra_get_checkout_default_shipping_option() {
+	if ( ! function_exists( 'muukal_product_shipping_options_get_product_options' ) ) {
+		return array();
+	}
+
+	$product_id = muukal_astra_get_checkout_shipping_product_id();
+	if ( ! $product_id ) {
+		return array();
+	}
+
+	$options = muukal_product_shipping_options_get_product_options( $product_id );
+	if ( empty( $options ) || ! is_array( $options ) ) {
+		return array();
+	}
+
+	foreach ( $options as $option ) {
+		if ( ! empty( $option['is_default'] ) ) {
+			return $option;
+		}
+	}
+
+	return isset( $options[0] ) && is_array( $options[0] ) ? $options[0] : array();
+}
+
+/**
+ * Whether the current cart should use the custom checkout shipping cards.
+ *
+ * @return bool
+ */
+function muukal_astra_checkout_has_custom_shipping_options() {
+	return ! empty( muukal_astra_get_checkout_default_shipping_option() );
+}
+
+/**
+ * Get the selected checkout shipping option, defaulting from the product config.
+ *
+ * @return array<string, string>
+ */
+function muukal_astra_get_checkout_shipping_selection() {
+	$selection = array();
+
+	if ( function_exists( 'WC' ) && WC()->session ) {
+		$session_value = WC()->session->get( 'muukal_checkout_shipping_option', array() );
+		$selection     = is_array( $session_value ) ? $session_value : array();
+	}
+
+	if ( ! empty( $selection['label'] ) ) {
+		return array(
+			'label' => sanitize_text_field( (string) $selection['label'] ),
+			'price' => '' !== (string) ( $selection['price'] ?? '' ) ? wc_format_decimal( $selection['price'] ) : '0',
+		);
+	}
+
+	$default_option = muukal_astra_get_checkout_default_shipping_option();
+	if ( empty( $default_option ) ) {
+		return array();
+	}
+
+	$selection = array(
+		'label' => sanitize_text_field( (string) $default_option['label'] ),
+		'price' => '' !== (string) ( $default_option['price'] ?? '' ) ? wc_format_decimal( $default_option['price'] ) : '0',
+	);
+
+	if ( function_exists( 'WC' ) && WC()->session ) {
+		WC()->session->set( 'muukal_checkout_shipping_option', $selection );
+	}
+
+	return $selection;
+}
+
+/**
+ * Render the custom shipping option cards on checkout.
+ *
+ * @return string
+ */
+function muukal_astra_render_checkout_shipping_options() {
+	if ( ! muukal_astra_checkout_has_custom_shipping_options() ) {
+		return '';
+	}
+
+	$product_id = muukal_astra_get_checkout_shipping_product_id();
+	$selection  = muukal_astra_get_checkout_shipping_selection();
+
+	if ( ! $product_id ) {
+		return '';
+	}
+
+	return do_shortcode(
+		sprintf(
+			'[muukal_product_shipping_options product_id="%d" title="" selected_label="%s" class="muukal-checkout-shipping-selector"]',
+			$product_id,
+			esc_attr( isset( $selection['label'] ) ? $selection['label'] : '' )
+		)
+	);
+}
+
+/**
+ * Persist the chosen custom shipping option in the WooCommerce session.
+ */
+function muukal_astra_set_checkout_shipping_option() {
+	check_ajax_referer( 'muukal_checkout_shipping_option', 'nonce' );
+
+	if ( ! function_exists( 'WC' ) || ! WC()->session || ! function_exists( 'muukal_product_shipping_options_get_product_options' ) ) {
+		wp_send_json_error( array( 'message' => 'Shipping options are unavailable.' ), 400 );
+	}
+
+	$product_id = muukal_astra_get_checkout_shipping_product_id();
+	$options    = $product_id ? muukal_product_shipping_options_get_product_options( $product_id ) : array();
+	$label      = isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '';
+	$match      = array();
+
+	foreach ( $options as $option ) {
+		if ( ! is_array( $option ) || empty( $option['label'] ) ) {
+			continue;
+		}
+
+		if ( $label === sanitize_text_field( (string) $option['label'] ) ) {
+			$match = $option;
+			break;
+		}
+	}
+
+	if ( empty( $match ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid shipping option.' ), 400 );
+	}
+
+	$selection = array(
+		'label' => sanitize_text_field( (string) $match['label'] ),
+		'price' => '' !== (string) ( $match['price'] ?? '' ) ? wc_format_decimal( $match['price'] ) : '0',
+	);
+
+	WC()->session->set( 'muukal_checkout_shipping_option', $selection );
+
+	wp_send_json_success( array( 'selection' => $selection ) );
+}
+add_action( 'wp_ajax_muukal_astra_set_checkout_shipping_option', 'muukal_astra_set_checkout_shipping_option' );
+add_action( 'wp_ajax_nopriv_muukal_astra_set_checkout_shipping_option', 'muukal_astra_set_checkout_shipping_option' );
+
+/**
+ * Replace native package rates with the custom checkout shipping card selection.
+ *
+ * @param array<int|string, WC_Shipping_Rate> $rates Shipping rates.
+ * @return array<int|string, WC_Shipping_Rate>
+ */
+function muukal_astra_filter_checkout_package_rates( $rates ) {
+	if ( ! muukal_astra_checkout_has_custom_shipping_options() ) {
+		return $rates;
+	}
+
+	return array();
+}
+add_filter( 'woocommerce_package_rates', 'muukal_astra_filter_checkout_package_rates', 1000 );
+
+/**
+ * Add the selected custom shipping option as a cart fee so totals update normally.
+ *
+ * @param WC_Cart $cart Cart object.
+ */
+function muukal_astra_apply_checkout_shipping_fee( $cart ) {
+	if ( ! $cart instanceof WC_Cart ) {
+		return;
+	}
+
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
+
+	$selection = muukal_astra_get_checkout_shipping_selection();
+	if ( empty( $selection['label'] ) ) {
+		return;
+	}
+
+	$cart->add_fee( __( 'Shipping Fee', 'astra' ), (float) $selection['price'], false );
+}
+add_action( 'woocommerce_cart_calculate_fees', 'muukal_astra_apply_checkout_shipping_fee' );
+
+/**
+ * Store the chosen custom shipping option on the order for later reference.
+ *
+ * @param WC_Order $order Order object.
+ */
+function muukal_astra_store_checkout_shipping_on_order( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return;
+	}
+
+	$selection = muukal_astra_get_checkout_shipping_selection();
+	if ( empty( $selection['label'] ) ) {
+		return;
+	}
+
+	$order->update_meta_data( '_muukal_shipping_option_label', $selection['label'] );
+	$order->update_meta_data( '_muukal_shipping_option_price', $selection['price'] );
+}
+add_action( 'woocommerce_checkout_create_order', 'muukal_astra_store_checkout_shipping_on_order' );
+
+/**
+ * Build a compact summary payload for one checkout line item.
+ *
+ * @param array<string, mixed> $cart_item Cart item data.
+ * @param string               $cart_item_key Cart item key.
+ * @return array<string, mixed>
+ */
+function muukal_astra_get_checkout_item_summary( $cart_item, $cart_item_key ) {
+	$_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+
+	if ( ! $_product || ! $_product->exists() ) {
+		return array();
+	}
+
+	$product_name  = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
+	$product_image = $_product->get_image_id()
+		? wp_get_attachment_image(
+			$_product->get_image_id(),
+			'woocommerce_thumbnail',
+			false,
+			array(
+				'loading'  => 'lazy',
+				'decoding' => 'async',
+			)
+		)
+		: $_product->get_image();
+	$item_data_rows = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
+	$frame_color    = '';
+	$frame_size     = '';
+	$lens_type      = '';
+	$usage          = '';
+
+	foreach ( $item_data_rows as $item_data_row ) {
+		$label = isset( $item_data_row['name'] ) ? wc_clean( (string) $item_data_row['name'] ) : '';
+		$value = isset( $item_data_row['display'] ) ? (string) $item_data_row['display'] : ( isset( $item_data_row['value'] ) ? (string) $item_data_row['value'] : '' );
+
+		if ( '' === trim( wp_strip_all_tags( $value ) ) ) {
+			continue;
+		}
+
+		if ( 'Frame Color' === $label ) {
+			$frame_color = $value;
+			continue;
+		}
+
+		if ( 'Frame Size' === $label ) {
+			$frame_size = $value;
+			continue;
+		}
+
+		if ( 'Lens Type' === $label ) {
+			$lens_type = $value;
+			continue;
+		}
+
+		if ( 'Usage' === $label ) {
+			$usage = $value;
+		}
+	}
+
+	if ( '' === $lens_type ) {
+		$lens_type = $usage;
+	}
+
+	return array(
+		'name'         => wp_strip_all_tags( (string) $product_name ),
+		'image_html'   => $product_image,
+		'frame_color'  => $frame_color,
+		'frame_size'   => $frame_size,
+		'lens_type'    => $lens_type,
+		'quantity'     => isset( $cart_item['quantity'] ) ? (int) $cart_item['quantity'] : 0,
+		'subtotal_html'=> WC()->cart ? WC()->cart->get_product_subtotal( $_product, isset( $cart_item['quantity'] ) ? (int) $cart_item['quantity'] : 0 ) : wc_price( 0 ),
+	);
+}
