@@ -268,31 +268,31 @@
 .color-striped { background: repeating-linear-gradient(135deg, #111 0, #111 4px, #fff 4px, #fff 8px); }
 
 .price-filter {
-	width: 220px;
+	width: 248px;
 }
 
 .muukal-price-slider {
 	position: relative;
-	height: 24px;
-	margin-bottom: 14px;
+	height: 28px;
+	margin-bottom: 18px;
 }
 
 .muukal-price-track,
 .muukal-price-progress {
 	position: absolute;
-	top: 10px;
-	height: 4px;
+	top: 11px;
+	height: 3px;
 	border-radius: 999px;
 }
 
 .muukal-price-track {
 	left: 0;
 	right: 0;
-	background: #d9d9d9;
+	background: #d7dce3;
 }
 
 .muukal-price-progress {
-	background: #111;
+	background: #111827;
 }
 
 .muukal-price-range {
@@ -309,22 +309,24 @@
 }
 
 .muukal-price-range::-webkit-slider-thumb {
-	width: 14px;
-	height: 14px;
-	border: 0;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #fff;
 	border-radius: 50%;
-	background: #111;
+	background: #111827;
+	box-shadow: 0 2px 8px rgba(17, 24, 39, 0.16);
 	-webkit-appearance: none;
 	appearance: none;
 	pointer-events: auto;
 }
 
 .muukal-price-range::-moz-range-thumb {
-	width: 14px;
-	height: 14px;
-	border: 0;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #fff;
 	border-radius: 50%;
-	background: #111;
+	background: #111827;
+	box-shadow: 0 2px 8px rgba(17, 24, 39, 0.16);
 	pointer-events: auto;
 }
 
@@ -332,22 +334,33 @@
 	background: transparent;
 }
 
+.muukal-filter-price-panel {
+	min-width: 280px;
+	padding: 18px 18px 16px;
+	border: 1px solid #eceff3;
+	border-radius: 14px;
+	box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
 .muukal-price-actions {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	width: 200px;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
 }
 
 .muukal-price-amount {
-	width: 110px;
-	height: 34px;
-	margin-left: -8px;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	color: #111;
+	width: 140px;
+	height: 40px;
+	margin-left: 0;
+	padding: 0 14px;
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	background: #f8fafc;
+	color: #334155;
 	font-size: 14px;
+	font-weight: 500;
 	box-shadow: none;
 }
 
@@ -355,14 +368,25 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 34px;
-	padding: 0 12px;
-	border: 1px solid #111;
+	height: 40px;
+	padding: 0 16px;
+	border: 1px solid #d1d5db;
+	border-radius: 10px;
 	background: #fff;
-	color: #111;
+	color: #111827;
 	font-size: 12px;
 	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 	box-shadow: none;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.muukal-price-submit.btn:hover,
+.muukal-price-submit.btn:focus {
+	border-color: #111827;
+	background: #111827;
+	color: #fff;
 }
 
 .muukal-filter-results-bar {

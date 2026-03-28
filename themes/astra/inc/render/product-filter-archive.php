@@ -483,7 +483,7 @@ function muukal_product_filter_archive_render_price_group( $atts, $min_price, $m
 				</div>
 				<div class="muukal-price-actions">
 					<input class="muukal-price-amount" type="text" readonly value="">
-					<button class="btn muukal-price-submit" type="button"><?php echo esc_html__( 'DONE', 'astra' ); ?></button>
+					<button class="btn muukal-price-submit" type="button"><?php echo esc_html__( 'Apply', 'astra' ); ?></button>
 					<input class="muukal-price-input muukal-price-input-min" type="hidden" name="min_price" value="<?php echo esc_attr( $slider_min ); ?>">
 					<input class="muukal-price-input muukal-price-input-max" type="hidden" name="max_price" value="<?php echo esc_attr( $slider_max ); ?>">
 				</div>
