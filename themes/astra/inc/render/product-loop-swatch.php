@@ -308,21 +308,16 @@ function muukal_render_product_loop_item( $args ) {
 				<a class="muukal-card-action muukal-card-action-secondary muukal-product-link" href="<?php echo esc_url( $default_state['link'] ); ?>">View Similar Frames</a>
 			</div>
 			<div class="product-content">
-				<div class="muukal-card-header">
-					<?php if ( ! empty( $chips ) ) : ?>
-						<div class="muukal-card-chips">
-							<?php foreach ( $chips as $chip ) : ?>
-								<span class="muukal-card-chip">
-									<span class="muukal-card-chip-label"><?php echo esc_html( $chip['label'] ); ?>:</span>
-									<span class="muukal-card-chip-value"><?php echo esc_html( $chip['value'] ); ?></span>
-								</span>
-							<?php endforeach; ?>
-						</div>
-					<?php endif; ?>
-					<h3 class="muukal-card-title">
-						<a class="muukal-product-link" href="<?php echo esc_url( $default_state['link'] ); ?>"><?php echo esc_html( $product_name ); ?></a>
-					</h3>
-				</div>
+				<?php if ( ! empty( $chips ) ) : ?>
+					<div class="muukal-card-chips">
+						<?php foreach ( $chips as $chip ) : ?>
+							<span class="muukal-card-chip">
+								<span class="muukal-card-chip-label"><?php echo esc_html( $chip['label'] ); ?>:</span>
+								<span class="muukal-card-chip-value"><?php echo esc_html( $chip['value'] ); ?></span>
+							</span>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 				<div class="ip-colors">
 					<div class="ip-colors-box text-left">
 						<?php foreach ( $rows as $row_index => $row ) : ?>
