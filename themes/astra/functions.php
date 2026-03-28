@@ -291,6 +291,11 @@ function muukal_astra_get_subcategory_pills_parent_term( $atts ) {
 	$queried_object = get_queried_object();
 
 	if ( $queried_object instanceof WP_Term && $taxonomy === $queried_object->taxonomy ) {
+		if ( ! empty( $queried_object->parent ) ) {
+			$parent_term = get_term( (int) $queried_object->parent, $taxonomy );
+			return ( $parent_term instanceof WP_Term && ! is_wp_error( $parent_term ) ) ? $parent_term : $queried_object;
+		}
+
 		return $queried_object;
 	}
 
@@ -389,7 +394,7 @@ function muukal_astra_render_subcategory_pills_shortcode( $atts ) {
 			'parent_id'         => '',
 			'parent_slug'       => '',
 			'hide_empty'        => 'false',
-			'include_view_all'  => 'true',
+			'include_view_all'  => 'false',
 			'view_all_label'    => 'View All',
 			'promotions_label'  => '',
 			'promotions_url'    => '',
