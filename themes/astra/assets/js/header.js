@@ -148,9 +148,7 @@
       var activeOpenDelay = 220;
       var initialOpenDelay = 70;
       var closeDelay = 240;
-      var switchLockDuration = 360;
       var awaitingSubmenuEntry = false;
-      var switchLockUntil = 0;
 
       function clearTimers() {
         if (openTimer) {
@@ -171,13 +169,11 @@
 
         activeItem = nextItem;
         awaitingSubmenuEntry = !!nextItem;
-        switchLockUntil = nextItem ? Date.now() + switchLockDuration : 0;
       }
 
       function releaseSubmenuLock(item) {
         if (activeItem === item) {
           awaitingSubmenuEntry = false;
-          switchLockUntil = 0;
         }
       }
 
@@ -202,8 +198,7 @@
           if (
             activeItem &&
             activeItem !== item &&
-            awaitingSubmenuEntry &&
-            Date.now() < switchLockUntil
+            awaitingSubmenuEntry
           ) {
             clearTimers();
             return;
@@ -214,7 +209,7 @@
 
         item.addEventListener('mouseleave', function () {
           if (activeItem === item) {
-            if (awaitingSubmenuEntry && Date.now() < switchLockUntil) {
+            if (awaitingSubmenuEntry) {
               clearTimers();
               return;
             }
