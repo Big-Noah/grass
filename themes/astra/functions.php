@@ -858,14 +858,24 @@ function muukal_astra_get_checkout_item_summary( $cart_item, $cart_item_key ) {
 	$product_image = $_product->get_image_id()
 		? wp_get_attachment_image(
 			$_product->get_image_id(),
-			'woocommerce_thumbnail',
+			'full',
 			false,
 			array(
+				'class'    => 'muukal-checkout-review__product-image',
+				'alt'      => wp_strip_all_tags( (string) $product_name ),
 				'loading'  => 'lazy',
 				'decoding' => 'async',
 			)
 		)
-		: $_product->get_image();
+		: wc_placeholder_img(
+			'large',
+			array(
+				'class'    => 'muukal-checkout-review__product-image',
+				'alt'      => wp_strip_all_tags( (string) $product_name ),
+				'loading'  => 'lazy',
+				'decoding' => 'async',
+			)
+		);
 	$item_data_rows = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
 	$frame_color    = '';
 	$frame_size     = '';

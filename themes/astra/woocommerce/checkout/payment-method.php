@@ -62,14 +62,18 @@ $master_logo = content_url( 'plugins/woocommerce/assets/images/payment-methods-c
 
 		<span class="muukal-checkout-payment-card__visual" aria-hidden="true">
 			<?php if ( $is_paypal ) : ?>
-				<img src="<?php echo esc_url( $paypal_logo ); ?>" alt="" />
+				<span class="muukal-checkout-payment-card__brand muukal-checkout-payment-card__brand--paypal">
+					<img src="<?php echo esc_url( $paypal_logo ); ?>" alt="" />
+				</span>
 			<?php elseif ( $is_card ) : ?>
-				<span class="muukal-checkout-payment-card__logos">
-					<span class="muukal-checkout-payment-card__logo-box">
-						<img src="<?php echo esc_url( $visa_logo ); ?>" alt="" />
-					</span>
-					<span class="muukal-checkout-payment-card__logo-box">
-						<img src="<?php echo esc_url( $master_logo ); ?>" alt="" />
+				<span class="muukal-checkout-payment-card__brand muukal-checkout-payment-card__brand--card">
+					<span class="muukal-checkout-payment-card__logos">
+						<span class="muukal-checkout-payment-card__logo-box">
+							<img src="<?php echo esc_url( $visa_logo ); ?>" alt="" />
+						</span>
+						<span class="muukal-checkout-payment-card__logo-box">
+							<img src="<?php echo esc_url( $master_logo ); ?>" alt="" />
+						</span>
 					</span>
 				</span>
 			<?php else : ?>

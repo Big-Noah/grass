@@ -30,15 +30,47 @@ $shipping_cards = muukal_astra_render_checkout_shipping_options();
 						<h2>1. <?php esc_html_e( 'Shipping Address', 'astra' ); ?></h2>
 					</header>
 
-					<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
-
-					<div class="muukal-checkout-customer" id="customer_details">
-						<div class="muukal-checkout-customer__col">
-							<?php do_action( 'woocommerce_checkout_billing' ); ?>
+					<div class="muukal-checkout-address-intro">
+						<div class="muukal-checkout-address-actions">
+							<button type="button" class="muukal-checkout-address-action" data-muukal-address-open="modal"><?php esc_html_e( 'Add New Address', 'astra' ); ?></button>
+							<button type="button" class="muukal-checkout-address-action" data-muukal-address-open="modal"><?php esc_html_e( 'Manage Address', 'astra' ); ?></button>
 						</div>
 
-						<div class="muukal-checkout-customer__col">
-							<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+						<div class="muukal-checkout-address-summary">
+							<div class="muukal-checkout-address-summary__label"><?php esc_html_e( 'Current shipping address', 'astra' ); ?></div>
+							<div class="muukal-checkout-address-summary__content" id="muukal-checkout-address-summary" data-empty-text="<?php esc_attr_e( 'No address added yet. Use Add New Address to fill in the checkout address.', 'astra' ); ?>">
+								<?php esc_html_e( 'No address added yet. Use Add New Address to fill in the checkout address.', 'astra' ); ?>
+							</div>
+						</div>
+					</div>
+
+					<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
+
+					<div class="muukal-checkout-address-modal" id="muukal-checkout-address-modal" aria-hidden="true">
+						<div class="muukal-checkout-address-modal__backdrop" data-muukal-address-close="modal"></div>
+						<div class="muukal-checkout-address-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="muukal-checkout-address-title">
+							<div class="muukal-checkout-address-modal__header">
+								<h3 id="muukal-checkout-address-title"><?php esc_html_e( 'Add New Address', 'astra' ); ?></h3>
+								<button type="button" class="muukal-checkout-address-modal__close" data-muukal-address-close="modal" aria-label="<?php esc_attr_e( 'Close address dialog', 'astra' ); ?>">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+
+							<div class="muukal-checkout-address-modal__body">
+								<div class="muukal-checkout-customer" id="customer_details">
+									<div class="muukal-checkout-customer__col muukal-checkout-customer__col--billing">
+										<?php do_action( 'woocommerce_checkout_billing' ); ?>
+									</div>
+
+									<div class="muukal-checkout-customer__col muukal-checkout-customer__col--shipping">
+										<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+									</div>
+								</div>
+							</div>
+
+							<div class="muukal-checkout-address-modal__footer">
+								<button type="button" class="muukal-checkout-address-modal__confirm" data-muukal-address-confirm="modal"><?php esc_html_e( 'Confirm', 'astra' ); ?></button>
+							</div>
 						</div>
 					</div>
 

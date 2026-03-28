@@ -101,6 +101,60 @@
 	font-size: 14px;
 }
 
+.muukal-checkout-address-intro {
+	display: grid;
+	gap: 16px;
+}
+
+.muukal-checkout-address-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 18px;
+}
+
+.muukal-checkout-address-action {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #ff5a5f;
+	font-size: 13px;
+	line-height: 1.5;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.muukal-checkout-address-action:hover,
+.muukal-checkout-address-action:focus {
+	color: #f04a50;
+}
+
+.muukal-checkout-address-summary {
+	display: grid;
+	gap: 8px;
+	padding: 18px 20px;
+	border: 1px solid #ece6de;
+	background: #fcfbfa;
+}
+
+.muukal-checkout-address-summary__label {
+	color: #1d1d1f;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.muukal-checkout-address-summary__content {
+	display: grid;
+	gap: 4px;
+	color: #625b55;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.muukal-checkout-address-summary__line {
+	display: block;
+}
+
 .muukal-checkout-customer {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -199,6 +253,121 @@
 	right: 8px;
 }
 
+.muukal-checkout-address-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.muukal-checkout-address-modal.is-open {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.muukal-checkout-address-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+}
+
+.muukal-checkout-address-modal__dialog {
+	position: relative;
+	z-index: 1;
+	width: min(760px, 100%);
+	max-height: min(90vh, 920px);
+	overflow: auto;
+	border: 1px solid #d9d3cc;
+	background: #fff;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+}
+
+.muukal-checkout-address-modal__header,
+.muukal-checkout-address-modal__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 16px 18px;
+}
+
+.muukal-checkout-address-modal__header {
+	border-bottom: 1px solid #ece6de;
+}
+
+.muukal-checkout-address-modal__header h3 {
+	margin: 0;
+	color: #1d1d1f;
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 1.35;
+}
+
+.muukal-checkout-address-modal__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #6f675f;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.muukal-checkout-address-modal__body {
+	padding: 18px;
+}
+
+.muukal-checkout-address-modal__body .muukal-checkout-customer {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.muukal-checkout-address-modal__body .muukal-checkout-customer__col {
+	display: grid;
+	gap: 18px;
+}
+
+.muukal-checkout-address-modal__body .muukal-checkout-customer__col--shipping .woocommerce-shipping-fields {
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+.muukal-checkout-address-modal__footer {
+	justify-content: flex-start;
+	border-top: 1px solid #ece6de;
+}
+
+.muukal-checkout-address-modal__confirm {
+	min-width: 130px;
+	min-height: 42px;
+	padding: 0 22px;
+	border: 1px solid #ff5a5f;
+	background: #fff;
+	color: #ff5a5f;
+	font-size: 15px;
+	font-weight: 500;
+	line-height: 1;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+body.muukal-checkout-address-modal-open {
+	overflow: hidden;
+}
+
 .muukal-checkout .woocommerce-shipping-fields {
 	padding: 18px;
 	border: 1px solid #ece6de;
@@ -244,8 +413,16 @@
 
 .muukal-checkout-coupon__button:hover,
 .muukal-checkout-coupon__button:focus {
-	background: #000;
-	border-color: #000;
+	background: #999;
+	border-color: #999;
+	color: #fff;
+}
+
+.woocommerce-checkout .muukal-checkout-coupon__button.button,
+.woocommerce-checkout .muukal-checkout-coupon__button.button:hover,
+.woocommerce-checkout .muukal-checkout-coupon__button.button:focus {
+	background: #999;
+	border-color: #999;
 	color: #fff;
 }
 
@@ -294,12 +471,12 @@
 
 .muukal-checkout-payment-card {
 	position: relative;
-	display: flex;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	justify-content: space-between;
-	gap: 18px;
-	min-height: 92px;
-	padding: 18px;
+	gap: 18px 22px;
+	min-height: 108px;
+	padding: 18px 52px 18px 18px;
 	border: 1px solid #ded9d3;
 	background: #fff;
 	cursor: pointer;
@@ -355,8 +532,8 @@
 	align-items: center;
 	justify-content: flex-end;
 	flex: 0 0 auto;
-	max-width: 180px;
-	min-width: 116px;
+	min-width: 148px;
+	justify-self: end;
 }
 
 .muukal-checkout-payment-card__visual img {
@@ -364,6 +541,27 @@
 	max-width: 100%;
 	height: auto;
 	object-fit: contain;
+}
+
+.muukal-checkout-payment-card__brand {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: 8px 12px;
+	background: rgba(255, 255, 255, 0.72);
+}
+
+.muukal-checkout-payment-card__brand--paypal {
+	min-width: 134px;
+}
+
+.muukal-checkout-payment-card__brand--paypal img {
+	max-width: 108px;
+}
+
+.muukal-checkout-payment-card__brand--card {
+	padding: 0;
 }
 
 .muukal-checkout-payment-card__logos {
@@ -401,12 +599,13 @@
 .muukal-checkout-payment-card__check {
 	position: absolute;
 	right: 14px;
-	bottom: 12px;
+	top: 50%;
+	bottom: auto;
 	width: 22px;
 	height: 22px;
 	color: #ff5a5f;
 	opacity: 0;
-	transform: scale(0.85);
+	transform: translateY(-50%) scale(0.85);
 	transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -428,7 +627,7 @@
 
 .muukal-checkout-payment .wc_payment_method.is-checked .muukal-checkout-payment-card__check {
 	opacity: 1;
-	transform: scale(1);
+	transform: translateY(-50%) scale(1);
 }
 
 .muukal-checkout-payment .payment_box {
@@ -487,7 +686,6 @@
 }
 
 .muukal-checkout-review {
-	border: 1px solid #e7ddd5;
 	background: #fff;
 }
 
@@ -529,13 +727,16 @@
 	display: grid;
 	gap: 10px;
 	align-content: start;
+	justify-items: start;
 }
 
-.muukal-checkout-review__item-media img {
+.muukal-checkout-review__item-media img,
+.muukal-checkout-review__product-image {
 	display: block;
 	width: 100%;
 	height: auto;
-	max-height: 92px;
+	max-width: 132px;
+	max-height: none;
 	object-fit: contain;
 }
 
@@ -706,6 +907,10 @@
 	}
 
 	.muukal-checkout-section__header,
+	.muukal-checkout-address-summary,
+	.muukal-checkout-address-modal__header,
+	.muukal-checkout-address-modal__body,
+	.muukal-checkout-address-modal__footer,
 	.muukal-checkout-payment .payment_box,
 	.muukal-checkout-review__head,
 	.muukal-checkout-review__item,
@@ -720,14 +925,29 @@
 	}
 
 	.muukal-checkout-payment-card {
-		flex-direction: column;
-		align-items: flex-start;
+		grid-template-columns: minmax(0, 1fr);
+		padding-right: 18px;
 	}
 
 	.muukal-checkout-payment-card__visual {
 		max-width: 100%;
 		min-width: 0;
 		justify-content: flex-start;
+		justify-self: start;
+	}
+
+	.muukal-checkout-payment-card__check {
+		top: 14px;
+		right: 14px;
+		transform: scale(0.85);
+	}
+
+	.muukal-checkout-payment .wc_payment_method.is-checked .muukal-checkout-payment-card__check {
+		transform: scale(1);
+	}
+
+	.muukal-checkout-address-modal {
+		padding: 12px;
 	}
 
 	.muukal-checkout-place-order__button {
