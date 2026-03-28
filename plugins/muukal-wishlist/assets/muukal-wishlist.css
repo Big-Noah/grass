@@ -190,23 +190,24 @@
   height: 32px;
   padding: 0;
   gap: 0;
-  border: 1px solid rgba(47, 35, 48, 0.08);
+  border: 1px solid rgba(255, 127, 144, 0.24);
   border-radius: 999px;
-  background: #fff;
-  color: rgba(47, 35, 48, 0.72);
-  box-shadow: 0 6px 16px rgba(47, 35, 48, 0.08);
+  background: rgba(255, 127, 144, 0.12);
+  color: #ef5f78;
+  box-shadow: 0 6px 16px rgba(239, 95, 120, 0.16);
 }
 
 .muukal-wishlist-page__remove:hover,
 .muukal-wishlist-page__remove.is-saved:hover {
-  border-color: rgba(255, 127, 144, 0.28);
-  background: #fff;
-  color: var(--muukal-wishlist-primary);
-  box-shadow: 0 8px 18px rgba(47, 35, 48, 0.1);
+  border-color: rgba(239, 95, 120, 0.34);
+  background: rgba(255, 127, 144, 0.18);
+  color: #e74864;
+  box-shadow: 0 8px 18px rgba(239, 95, 120, 0.2);
 }
 
 .muukal-wishlist-page__remove .muukal-wishlist-manual-button__heart {
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .muukal-wishlist-page__remove .muukal-wishlist-manual-button__label {
