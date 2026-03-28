@@ -139,7 +139,7 @@ function muukal_render_footer( $args ) {
 	$show_service_strip = isset( $args['show_service_strip'] ) ? filter_var( $args['show_service_strip'], FILTER_VALIDATE_BOOLEAN ) : true;
 	$show_newsletter    = isset( $args['show_newsletter'] ) ? filter_var( $args['show_newsletter'], FILTER_VALIDATE_BOOLEAN ) : true;
 	$support_text       = isset( $args['support_text'] ) ? sanitize_text_field( $args['support_text'] ) : 'Have a question? Contact Customer Service Department';
-	$support_email      = isset( $args['support_email'] ) ? sanitize_email( $args['support_email'] ) : 'service@muukal.com';
+	$support_email      = isset( $args['support_email'] ) ? sanitize_email( $args['support_email'] ) : 'service@mdoniver.com';
 	$newsletter_title   = isset( $args['newsletter_title'] ) ? sanitize_text_field( $args['newsletter_title'] ) : 'Sign up to Newsletter';
 	$newsletter_text    = isset( $args['newsletter_text'] ) ? sanitize_text_field( $args['newsletter_text'] ) : 'Be the first to get our best offers & new products';
 	$newsletter_cta     = isset( $args['newsletter_cta'] ) ? sanitize_text_field( $args['newsletter_cta'] ) : 'subscribe';
