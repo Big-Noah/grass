@@ -533,7 +533,11 @@ function muukal_wishlist_get_manual_button_html( $product_id, $class_name = '' )
 		data-label-added="<?php echo esc_attr( $settings['button_label_added'] ); ?>"
 		aria-pressed="<?php echo $is_saved ? 'true' : 'false'; ?>"
 	>
-		<span class="muukal-wishlist-manual-button__heart" aria-hidden="true">&#10084;</span>
+		<span class="muukal-wishlist-manual-button__heart" aria-hidden="true">
+			<svg viewBox="0 0 20 20" focusable="false">
+				<path d="M10 17.25 3.74 11a4.43 4.43 0 0 1 6.26-6.26L10 5.74l1-1a4.43 4.43 0 1 1 6.26 6.26Z"></path>
+			</svg>
+		</span>
 		<span class="muukal-wishlist-manual-button__label"><?php echo esc_html( $is_saved ? $settings['button_label_added'] : $settings['button_label_add'] ); ?></span>
 	</button>
 	<?php
