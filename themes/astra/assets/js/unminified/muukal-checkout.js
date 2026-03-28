@@ -69,6 +69,10 @@
     const phone = getFieldValue("billing_phone");
     const email = getFieldValue("billing_email");
 
+    if (![name, addressOne, addressTwo, locality, phone, email].some(Boolean)) {
+      return [];
+    }
+
     return [name, addressOne, addressTwo, locality, country, phone, email].filter(
       Boolean
     );
