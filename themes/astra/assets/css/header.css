@@ -237,9 +237,14 @@
   color: var(--muukal-accent);
 }
 
-.muukal-header__nav .menu-item-has-children:hover > .sub-menu,
 .muukal-header__nav .menu-item-has-children:focus-within > .sub-menu,
 .muukal-header__nav .menu-item-has-children.is-mega-open > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.muukal-header__nav .muukal-header__menu > li:not(.muukal-header__menu-item--mega):hover > .sub-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
