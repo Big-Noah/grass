@@ -513,6 +513,12 @@ body.muukal-checkout-address-modal-open {
 	list-style: none;
 }
 
+.muukal-checkout-payment .wc_payment_methods::before,
+.muukal-checkout-payment .wc_payment_methods::after {
+	content: none !important;
+	display: none !important;
+}
+
 .muukal-checkout-payment .wc_payment_method {
 	display: block;
 	box-sizing: border-box;
