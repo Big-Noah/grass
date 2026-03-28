@@ -308,9 +308,17 @@
   background: transparent;
   border: 0;
   box-shadow: none;
+  transform: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.muukal-header__nav .muukal-header__menu > .muukal-header__menu-item--mega.is-mega-open > .sub-menu > .muukal-header__mega-column > .sub-menu,
+.muukal-header__nav .muukal-header__menu > .muukal-header__menu-item--mega:focus-within > .sub-menu > .muukal-header__mega-column > .sub-menu {
   opacity: 1;
   visibility: visible;
-  transform: none;
+  pointer-events: auto;
 }
 
 .muukal-header__nav .muukal-header__menu > .muukal-header__menu-item--mega > .sub-menu > .muukal-header__mega-column > .sub-menu > li > a {

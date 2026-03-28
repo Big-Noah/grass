@@ -137,6 +137,7 @@
       }
 
       var desktopItems = header.querySelectorAll('.muukal-header__nav .muukal-header__menu > .menu-item-has-children');
+      var desktopNav = header.querySelector('.muukal-header__nav');
       if (!desktopItems.length) {
         return;
       }
@@ -147,6 +148,9 @@
       var activeOpenDelay = 220;
       var initialOpenDelay = 70;
       var closeDelay = 240;
+      var switchLockDuration = 360;
+      var awaitingSubmenuEntry = false;
+      var switchLockUntil = 0;
 
       function clearTimers() {
         if (openTimer) {
@@ -166,6 +170,15 @@
         });
 
         activeItem = nextItem;
+        awaitingSubmenuEntry = !!nextItem;
+        switchLockUntil = nextItem ? Date.now() + switchLockDuration : 0;
+      }
+
+      function releaseSubmenuLock(item) {
+        if (activeItem === item) {
+          awaitingSubmenuEntry = false;
+          switchLockUntil = 0;
+        }
       }
 
       function queueOpen(item) {
@@ -183,12 +196,29 @@
       }
 
       Array.prototype.forEach.call(desktopItems, function (item) {
+        var submenu = item.querySelector(':scope > .sub-menu');
+
         item.addEventListener('mouseenter', function () {
+          if (
+            activeItem &&
+            activeItem !== item &&
+            awaitingSubmenuEntry &&
+            Date.now() < switchLockUntil
+          ) {
+            clearTimers();
+            return;
+          }
+
           queueOpen(item);
         });
 
         item.addEventListener('mouseleave', function () {
           if (activeItem === item) {
+            if (awaitingSubmenuEntry && Date.now() < switchLockUntil) {
+              clearTimers();
+              return;
+            }
+
             queueClose();
           } else {
             clearTimers();
@@ -207,7 +237,23 @@
             }
           }, 0);
         });
+
+        if (submenu) {
+          submenu.addEventListener('mouseenter', function () {
+            releaseSubmenuLock(item);
+          });
+
+          submenu.addEventListener('mousemove', function () {
+            releaseSubmenuLock(item);
+          });
+        }
       });
+
+      if (desktopNav) {
+        desktopNav.addEventListener('mouseleave', function () {
+          queueClose();
+        });
+      }
 
       document.addEventListener('keydown', function (event) {
         if ('Escape' === event.key) {
