@@ -270,6 +270,31 @@ function muukal_astra_locate_account_form_template( $template, $template_name ) 
 add_filter( 'woocommerce_locate_template', 'muukal_astra_locate_account_form_template', 20, 2 );
 
 /**
+ * Force WooCommerce to use the custom checkout templates from the theme.
+ *
+ * @param string $template Resolved template path.
+ * @param string $template_name Requested template name.
+ * @return string
+ */
+function muukal_astra_locate_checkout_templates( $template, $template_name ) {
+	$custom_templates = array(
+		'checkout/form-checkout.php'  => ASTRA_THEME_DIR . 'woocommerce/checkout/form-checkout.php',
+		'checkout/payment.php'        => ASTRA_THEME_DIR . 'woocommerce/checkout/payment.php',
+		'checkout/payment-method.php' => ASTRA_THEME_DIR . 'woocommerce/checkout/payment-method.php',
+		'checkout/review-order.php'   => ASTRA_THEME_DIR . 'woocommerce/checkout/review-order.php',
+	);
+
+	if ( ! isset( $custom_templates[ $template_name ] ) ) {
+		return $template;
+	}
+
+	$custom_template = $custom_templates[ $template_name ];
+
+	return file_exists( $custom_template ) ? $custom_template : $template;
+}
+add_filter( 'woocommerce_locate_template', 'muukal_astra_locate_checkout_templates', 25, 2 );
+
+/**
  * Force WooCommerce to include the custom account templates at render time.
  *
  * @param string $template Resolved template path.
