@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.2.6
+ * Version: 1.3.0
  * Author: Codex
  */
 
@@ -10,10 +10,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.2.6' );
+define( 'FACEPP_TRYON_VERSION', '1.3.0' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
+define( 'FACEPP_TRYON_PRODUCT_FRAMES_META', '_facepp_tryon_product_frames' );
+define( 'FACEPP_TRYON_PRODUCT_MODELS_META', '_facepp_tryon_product_models' );
 
 function facepp_tryon_defaults() {
 	return array(
@@ -130,13 +132,506 @@ function facepp_tryon_get_settings() {
 	return wp_parse_args( get_option( 'facepp_tryon_settings', array() ), facepp_tryon_defaults() );
 }
 
-function facepp_tryon_build_product_frames( $product_id ) {
-	if ( ! $product_id || ! function_exists( 'muukal_loop_swatch_get_rows' ) ) {
-		return array();
+function facepp_tryon_product_frame_defaults() {
+	return array(
+		'name'        => '',
+		'key'         => '',
+		'source_url'  => '',
+		'processed_url' => '',
+		'thumbnail'   => '',
+		'attachment_id' => 0,
+		'widthFactor' => 2.15,
+		'yOffset'     => 0.02,
+		'fitScale'    => 0.78,
+		'leftEyeX'    => 0.32,
+		'leftEyeY'    => 0.43,
+		'rightEyeX'   => 0.68,
+		'rightEyeY'   => 0.43,
+	);
+}
+
+function facepp_tryon_product_model_defaults() {
+	return array(
+		'name'          => '',
+		'source_url'    => '',
+		'processed_url' => '',
+		'attachment_id' => 0,
+		'detectedEyes'  => array(),
+	);
+}
+
+function facepp_tryon_normalize_product_frame( $entry, $index = 0 ) {
+	$defaults = facepp_tryon_product_frame_defaults();
+	$entry    = is_array( $entry ) ? $entry : array();
+	$name     = ! empty( $entry['name'] ) ? sanitize_text_field( (string) $entry['name'] ) : 'Custom Frame ' . ( $index + 1 );
+	$key      = ! empty( $entry['key'] ) ? sanitize_title( (string) $entry['key'] ) : sanitize_title( $name );
+
+	return array(
+		'name'          => $name,
+		'key'           => $key,
+		'source_url'    => ! empty( $entry['source_url'] ) ? esc_url_raw( (string) $entry['source_url'] ) : '',
+		'processed_url' => ! empty( $entry['processed_url'] ) ? esc_url_raw( (string) $entry['processed_url'] ) : '',
+		'thumbnail'     => ! empty( $entry['thumbnail'] ) ? esc_url_raw( (string) $entry['thumbnail'] ) : '',
+		'attachment_id' => ! empty( $entry['attachment_id'] ) ? absint( $entry['attachment_id'] ) : 0,
+		'widthFactor'   => isset( $entry['widthFactor'] ) ? (float) $entry['widthFactor'] : $defaults['widthFactor'],
+		'yOffset'       => isset( $entry['yOffset'] ) ? (float) $entry['yOffset'] : $defaults['yOffset'],
+		'fitScale'      => isset( $entry['fitScale'] ) ? (float) $entry['fitScale'] : $defaults['fitScale'],
+		'leftEyeX'      => isset( $entry['leftEyeX'] ) ? (float) $entry['leftEyeX'] : $defaults['leftEyeX'],
+		'leftEyeY'      => isset( $entry['leftEyeY'] ) ? (float) $entry['leftEyeY'] : $defaults['leftEyeY'],
+		'rightEyeX'     => isset( $entry['rightEyeX'] ) ? (float) $entry['rightEyeX'] : $defaults['rightEyeX'],
+		'rightEyeY'     => isset( $entry['rightEyeY'] ) ? (float) $entry['rightEyeY'] : $defaults['rightEyeY'],
+	);
+}
+
+function facepp_tryon_normalize_product_model( $entry, $index = 0 ) {
+	$entry = is_array( $entry ) ? $entry : array();
+	$name  = ! empty( $entry['name'] ) ? sanitize_text_field( (string) $entry['name'] ) : 'Custom Model ' . ( $index + 1 );
+	$eyes  = array();
+
+	if ( ! empty( $entry['detectedEyes'] ) && is_array( $entry['detectedEyes'] ) ) {
+		foreach ( array( 'left_eye', 'right_eye' ) as $side ) {
+			if ( empty( $entry['detectedEyes'][ $side ] ) || ! is_array( $entry['detectedEyes'][ $side ] ) ) {
+				continue;
+			}
+
+			$eyes[ $side ] = array(
+				'x' => isset( $entry['detectedEyes'][ $side ]['x'] ) ? (float) $entry['detectedEyes'][ $side ]['x'] : 0,
+				'y' => isset( $entry['detectedEyes'][ $side ]['y'] ) ? (float) $entry['detectedEyes'][ $side ]['y'] : 0,
+			);
+		}
 	}
 
-	$rows   = muukal_loop_swatch_get_rows( $product_id );
+	return array(
+		'name'          => $name,
+		'source_url'    => ! empty( $entry['source_url'] ) ? esc_url_raw( (string) $entry['source_url'] ) : '',
+		'processed_url' => ! empty( $entry['processed_url'] ) ? esc_url_raw( (string) $entry['processed_url'] ) : '',
+		'attachment_id' => ! empty( $entry['attachment_id'] ) ? absint( $entry['attachment_id'] ) : 0,
+		'detectedEyes'  => $eyes,
+	);
+}
+
+function facepp_tryon_get_product_custom_frames( $product_id ) {
+	$stored = get_post_meta( $product_id, FACEPP_TRYON_PRODUCT_FRAMES_META, true );
+	$stored = is_array( $stored ) ? $stored : array();
 	$frames = array();
+
+	foreach ( $stored as $index => $entry ) {
+		$frame = facepp_tryon_normalize_product_frame( $entry, (int) $index );
+
+		if ( '' === $frame['source_url'] && '' === $frame['processed_url'] ) {
+			continue;
+		}
+
+		$frames[] = $frame;
+	}
+
+	return $frames;
+}
+
+function facepp_tryon_get_product_custom_models( $product_id ) {
+	$stored = get_post_meta( $product_id, FACEPP_TRYON_PRODUCT_MODELS_META, true );
+	$stored = is_array( $stored ) ? $stored : array();
+	$models = array();
+
+	foreach ( $stored as $index => $entry ) {
+		$model = facepp_tryon_normalize_product_model( $entry, (int) $index );
+
+		if ( '' === $model['source_url'] && '' === $model['processed_url'] ) {
+			continue;
+		}
+
+		$models[] = $model;
+	}
+
+	return $models;
+}
+
+function facepp_tryon_fetch_attachment_payload( $attachment_id, $fallback_url = '' ) {
+	$attachment_id = absint( $attachment_id );
+	$fallback_url  = esc_url_raw( (string) $fallback_url );
+
+	if ( $attachment_id ) {
+		$file_path = get_attached_file( $attachment_id );
+
+		if ( $file_path && file_exists( $file_path ) ) {
+			$bytes = file_get_contents( $file_path );
+
+			if ( false !== $bytes ) {
+				return array(
+					'bytes' => $bytes,
+					'url'   => wp_get_attachment_url( $attachment_id ) ?: $fallback_url,
+					'mime'  => get_post_mime_type( $attachment_id ) ?: '',
+				);
+			}
+		}
+	}
+
+	if ( '' === $fallback_url ) {
+		return null;
+	}
+
+	$response = wp_remote_get(
+		$fallback_url,
+		array(
+			'timeout'     => 20,
+			'redirection' => 4,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return null;
+	}
+
+	if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return null;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+
+	if ( '' === $body ) {
+		return null;
+	}
+
+	return array(
+		'bytes' => $body,
+		'url'   => $fallback_url,
+		'mime'  => (string) wp_remote_retrieve_header( $response, 'content-type' ),
+	);
+}
+
+function facepp_tryon_create_truecolor_canvas( $width, $height ) {
+	$canvas = imagecreatetruecolor( $width, $height );
+
+	if ( ! $canvas ) {
+		return null;
+	}
+
+	imagealphablending( $canvas, false );
+	imagesavealpha( $canvas, true );
+	$transparent = imagecolorallocatealpha( $canvas, 0, 0, 0, 127 );
+	imagefilledrectangle( $canvas, 0, 0, $width, $height, $transparent );
+
+	return $canvas;
+}
+
+function facepp_tryon_save_generated_png( $image, $product_id, $filename ) {
+	$uploads = wp_upload_dir();
+
+	if ( ! empty( $uploads['error'] ) ) {
+		return '';
+	}
+
+	$directory = trailingslashit( $uploads['basedir'] ) . 'facepp-tryon/product-' . absint( $product_id ) . '/';
+
+	if ( ! wp_mkdir_p( $directory ) ) {
+		return '';
+	}
+
+	$file_path = $directory . sanitize_file_name( $filename );
+
+	if ( ! imagepng( $image, $file_path ) ) {
+		return '';
+	}
+
+	return trailingslashit( $uploads['baseurl'] ) . 'facepp-tryon/product-' . absint( $product_id ) . '/' . basename( $file_path );
+}
+
+function facepp_tryon_prepare_frame_asset( $product_id, $slot, $entry ) {
+	if ( ! function_exists( 'imagecreatefromstring' ) ) {
+		return $entry;
+	}
+
+	$payload = facepp_tryon_fetch_attachment_payload( $entry['attachment_id'], $entry['source_url'] );
+
+	if ( empty( $payload['bytes'] ) ) {
+		return $entry;
+	}
+
+	$image = @imagecreatefromstring( $payload['bytes'] );
+
+	if ( ! $image ) {
+		return $entry;
+	}
+
+	$width   = imagesx( $image );
+	$height  = imagesy( $image );
+	$min_x   = $width;
+	$min_y   = $height;
+	$max_x   = -1;
+	$max_y   = -1;
+
+	for ( $x = 0; $x < $width; $x++ ) {
+		for ( $y = 0; $y < $height; $y++ ) {
+			$rgba  = imagecolorat( $image, $x, $y );
+			$alpha = ( $rgba & 0x7F000000 ) >> 24;
+
+			if ( $alpha >= 126 ) {
+				continue;
+			}
+
+			$min_x = min( $min_x, $x );
+			$min_y = min( $min_y, $y );
+			$max_x = max( $max_x, $x );
+			$max_y = max( $max_y, $y );
+		}
+	}
+
+	if ( $max_x < 0 || $max_y < 0 ) {
+		$min_x = 0;
+		$min_y = 0;
+		$max_x = $width - 1;
+		$max_y = $height - 1;
+	}
+
+	$trim_w = max( 1, $max_x - $min_x + 1 );
+	$trim_h = max( 1, $max_y - $min_y + 1 );
+	$canvas = facepp_tryon_create_truecolor_canvas( $trim_w, $trim_h );
+
+	if ( ! $canvas ) {
+		imagedestroy( $image );
+		return $entry;
+	}
+
+	imagecopy( $canvas, $image, 0, 0, $min_x, $min_y, $trim_w, $trim_h );
+	imagedestroy( $image );
+
+	$file_name = sprintf( 'frame-%d-%d.png', absint( $slot ) + 1, time() );
+	$url       = facepp_tryon_save_generated_png( $canvas, $product_id, $file_name );
+	imagedestroy( $canvas );
+
+	if ( '' === $url ) {
+		return $entry;
+	}
+
+	$entry['processed_url'] = $url;
+	$entry['thumbnail']     = $url;
+
+	return $entry;
+}
+
+function facepp_tryon_detect_face_result( $args ) {
+	$settings   = facepp_tryon_get_settings();
+	$api_key    = isset( $settings['api_key'] ) ? trim( (string) $settings['api_key'] ) : '';
+	$api_secret = isset( $settings['api_secret'] ) ? trim( (string) $settings['api_secret'] ) : '';
+	$endpoint   = isset( $settings['api_endpoint'] ) ? trim( (string) $settings['api_endpoint'] ) : '';
+	$image_data = ! empty( $args['image_base64'] ) ? (string) $args['image_base64'] : '';
+	$image_url  = ! empty( $args['image_url'] ) ? esc_url_raw( (string) $args['image_url'] ) : '';
+
+	if ( '' === $endpoint ) {
+		$endpoint = 'https://api-us.faceplusplus.com/facepp/v3/detect';
+	}
+
+	if ( '' === $api_key || '' === $api_secret ) {
+		return new WP_Error( 'missing_credentials', 'Missing Face++ credentials.' );
+	}
+
+	if ( '' === $image_data && '' === $image_url ) {
+		return new WP_Error( 'invalid_image', 'Invalid image payload.' );
+	}
+
+	$payload = array(
+		'api_key'         => $api_key,
+		'api_secret'      => $api_secret,
+		'return_landmark' => '1',
+	);
+
+	if ( '' !== $image_data ) {
+		$payload['image_base64'] = $image_data;
+	} else {
+		$payload['image_url'] = $image_url;
+	}
+
+	$response = wp_remote_post(
+		$endpoint,
+		array(
+			'timeout' => 20,
+			'body'    => $payload,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+
+	$status = wp_remote_retrieve_response_code( $response );
+	$body   = wp_remote_retrieve_body( $response );
+	$data   = json_decode( $body, true );
+
+	if ( 200 !== $status || ! is_array( $data ) ) {
+		return new WP_Error( 'invalid_response', 'Invalid Face++ response.' );
+	}
+
+	if ( ! empty( $data['error_message'] ) ) {
+		return new WP_Error( 'facepp_error', (string) $data['error_message'] );
+	}
+
+	if ( empty( $data['faces'] ) ) {
+		return new WP_Error( 'no_face', 'No face detected.' );
+	}
+
+	$best_face = null;
+	$max_area  = -1;
+
+	foreach ( $data['faces'] as $face ) {
+		if ( empty( $face['face_rectangle'] ) ) {
+			continue;
+		}
+
+		$area = (float) $face['face_rectangle']['width'] * (float) $face['face_rectangle']['height'];
+
+		if ( $area > $max_area ) {
+			$max_area  = $area;
+			$best_face = $face;
+		}
+	}
+
+	if ( empty( $best_face['landmark']['left_eye_pupil'] ) || empty( $best_face['landmark']['right_eye_pupil'] ) ) {
+		return new WP_Error( 'no_eye_landmark', 'Eye pupil landmarks are missing.' );
+	}
+
+	return array(
+		'left_eye'  => array(
+			'x' => (float) $best_face['landmark']['left_eye_pupil']['x'],
+			'y' => (float) $best_face['landmark']['left_eye_pupil']['y'],
+		),
+		'right_eye' => array(
+			'x' => (float) $best_face['landmark']['right_eye_pupil']['x'],
+			'y' => (float) $best_face['landmark']['right_eye_pupil']['y'],
+		),
+		'face_rectangle' => array(
+			'top'    => (float) $best_face['face_rectangle']['top'],
+			'left'   => (float) $best_face['face_rectangle']['left'],
+			'width'  => (float) $best_face['face_rectangle']['width'],
+			'height' => (float) $best_face['face_rectangle']['height'],
+		),
+	);
+}
+
+function facepp_tryon_prepare_model_asset( $product_id, $slot, $entry ) {
+	if ( ! function_exists( 'imagecreatefromstring' ) ) {
+		return $entry;
+	}
+
+	$payload = facepp_tryon_fetch_attachment_payload( $entry['attachment_id'], $entry['source_url'] );
+
+	if ( empty( $payload['bytes'] ) ) {
+		return $entry;
+	}
+
+	$image = @imagecreatefromstring( $payload['bytes'] );
+
+	if ( ! $image ) {
+		return $entry;
+	}
+
+	$detected = facepp_tryon_detect_face_result(
+		array(
+			'image_base64' => base64_encode( $payload['bytes'] ),
+		)
+	);
+
+	if ( is_wp_error( $detected ) ) {
+		imagedestroy( $image );
+		return $entry;
+	}
+
+	$source_w     = imagesx( $image );
+	$source_h     = imagesy( $image );
+	$target_w     = 350;
+	$target_h     = 410;
+	$target_ratio = $target_w / $target_h;
+	$left_eye     = $detected['left_eye'];
+	$right_eye    = $detected['right_eye'];
+	$face_rect    = $detected['face_rectangle'];
+	$eye_distance = sqrt( pow( $right_eye['x'] - $left_eye['x'], 2 ) + pow( $right_eye['y'] - $left_eye['y'], 2 ) );
+	$center_x     = ( $left_eye['x'] + $right_eye['x'] ) / 2;
+	$eye_center_y = ( $left_eye['y'] + $right_eye['y'] ) / 2;
+	$crop_w       = max( $face_rect['width'] * 2, $eye_distance * 3.4, $source_w * 0.4 );
+	$crop_w       = min( $crop_w, $source_w );
+	$crop_h       = $crop_w / $target_ratio;
+
+	if ( $crop_h > $source_h ) {
+		$crop_h = $source_h;
+		$crop_w = $crop_h * $target_ratio;
+	}
+
+	$crop_x = $center_x - ( $crop_w / 2 );
+	$crop_y = $eye_center_y - ( $crop_h * 0.38 );
+	$crop_x = max( 0, min( $source_w - $crop_w, $crop_x ) );
+	$crop_y = max( 0, min( $source_h - $crop_h, $crop_y ) );
+	$canvas = facepp_tryon_create_truecolor_canvas( $target_w, $target_h );
+
+	if ( ! $canvas ) {
+		imagedestroy( $image );
+		return $entry;
+	}
+
+	imagecopyresampled( $canvas, $image, 0, 0, (int) round( $crop_x ), (int) round( $crop_y ), $target_w, $target_h, (int) round( $crop_w ), (int) round( $crop_h ) );
+	imagedestroy( $image );
+
+	$file_name = sprintf( 'model-%d-%d.png', absint( $slot ) + 1, time() );
+	$url       = facepp_tryon_save_generated_png( $canvas, $product_id, $file_name );
+	imagedestroy( $canvas );
+
+	if ( '' === $url ) {
+		return $entry;
+	}
+
+	$scale_x = $target_w / max( 1, $crop_w );
+	$scale_y = $target_h / max( 1, $crop_h );
+
+	$entry['processed_url'] = $url;
+	$entry['detectedEyes']  = array(
+		'left_eye'  => array(
+			'x' => round( ( $left_eye['x'] - $crop_x ) * $scale_x, 2 ),
+			'y' => round( ( $left_eye['y'] - $crop_y ) * $scale_y, 2 ),
+		),
+		'right_eye' => array(
+			'x' => round( ( $right_eye['x'] - $crop_x ) * $scale_x, 2 ),
+			'y' => round( ( $right_eye['y'] - $crop_y ) * $scale_y, 2 ),
+		),
+	);
+
+	return $entry;
+}
+
+function facepp_tryon_build_product_frames( $product_id ) {
+	$frames = array();
+	$seen   = array();
+
+	if ( $product_id ) {
+		foreach ( facepp_tryon_get_product_custom_frames( $product_id ) as $custom_frame ) {
+			$url = '' !== $custom_frame['processed_url'] ? $custom_frame['processed_url'] : $custom_frame['source_url'];
+
+			if ( '' === $url ) {
+				continue;
+			}
+
+			$key = sanitize_title( $custom_frame['key'] );
+
+			$frames[] = array(
+				'key'         => $key,
+				'name'        => $custom_frame['name'],
+				'url'         => $url,
+				'thumbnail'   => '' !== $custom_frame['thumbnail'] ? $custom_frame['thumbnail'] : $url,
+				'widthFactor' => (float) $custom_frame['widthFactor'],
+				'yOffset'     => (float) $custom_frame['yOffset'],
+				'fitScale'    => (float) $custom_frame['fitScale'],
+				'leftEyeX'    => (float) $custom_frame['leftEyeX'],
+				'leftEyeY'    => (float) $custom_frame['leftEyeY'],
+				'rightEyeX'   => (float) $custom_frame['rightEyeX'],
+				'rightEyeY'   => (float) $custom_frame['rightEyeY'],
+			);
+
+			$seen[ $key ] = true;
+		}
+	}
+
+	if ( ! $product_id || ! function_exists( 'muukal_loop_swatch_get_rows' ) ) {
+		return $frames;
+	}
+
+	$rows = muukal_loop_swatch_get_rows( $product_id );
 
 	foreach ( $rows as $index => $row ) {
 		if ( ! is_array( $row ) ) {
@@ -184,6 +679,10 @@ function facepp_tryon_build_product_frames( $product_id ) {
 				: ( ! empty( $row['variant_slug'] ) ? (string) $row['variant_slug'] : $color_name )
 		);
 
+		if ( isset( $seen[ $key ] ) ) {
+			continue;
+		}
+
 		$frames[] = array(
 			'key'         => $key,
 			'name'        => $color_name,
@@ -197,6 +696,8 @@ function facepp_tryon_build_product_frames( $product_id ) {
 			'rightEyeX'   => 0.68,
 			'rightEyeY'   => 0.43,
 		);
+
+		$seen[ $key ] = true;
 	}
 
 	return $frames;
@@ -242,9 +743,33 @@ function facepp_tryon_get_frames() {
 	return $frames;
 }
 
-function facepp_tryon_get_models() {
+function facepp_tryon_get_models( $product_id = 0 ) {
+	$product_id = absint( $product_id );
+	$models     = array();
+
+	if ( $product_id ) {
+		foreach ( facepp_tryon_get_product_custom_models( $product_id ) as $custom_model ) {
+			$url = '' !== $custom_model['processed_url'] ? $custom_model['processed_url'] : $custom_model['source_url'];
+
+			if ( '' === $url ) {
+				continue;
+			}
+
+			$model = array(
+				'name' => $custom_model['name'],
+				'url'  => $url,
+			);
+
+			if ( ! empty( $custom_model['detectedEyes']['left_eye'] ) && ! empty( $custom_model['detectedEyes']['right_eye'] ) ) {
+				$model['detectedEyes'] = $custom_model['detectedEyes'];
+			}
+
+			$models[] = $model;
+		}
+	}
+
 	$settings = facepp_tryon_get_settings();
-	$models   = array();
+	$extra    = array();
 
 	for ( $i = 1; $i <= 4; $i++ ) {
 		$url = isset( $settings[ 'model_' . $i . '_url' ] ) ? trim( (string) $settings[ 'model_' . $i . '_url' ] ) : '';
@@ -252,17 +777,17 @@ function facepp_tryon_get_models() {
 			continue;
 		}
 
-		$models[] = array(
+		$extra[] = array(
 			'name' => isset( $settings[ 'model_' . $i . '_name' ] ) ? sanitize_text_field( (string) $settings[ 'model_' . $i . '_name' ] ) : 'Model ' . $i,
 			'url'  => esc_url_raw( $url ),
 		);
 	}
 
-	if ( ! empty( $models ) ) {
-		return $models;
+	if ( empty( $extra ) ) {
+		$extra = facepp_tryon_default_models();
 	}
 
-	return facepp_tryon_default_models();
+	return array_merge( $models, $extra );
 }
 
 function facepp_tryon_sanitize_settings( $input ) {
@@ -337,9 +862,13 @@ function facepp_tryon_admin_menu() {
 add_action( 'admin_menu', 'facepp_tryon_admin_menu' );
 
 function facepp_tryon_admin_assets( $hook ) {
-	if ( false === strpos( $hook, 'facepp-tryon' ) ) {
+	$is_plugin_screen  = false !== strpos( $hook, 'facepp-tryon' );
+	$is_product_screen = in_array( $hook, array( 'post.php', 'post-new.php' ), true ) && 'product' === get_post_type();
+
+	if ( ! $is_plugin_screen && ! $is_product_screen ) {
 		return;
 	}
+
 	wp_enqueue_media();
 	wp_enqueue_script( 'facepp-tryon-admin', FACEPP_TRYON_URL . 'assets/admin.js', array( 'jquery' ), FACEPP_TRYON_VERSION, true );
 
@@ -348,6 +877,195 @@ function facepp_tryon_admin_assets( $hook ) {
 	}
 }
 add_action( 'admin_enqueue_scripts', 'facepp_tryon_admin_assets' );
+
+function facepp_tryon_add_product_metabox() {
+	add_meta_box(
+		'facepp-tryon-product-assets',
+		'Face++ Try On Assets',
+		'facepp_tryon_render_product_metabox',
+		'product',
+		'normal',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes_product', 'facepp_tryon_add_product_metabox' );
+
+function facepp_tryon_render_product_metabox( $post ) {
+	$product_id = $post instanceof WP_Post ? $post->ID : 0;
+	$frames     = facepp_tryon_get_product_custom_frames( $product_id );
+	$models     = facepp_tryon_get_product_custom_models( $product_id );
+
+	wp_nonce_field( 'facepp_tryon_product_assets', 'facepp_tryon_product_assets_nonce' );
+	?>
+	<p>Upload custom try-on frame PNGs and model portraits for this product. Existing built-in templates stay available as fallback. If you want a frame to auto-switch with a product color, keep the <strong>Key</strong> aligned with that color's try-on key or slug.</p>
+	<table class="widefat striped" style="margin-bottom:20px;">
+		<thead>
+			<tr>
+				<th colspan="11">Custom Frame PNGs</th>
+			</tr>
+			<tr>
+				<th>Name</th>
+				<th>Key</th>
+				<th>PNG URL</th>
+				<th>Width</th>
+				<th>Y Offset</th>
+				<th>Fit Scale</th>
+				<th>Left X</th>
+				<th>Left Y</th>
+				<th>Right X</th>
+				<th>Right Y</th>
+				<th>Processed</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php for ( $i = 0; $i < 4; $i++ ) : ?>
+				<?php $frame = isset( $frames[ $i ] ) ? $frames[ $i ] : facepp_tryon_product_frame_defaults(); ?>
+				<tr>
+					<td><input type="text" class="widefat" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][name]" value="<?php echo esc_attr( $frame['name'] ); ?>"></td>
+					<td><input type="text" class="widefat" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][key]" value="<?php echo esc_attr( $frame['key'] ); ?>"></td>
+					<td>
+						<input type="url" class="widefat" id="facepp-frame-url-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][source_url]" value="<?php echo esc_attr( $frame['source_url'] ); ?>">
+						<input type="hidden" id="facepp-frame-id-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][attachment_id]" value="<?php echo esc_attr( $frame['attachment_id'] ); ?>">
+						<button type="button" class="button facepp-tryon-pick" data-target="#facepp-frame-url-<?php echo esc_attr( $i ); ?>" data-target-id="#facepp-frame-id-<?php echo esc_attr( $i ); ?>" data-facepp-png="1" style="margin-top:6px;">Choose PNG</button>
+					</td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][widthFactor]" value="<?php echo esc_attr( $frame['widthFactor'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][yOffset]" value="<?php echo esc_attr( $frame['yOffset'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][fitScale]" value="<?php echo esc_attr( $frame['fitScale'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][leftEyeX]" value="<?php echo esc_attr( $frame['leftEyeX'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][leftEyeY]" value="<?php echo esc_attr( $frame['leftEyeY'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][rightEyeX]" value="<?php echo esc_attr( $frame['rightEyeX'] ); ?>"></td>
+					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][rightEyeY]" value="<?php echo esc_attr( $frame['rightEyeY'] ); ?>"></td>
+					<td>
+						<?php if ( ! empty( $frame['processed_url'] ) ) : ?>
+							<a href="<?php echo esc_url( $frame['processed_url'] ); ?>" target="_blank" rel="noreferrer">View trimmed PNG</a>
+						<?php else : ?>
+							<span style="color:#666;">Will auto-trim transparent edge on save</span>
+						<?php endif; ?>
+					</td>
+				</tr>
+			<?php endfor; ?>
+		</tbody>
+	</table>
+
+	<table class="widefat striped">
+		<thead>
+			<tr>
+				<th colspan="4">Custom Model Images</th>
+			</tr>
+			<tr>
+				<th>Name</th>
+				<th>Image URL</th>
+				<th>Processed</th>
+				<th>Detected Eyes</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php for ( $i = 0; $i < 4; $i++ ) : ?>
+				<?php $model = isset( $models[ $i ] ) ? $models[ $i ] : facepp_tryon_product_model_defaults(); ?>
+				<tr>
+					<td><input type="text" class="widefat" name="facepp_tryon_product[models][<?php echo esc_attr( $i ); ?>][name]" value="<?php echo esc_attr( $model['name'] ); ?>"></td>
+					<td>
+						<input type="url" class="widefat" id="facepp-model-url-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[models][<?php echo esc_attr( $i ); ?>][source_url]" value="<?php echo esc_attr( $model['source_url'] ); ?>">
+						<input type="hidden" id="facepp-model-id-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[models][<?php echo esc_attr( $i ); ?>][attachment_id]" value="<?php echo esc_attr( $model['attachment_id'] ); ?>">
+						<button type="button" class="button facepp-tryon-pick" data-target="#facepp-model-url-<?php echo esc_attr( $i ); ?>" data-target-id="#facepp-model-id-<?php echo esc_attr( $i ); ?>" style="margin-top:6px;">Choose image</button>
+					</td>
+					<td>
+						<?php if ( ! empty( $model['processed_url'] ) ) : ?>
+							<a href="<?php echo esc_url( $model['processed_url'] ); ?>" target="_blank" rel="noreferrer">View cropped model</a>
+						<?php else : ?>
+							<span style="color:#666;">Will auto-crop portrait on save</span>
+						<?php endif; ?>
+					</td>
+					<td>
+						<?php if ( ! empty( $model['detectedEyes']['left_eye'] ) && ! empty( $model['detectedEyes']['right_eye'] ) ) : ?>
+							<code>L(<?php echo esc_html( $model['detectedEyes']['left_eye']['x'] . ',' . $model['detectedEyes']['left_eye']['y'] ); ?>)</code><br>
+							<code>R(<?php echo esc_html( $model['detectedEyes']['right_eye']['x'] . ',' . $model['detectedEyes']['right_eye']['y'] ); ?>)</code>
+						<?php else : ?>
+							<span style="color:#666;">Will detect on save if Face++ is available</span>
+						<?php endif; ?>
+					</td>
+				</tr>
+			<?php endfor; ?>
+		</tbody>
+	</table>
+	<p style="margin-top:12px;color:#666;">Frame PNGs are trimmed on save to remove extra transparent area. Model images are cropped into a try-on portrait and saved with stored eye landmarks when Face++ detection succeeds.</p>
+	<?php
+}
+
+function facepp_tryon_save_product_assets( $post_id, $post ) {
+	if ( ! $post instanceof WP_Post || 'product' !== $post->post_type ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['facepp_tryon_product_assets_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['facepp_tryon_product_assets_nonce'] ) ), 'facepp_tryon_product_assets' ) ) {
+		return;
+	}
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	$payload = isset( $_POST['facepp_tryon_product'] ) && is_array( $_POST['facepp_tryon_product'] ) ? wp_unslash( $_POST['facepp_tryon_product'] ) : array();
+	$frames  = array();
+	$models  = array();
+	$stored_frames = facepp_tryon_get_product_custom_frames( $post_id );
+	$stored_models = facepp_tryon_get_product_custom_models( $post_id );
+
+	if ( ! empty( $payload['frames'] ) && is_array( $payload['frames'] ) ) {
+		foreach ( $payload['frames'] as $index => $entry ) {
+			$frame = facepp_tryon_normalize_product_frame( $entry, (int) $index );
+
+			if ( '' === $frame['source_url'] ) {
+				continue;
+			}
+
+			if ( isset( $stored_frames[ $index ] ) && $stored_frames[ $index ]['source_url'] === $frame['source_url'] && '' !== $stored_frames[ $index ]['processed_url'] ) {
+				$frame['processed_url'] = $stored_frames[ $index ]['processed_url'];
+				$frame['thumbnail']     = $stored_frames[ $index ]['thumbnail'];
+				$frames[]               = $frame;
+				continue;
+			}
+
+			$frames[] = facepp_tryon_prepare_frame_asset( $post_id, (int) $index, $frame );
+		}
+	}
+
+	if ( ! empty( $payload['models'] ) && is_array( $payload['models'] ) ) {
+		foreach ( $payload['models'] as $index => $entry ) {
+			$model = facepp_tryon_normalize_product_model( $entry, (int) $index );
+
+			if ( '' === $model['source_url'] ) {
+				continue;
+			}
+
+			if ( isset( $stored_models[ $index ] ) && $stored_models[ $index ]['source_url'] === $model['source_url'] && '' !== $stored_models[ $index ]['processed_url'] ) {
+				$model['processed_url'] = $stored_models[ $index ]['processed_url'];
+				$model['detectedEyes']  = $stored_models[ $index ]['detectedEyes'];
+				$models[]               = $model;
+				continue;
+			}
+
+			$models[] = facepp_tryon_prepare_model_asset( $post_id, (int) $index, $model );
+		}
+	}
+
+	if ( empty( $frames ) ) {
+		delete_post_meta( $post_id, FACEPP_TRYON_PRODUCT_FRAMES_META );
+	} else {
+		update_post_meta( $post_id, FACEPP_TRYON_PRODUCT_FRAMES_META, $frames );
+	}
+
+	if ( empty( $models ) ) {
+		delete_post_meta( $post_id, FACEPP_TRYON_PRODUCT_MODELS_META );
+	} else {
+		update_post_meta( $post_id, FACEPP_TRYON_PRODUCT_MODELS_META, $models );
+	}
+}
+add_action( 'save_post_product', 'facepp_tryon_save_product_assets', 10, 2 );
 
 function facepp_tryon_register_assets() {
 	wp_register_style( 'facepp-tryon-style', FACEPP_TRYON_URL . 'assets/app.css', array(), FACEPP_TRYON_VERSION );
@@ -387,27 +1105,8 @@ function facepp_tryon_enqueue_assets() {
 
 function facepp_tryon_ajax_detect() {
 	check_ajax_referer( 'facepp_tryon_detect', 'nonce' );
-
-	$settings   = facepp_tryon_get_settings();
-	$api_key    = isset( $settings['api_key'] ) ? trim( (string) $settings['api_key'] ) : '';
-	$api_secret = isset( $settings['api_secret'] ) ? trim( (string) $settings['api_secret'] ) : '';
-	$endpoint   = isset( $settings['api_endpoint'] ) ? trim( (string) $settings['api_endpoint'] ) : '';
 	$image_data = isset( $_POST['image'] ) ? (string) wp_unslash( $_POST['image'] ) : '';
 	$image_url  = isset( $_POST['image_url'] ) ? esc_url_raw( (string) wp_unslash( $_POST['image_url'] ) ) : '';
-
-	if ( '' === $endpoint ) {
-		$endpoint = 'https://api-us.faceplusplus.com/facepp/v3/detect';
-	}
-
-	if ( '' === $api_key || '' === $api_secret ) {
-		wp_send_json_error(
-			array(
-				'code'    => 'missing_credentials',
-				'message' => 'Missing Face++ credentials.',
-			),
-			400
-		);
-	}
 
 	if ( ! preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) && '' === $image_url ) {
 		wp_send_json_error(
@@ -419,134 +1118,32 @@ function facepp_tryon_ajax_detect() {
 		);
 	}
 
-	$payload = array(
-		'api_key'         => $api_key,
-		'api_secret'      => $api_secret,
-		'return_landmark' => '1',
-	);
-
-	if ( preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) ) {
-		$payload['image_base64'] = preg_replace( '/^data:image\/(?:png|jpe?g|webp);base64,/', '', $image_data );
-	} else {
-		$image_response = wp_remote_get(
-			$image_url,
-			array(
-				'timeout'     => 20,
-				'redirection' => 4,
-			)
-		);
-
-		if ( is_wp_error( $image_response ) ) {
-			wp_send_json_error(
-				array(
-					'code'    => 'image_fetch_failed',
-					'message' => $image_response->get_error_message(),
-				),
-				502
-			);
-		}
-
-		$image_status = wp_remote_retrieve_response_code( $image_response );
-		$image_body   = wp_remote_retrieve_body( $image_response );
-
-		if ( 200 !== $image_status || '' === $image_body ) {
-			wp_send_json_error(
-				array(
-					'code'    => 'image_fetch_failed',
-					'message' => 'Could not fetch the source image.',
-				),
-				502
-			);
-		}
-
-		$payload['image_base64'] = base64_encode( $image_body );
-	}
-
-	$response = wp_remote_post(
-		$endpoint,
+	$result = facepp_tryon_detect_face_result(
 		array(
-			'timeout' => 20,
-			'body'    => $payload,
+			'image_base64' => preg_match( '/^data:image\/(?:png|jpe?g|webp);base64,/', $image_data ) ? preg_replace( '/^data:image\/(?:png|jpe?g|webp);base64,/', '', $image_data ) : '',
+			'image_url'    => $image_url,
 		)
 	);
 
-	if ( is_wp_error( $response ) ) {
+	if ( is_wp_error( $result ) ) {
 		wp_send_json_error(
 			array(
-				'code'    => 'http_error',
-				'message' => $response->get_error_message(),
+				'code'    => $result->get_error_code(),
+				'message' => $result->get_error_message(),
 			),
-			502
-		);
-	}
-
-	$status = wp_remote_retrieve_response_code( $response );
-	$body   = wp_remote_retrieve_body( $response );
-	$data   = json_decode( $body, true );
-
-	if ( 200 !== $status || ! is_array( $data ) ) {
-		wp_send_json_error(
-			array(
-				'code'    => 'invalid_response',
-				'message' => 'Invalid Face++ response.',
-			),
-			502
-		);
-	}
-
-	if ( ! empty( $data['error_message'] ) ) {
-		wp_send_json_error(
-			array(
-				'code'    => 'facepp_error',
-				'message' => (string) $data['error_message'],
-			),
-			400
-		);
-	}
-
-	if ( empty( $data['faces'] ) ) {
-		wp_send_json_error(
-			array(
-				'code'    => 'no_face',
-				'message' => 'No face detected.',
-			),
-			404
-		);
-	}
-
-	$best_face = null;
-	$max_area  = -1;
-
-	foreach ( $data['faces'] as $face ) {
-		if ( empty( $face['face_rectangle'] ) ) {
-			continue;
-		}
-		$area = (float) $face['face_rectangle']['width'] * (float) $face['face_rectangle']['height'];
-		if ( $area > $max_area ) {
-			$max_area  = $area;
-			$best_face = $face;
-		}
-	}
-
-	if ( empty( $best_face['landmark']['left_eye_pupil'] ) || empty( $best_face['landmark']['right_eye_pupil'] ) ) {
-		wp_send_json_error(
-			array(
-				'code'    => 'no_eye_landmark',
-				'message' => 'Eye pupil landmarks are missing.',
-			),
-			404
+			in_array( $result->get_error_code(), array( 'missing_credentials', 'invalid_image', 'facepp_error' ), true ) ? 400 : 502
 		);
 	}
 
 	wp_send_json_success(
 		array(
 			'left_eye'  => array(
-				'x' => (float) $best_face['landmark']['left_eye_pupil']['x'],
-				'y' => (float) $best_face['landmark']['left_eye_pupil']['y'],
+				'x' => (float) $result['left_eye']['x'],
+				'y' => (float) $result['left_eye']['y'],
 			),
 			'right_eye' => array(
-				'x' => (float) $best_face['landmark']['right_eye_pupil']['x'],
-				'y' => (float) $best_face['landmark']['right_eye_pupil']['y'],
+				'x' => (float) $result['right_eye']['x'],
+				'y' => (float) $result['right_eye']['y'],
 			),
 		)
 	);
@@ -576,7 +1173,7 @@ function facepp_tryon_shortcode( $atts = array() ) {
 	$product_id    = absint( $atts['product_id'] );
 	$default_frame = sanitize_title( (string) $atts['default_frame'] );
 	$instance_id   = wp_unique_id( 'facepp-tryon-' );
-	$models        = facepp_tryon_get_models();
+	$models        = facepp_tryon_get_models( $product_id );
 	$frames        = facepp_tryon_get_instance_frames(
 		array(
 			'product_id' => $product_id,

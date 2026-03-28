@@ -103,6 +103,7 @@
 			drag: null,
 			pendingDetect: false,
 			pendingPreset: null,
+			pendingDetectedEyes: null,
 			detectedEyes: null,
 			loadToken: 0,
 			alignToken: 0,
@@ -381,7 +382,7 @@
 			}
 		}
 
-		function loadPhoto(src, dataUrl, readyMessage, preset, shouldDetect) {
+		function loadPhoto(src, dataUrl, readyMessage, preset, shouldDetect, detectedEyes) {
 			var loadToken = ++state.loadToken;
 
 			state.alignToken += 1;
@@ -389,6 +390,7 @@
 			state.photoSourceUrl = typeof src === 'string' && src.indexOf('data:image/') !== 0 ? src : '';
 			state.pendingPreset = preset || null;
 			state.pendingDetect = !!shouldDetect;
+			state.pendingDetectedEyes = detectedEyes || null;
 			state.detectedEyes = null;
 			state.photoLoaded = false;
 			clearEyeMarkers();
@@ -400,6 +402,17 @@
 				}
 
 				state.photoLoaded = true;
+
+				if (state.pendingDetectedEyes && state.frameLoaded) {
+					state.detectedEyes = state.pendingDetectedEyes;
+					state.pendingDetect = false;
+
+					if (applyStoredEyes()) {
+						setBusy(false);
+						setStatus((globals.i18n || {}).aligned);
+						return;
+					}
+				}
 
 				if (state.pendingDetect && state.frameLoaded) {
 					runAutoAlign({ fallbackPreset: state.pendingPreset });
@@ -445,10 +458,11 @@
 				button.className = 'try_sys_pic facepp-tryon-model-item';
 				button.innerHTML = '<img alt="' + (item.name || 'Model') + '" src="' + item.url + '">';
 				button.addEventListener('click', function () {
+					var storedEyes = item.detectedEyes || null;
 					state.selectedModel = item;
 					setActiveModelButton(button);
 					setBusy(true, (globals.i18n || {}).loadingModel || (globals.i18n || {}).detecting);
-					loadPhoto(item.url, '', (globals.i18n || {}).modelReady || (globals.i18n || {}).photoReady, item.preset || null, true);
+					loadPhoto(item.url, '', (globals.i18n || {}).modelReady || (globals.i18n || {}).photoReady, item.preset || null, !storedEyes, storedEyes);
 				});
 				modelsBox.appendChild(button);
 			});
