@@ -539,24 +539,43 @@ function facepp_tryon_prepare_model_asset( $product_id, $slot, $entry ) {
 	$source_h     = imagesy( $image );
 	$target_w     = 350;
 	$target_h     = 410;
-	$target_ratio = $target_w / $target_h;
 	$left_eye     = $detected['left_eye'];
 	$right_eye    = $detected['right_eye'];
 	$face_rect    = $detected['face_rectangle'];
 	$eye_distance = sqrt( pow( $right_eye['x'] - $left_eye['x'], 2 ) + pow( $right_eye['y'] - $left_eye['y'], 2 ) );
 	$center_x     = ( $left_eye['x'] + $right_eye['x'] ) / 2;
 	$eye_center_y = ( $left_eye['y'] + $right_eye['y'] ) / 2;
-	$crop_w       = max( $face_rect['width'] * 2, $eye_distance * 3.4, $source_w * 0.4 );
-	$crop_w       = min( $crop_w, $source_w );
-	$crop_h       = $crop_w / $target_ratio;
+	$target_eye_distance = 126;
+	$target_eye_y        = 168;
+	$scale               = $target_eye_distance / max( 1, $eye_distance );
+	$scale               = max( 0.45, min( 1.8, $scale ) );
+	$crop_w              = $target_w / $scale;
+	$crop_h              = $target_h / $scale;
+	$min_crop_w          = max( $face_rect['width'] * 1.85, $eye_distance * 2.9 );
+	$min_crop_h          = max( $face_rect['height'] * 1.7, $eye_distance * 3.45 );
+
+	$crop_w = max( $crop_w, $min_crop_w );
+	$crop_h = max( $crop_h, $min_crop_h );
+
+	if ( $crop_w > $source_w ) {
+		$crop_w = $source_w;
+	}
 
 	if ( $crop_h > $source_h ) {
 		$crop_h = $source_h;
-		$crop_w = $crop_h * $target_ratio;
+	}
+
+	$target_ratio = $target_w / $target_h;
+	$current_ratio = $crop_w / max( 1, $crop_h );
+
+	if ( $current_ratio > $target_ratio ) {
+		$crop_w = min( $source_w, $crop_h * $target_ratio );
+	} else {
+		$crop_h = min( $source_h, $crop_w / $target_ratio );
 	}
 
 	$crop_x = $center_x - ( $crop_w / 2 );
-	$crop_y = $eye_center_y - ( $crop_h * 0.38 );
+	$crop_y = $eye_center_y - ( $target_eye_y / $target_h ) * $crop_h;
 	$crop_x = max( 0, min( $source_w - $crop_w, $crop_x ) );
 	$crop_y = max( 0, min( $source_h - $crop_h, $crop_y ) );
 	$canvas = facepp_tryon_create_truecolor_canvas( $target_w, $target_h );
@@ -992,7 +1011,7 @@ function facepp_tryon_render_product_metabox( $post ) {
 						<?php if ( ! empty( $model['processed_url'] ) ) : ?>
 							<a href="<?php echo esc_url( $model['processed_url'] ); ?>" target="_blank" rel="noreferrer">View cropped model</a>
 						<?php else : ?>
-							<span style="color:#666;">Will auto-crop portrait on save</span>
+							<span style="color:#666;">Will normalize portrait crop on save</span>
 						<?php endif; ?>
 					</td>
 					<td>
@@ -1007,7 +1026,7 @@ function facepp_tryon_render_product_metabox( $post ) {
 			<?php endfor; ?>
 		</tbody>
 	</table>
-	<p style="margin-top:12px;color:#666;">Frame PNGs are trimmed on save to remove extra transparent area. Model images are cropped into a try-on portrait and saved with stored eye landmarks when Face++ detection succeeds.</p>
+	<p style="margin-top:12px;color:#666;">Frame PNGs are trimmed on save to remove extra transparent area. Model images are normalized to a consistent eye-line crop and saved with stored eye landmarks when Face++ detection succeeds.</p>
 	<?php
 }
 
