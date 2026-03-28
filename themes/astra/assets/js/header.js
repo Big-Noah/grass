@@ -131,12 +131,96 @@
       });
     }
 
+    function bindDesktopMegaMenuHover() {
+      if (window.matchMedia('(max-width: 1024px)').matches) {
+        return;
+      }
+
+      var desktopItems = header.querySelectorAll('.muukal-header__nav .muukal-header__menu > .menu-item-has-children');
+      if (!desktopItems.length) {
+        return;
+      }
+
+      var openTimer = null;
+      var closeTimer = null;
+      var activeItem = null;
+
+      function clearTimers() {
+        if (openTimer) {
+          window.clearTimeout(openTimer);
+          openTimer = null;
+        }
+
+        if (closeTimer) {
+          window.clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+      }
+
+      function setActiveItem(nextItem) {
+        Array.prototype.forEach.call(desktopItems, function (item) {
+          item.classList.toggle('is-mega-open', item === nextItem);
+        });
+
+        activeItem = nextItem;
+      }
+
+      function queueOpen(item) {
+        clearTimers();
+        openTimer = window.setTimeout(function () {
+          setActiveItem(item);
+        }, 60);
+      }
+
+      function queueClose() {
+        clearTimers();
+        closeTimer = window.setTimeout(function () {
+          setActiveItem(null);
+        }, 180);
+      }
+
+      Array.prototype.forEach.call(desktopItems, function (item) {
+        item.addEventListener('mouseenter', function () {
+          queueOpen(item);
+        });
+
+        item.addEventListener('mouseleave', function () {
+          if (activeItem === item) {
+            queueClose();
+          } else {
+            clearTimers();
+          }
+        });
+
+        item.addEventListener('focusin', function () {
+          clearTimers();
+          setActiveItem(item);
+        });
+
+        item.addEventListener('focusout', function () {
+          window.setTimeout(function () {
+            if (!item.contains(document.activeElement)) {
+              queueClose();
+            }
+          }, 0);
+        });
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if ('Escape' === event.key) {
+          clearTimers();
+          setActiveItem(null);
+        }
+      });
+    }
+
     var searchButton = header.querySelector('[data-muukal-search-toggle]');
     var searchPanel = header.querySelector('#muukal-header-search');
     var menuButton = header.querySelector('[data-muukal-menu-toggle]');
     var menuPanel = header.querySelector('#muukal-header-mobile-menu');
 
     decorateDesktopMegaMenu();
+    bindDesktopMegaMenuHover();
 
     if (searchButton && searchPanel) {
       searchButton.addEventListener('click', function () {
