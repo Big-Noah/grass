@@ -184,19 +184,20 @@
   top: 10px;
   right: 10px;
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 32px;
   min-width: 32px;
   width: 32px;
   height: 32px;
   padding: 0;
   gap: 0;
-  border: 1px solid rgba(255, 127, 144, 0.24);
-  border-radius: 999px;
-  background: rgba(255, 127, 144, 0.12);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='white' d='M10 17.25 3.74 11a4.43 4.43 0 0 1 6.26-6.26L10 5.74l1-1a4.43 4.43 0 1 1 6.26 6.26Z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 14px 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 127, 144, 0.24) !important;
+  border-radius: 50% !important;
+  background: rgba(255, 127, 144, 0.12) !important;
   color: #ef5f78;
   box-shadow: 0 6px 16px rgba(239, 95, 120, 0.16);
   font-size: 0;
@@ -208,10 +209,40 @@
 .muukal-wishlist-page__remove:hover,
 .muukal-wishlist-page__remove.is-saved:hover {
   border-color: rgba(239, 95, 120, 0.34);
-  background: rgba(255, 127, 144, 0.18);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='white' d='M10 17.25 3.74 11a4.43 4.43 0 0 1 6.26-6.26L10 5.74l1-1a4.43 4.43 0 1 1 6.26 6.26Z'/%3E%3C/svg%3E");
+  background: rgba(255, 127, 144, 0.18) !important;
   color: #e74864;
   box-shadow: 0 8px 18px rgba(239, 95, 120, 0.2);
+}
+
+.muukal-wishlist-page__remove::before,
+.muukal-wishlist-page__remove::after,
+.muukal-wishlist-page__remove.is-saved::before,
+.muukal-wishlist-page__remove.is-saved::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.muukal-wishlist-page__remove::before,
+.muukal-wishlist-page__remove.is-saved::before {
+  left: 11px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.muukal-wishlist-page__remove::after,
+.muukal-wishlist-page__remove.is-saved::after {
+  left: 8px;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  border-radius: 50%;
+  box-shadow: 6px 0 0 currentColor;
 }
 
 .muukal-wishlist-page__remove .muukal-wishlist-manual-button__heart {
