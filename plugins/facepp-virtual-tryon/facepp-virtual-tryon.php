@@ -927,6 +927,13 @@ function facepp_tryon_render_product_metabox( $post ) {
 						<input type="url" class="widefat" id="facepp-frame-url-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][source_url]" value="<?php echo esc_attr( $frame['source_url'] ); ?>">
 						<input type="hidden" id="facepp-frame-id-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][attachment_id]" value="<?php echo esc_attr( $frame['attachment_id'] ); ?>">
 						<button type="button" class="button facepp-tryon-pick" data-target="#facepp-frame-url-<?php echo esc_attr( $i ); ?>" data-target-id="#facepp-frame-id-<?php echo esc_attr( $i ); ?>" data-facepp-png="1" style="margin-top:6px;">Choose PNG</button>
+						<div class="facepp-admin-preview facepp-admin-preview--frame" style="margin-top:8px;">
+							<?php if ( ! empty( $frame['processed_url'] ) ) : ?>
+								<img class="facepp-admin-preview__image" src="<?php echo esc_url( $frame['processed_url'] ); ?>" alt="" style="max-width:140px;max-height:60px;display:block;">
+							<?php elseif ( ! empty( $frame['source_url'] ) ) : ?>
+								<img class="facepp-admin-preview__image" src="<?php echo esc_url( $frame['source_url'] ); ?>" alt="" style="max-width:140px;max-height:60px;display:block;">
+							<?php endif; ?>
+						</div>
 					</td>
 					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][widthFactor]" value="<?php echo esc_attr( $frame['widthFactor'] ); ?>"></td>
 					<td><input type="number" step="any" class="small-text" name="facepp_tryon_product[frames][<?php echo esc_attr( $i ); ?>][yOffset]" value="<?php echo esc_attr( $frame['yOffset'] ); ?>"></td>
@@ -941,6 +948,7 @@ function facepp_tryon_render_product_metabox( $post ) {
 						<?php else : ?>
 							<span style="color:#666;">Will auto-trim transparent edge on save</span>
 						<?php endif; ?>
+						<div style="margin-top:6px;color:#666;font-size:12px;">If the frame looks too large on product page, reduce <strong>Fit Scale</strong> first, then fine-tune Left/Right Eye X.</div>
 					</td>
 				</tr>
 			<?php endfor; ?>
@@ -968,6 +976,17 @@ function facepp_tryon_render_product_metabox( $post ) {
 						<input type="url" class="widefat" id="facepp-model-url-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[models][<?php echo esc_attr( $i ); ?>][source_url]" value="<?php echo esc_attr( $model['source_url'] ); ?>">
 						<input type="hidden" id="facepp-model-id-<?php echo esc_attr( $i ); ?>" name="facepp_tryon_product[models][<?php echo esc_attr( $i ); ?>][attachment_id]" value="<?php echo esc_attr( $model['attachment_id'] ); ?>">
 						<button type="button" class="button facepp-tryon-pick" data-target="#facepp-model-url-<?php echo esc_attr( $i ); ?>" data-target-id="#facepp-model-id-<?php echo esc_attr( $i ); ?>" style="margin-top:6px;">Choose image</button>
+						<div
+							class="facepp-admin-preview facepp-admin-preview--model"
+							data-facepp-eyes="<?php echo esc_attr( wp_json_encode( $model['detectedEyes'] ) ); ?>"
+							style="position:relative;margin-top:8px;width:140px;min-height:120px;border:1px solid #ddd;border-radius:6px;overflow:hidden;background:#fafafa;"
+						>
+							<?php if ( ! empty( $model['processed_url'] ) ) : ?>
+								<img class="facepp-admin-preview__image" src="<?php echo esc_url( $model['processed_url'] ); ?>" alt="" style="width:100%;height:auto;display:block;">
+							<?php elseif ( ! empty( $model['source_url'] ) ) : ?>
+								<img class="facepp-admin-preview__image" src="<?php echo esc_url( $model['source_url'] ); ?>" alt="" style="width:100%;height:auto;display:block;">
+							<?php endif; ?>
+						</div>
 					</td>
 					<td>
 						<?php if ( ! empty( $model['processed_url'] ) ) : ?>
