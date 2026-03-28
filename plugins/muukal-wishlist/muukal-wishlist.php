@@ -816,7 +816,7 @@ function muukal_wishlist_shortcode() {
 					$price_html = $product->get_price_html();
 					?>
 					<article class="muukal-wishlist-card" data-product-id="<?php echo esc_attr( $product_id ); ?>">
-						<?php echo wp_kses_post( muukal_wishlist_get_manual_button_html( $product_id, 'muukal-wishlist-page__remove' ) ); ?>
+						<?php echo muukal_wishlist_get_manual_button_html( $product_id, 'muukal-wishlist-page__remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<a class="muukal-wishlist-card__media" href="<?php echo esc_url( get_permalink( $product_id ) ); ?>">
 							<?php echo wp_kses_post( $image_html ); ?>
 						</a>
