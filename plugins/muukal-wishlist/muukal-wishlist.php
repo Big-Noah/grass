@@ -812,23 +812,17 @@ function muukal_wishlist_shortcode() {
 					$price_html = $product->get_price_html();
 					?>
 					<article class="muukal-wishlist-card" data-product-id="<?php echo esc_attr( $product_id ); ?>">
+						<?php echo wp_kses_post( muukal_wishlist_get_manual_button_html( $product_id, 'muukal-wishlist-page__remove' ) ); ?>
 						<a class="muukal-wishlist-card__media" href="<?php echo esc_url( get_permalink( $product_id ) ); ?>">
 							<?php echo wp_kses_post( $image_html ); ?>
 						</a>
-						<div class="muukal-wishlist-card__body">
-							<h3 class="muukal-wishlist-card__title">
-								<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>"><?php echo esc_html( $product->get_name() ); ?></a>
-							</h3>
-							<?php if ( $price_html ) : ?>
-								<p class="muukal-wishlist-card__price"><?php echo wp_kses_post( $price_html ); ?></p>
-							<?php endif; ?>
-							<div class="muukal-wishlist-card__actions">
-								<?php echo wp_kses_post( muukal_wishlist_get_manual_button_html( $product_id, 'muukal-wishlist-page__remove' ) ); ?>
-								<a class="muukal-wishlist-card__view" href="<?php echo esc_url( get_permalink( $product_id ) ); ?>">
-									<?php esc_html_e( 'View product', 'muukal-wishlist' ); ?>
-								</a>
+						<?php if ( $price_html ) : ?>
+							<div class="muukal-wishlist-card__body">
+								<?php if ( $price_html ) : ?>
+									<p class="muukal-wishlist-card__price"><?php echo wp_kses_post( $price_html ); ?></p>
+								<?php endif; ?>
 							</div>
-						</div>
+						<?php endif; ?>
 					</article>
 				<?php endforeach; ?>
 			</div>
