@@ -207,7 +207,7 @@ function muukal_render_footer( $args ) {
 							<?php if ( $logo_markup ) : ?>
 								<?php echo $logo_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php else : ?>
-								<img src="<?php echo esc_url( $asset_base . 'logo_n.png' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="lazy" decoding="async">
+								<span class="muukal-footer__logo-text"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
 							<?php endif; ?>
 						</a>
 

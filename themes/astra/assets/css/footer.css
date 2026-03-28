@@ -175,6 +175,20 @@
   height: auto;
 }
 
+.muukal-footer__logo-image {
+  display: block;
+  width: 150px;
+  height: auto;
+}
+
+.muukal-footer__logo-text {
+  color: var(--muukal-footer-accent);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .muukal-footer__support {
   margin-top: 18px;
 }
