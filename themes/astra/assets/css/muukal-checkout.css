@@ -53,6 +53,14 @@
 	box-sizing: border-box;
 }
 
+.woocommerce-checkout .muukal-checkout-sidebar .woocommerce-checkout-review-order,
+.woocommerce-checkout .muukal-checkout-sidebar #order_review,
+.woocommerce-checkout .muukal-checkout-sidebar .woocommerce-checkout-review-order-table {
+	float: none;
+	width: 100%;
+	max-width: none;
+}
+
 .muukal-checkout-main {
 	display: grid;
 	gap: 34px;
