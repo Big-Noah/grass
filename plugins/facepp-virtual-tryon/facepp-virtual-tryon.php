@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Face++ Virtual Try On
  * Description: Independent virtual try-on plugin using Face++ eye landmarks for glasses alignment.
- * Version: 1.2.5
+ * Version: 1.2.6
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FACEPP_TRYON_VERSION', '1.2.5' );
+define( 'FACEPP_TRYON_VERSION', '1.2.6' );
 define( 'FACEPP_TRYON_FILE', __FILE__ );
 define( 'FACEPP_TRYON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FACEPP_TRYON_URL', plugin_dir_url( __FILE__ ) );
@@ -608,7 +608,14 @@ function facepp_tryon_shortcode( $atts = array() ) {
 			<div class="facepp-tryon-mask" data-close="1"></div>
 			<div class="facepp-tryon-dialog" role="dialog" aria-modal="true">
 				<div class="facepp-tryon-header">
-					<button class="facepp-tryon-close" type="button" data-close="1" aria-label="Close">&times;</button>
+					<button class="facepp-tryon-close" type="button" data-close="1" aria-label="Close">
+						<span class="facepp-tryon-close-icon" aria-hidden="true">
+							<svg viewBox="0 0 20 20" focusable="false">
+								<path d="M5 5l10 10"></path>
+								<path d="M15 5L5 15"></path>
+							</svg>
+						</span>
+					</button>
 					<h4 class="facepp-tryon-title"><?php echo esc_html( $modal_title ); ?></h4>
 				</div>
 				<div class="facepp-tryon-main">
