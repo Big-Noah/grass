@@ -619,6 +619,111 @@ function muukal_astra_prepare_checkout_hooks() {
 add_action( 'wp', 'muukal_astra_prepare_checkout_hooks' );
 
 /**
+ * Simplify the custom checkout address modal fields so they fit the desired
+ * modal layout instead of WooCommerce's default long-form checkout styling.
+ *
+ * @param array<string, array<string, array<string, mixed>>> $fields Checkout fields.
+ * @return array<string, array<string, array<string, mixed>>>
+ */
+function muukal_astra_customize_checkout_fields( $fields ) {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) ) {
+		return $fields;
+	}
+
+	unset( $fields['billing']['billing_company'] );
+	unset( $fields['order']['order_comments'] );
+
+	$field_updates = array(
+		'billing_first_name' => array(
+			'placeholder' => __( 'First Name', 'astra' ),
+			'class'       => array( 'form-row-first' ),
+			'priority'    => 10,
+		),
+		'billing_last_name'  => array(
+			'placeholder' => __( 'Last Name', 'astra' ),
+			'class'       => array( 'form-row-last' ),
+			'priority'    => 20,
+		),
+		'billing_country'    => array(
+			'label'       => __( 'Country', 'astra' ),
+			'placeholder' => __( 'Please Choose Country', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 30,
+		),
+		'billing_address_1'  => array(
+			'label'       => __( 'Address Line 1', 'astra' ),
+			'placeholder' => __( 'Address Line 1', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 40,
+		),
+		'billing_address_2'  => array(
+			'label'       => __( 'Address Line 2', 'astra' ),
+			'placeholder' => __( 'Address Line 2', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 50,
+		),
+		'billing_city'       => array(
+			'label'       => __( 'City', 'astra' ),
+			'placeholder' => __( 'City', 'astra' ),
+			'class'       => array( 'form-row-first' ),
+			'priority'    => 60,
+		),
+		'billing_postcode'   => array(
+			'label'       => __( 'Post/Zip Code', 'astra' ),
+			'placeholder' => __( 'Post/Zip Code', 'astra' ),
+			'class'       => array( 'form-row-last' ),
+			'priority'    => 70,
+		),
+		'billing_state'      => array(
+			'label'       => __( 'State/Province', 'astra' ),
+			'placeholder' => __( 'State/Province', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 80,
+		),
+		'billing_phone'      => array(
+			'label'       => __( 'Phone Number', 'astra' ),
+			'placeholder' => __( 'Phone Number', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 90,
+		),
+		'billing_email'      => array(
+			'label'       => __( 'Email Address', 'astra' ),
+			'placeholder' => __( 'Email Address', 'astra' ),
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => 100,
+		),
+	);
+
+	foreach ( $field_updates as $field_key => $updates ) {
+		if ( ! isset( $fields['billing'][ $field_key ] ) || ! is_array( $fields['billing'][ $field_key ] ) ) {
+			continue;
+		}
+
+		$fields['billing'][ $field_key ] = array_merge( $fields['billing'][ $field_key ], $updates );
+	}
+
+	return $fields;
+}
+add_filter( 'woocommerce_checkout_fields', 'muukal_astra_customize_checkout_fields', 20 );
+
+/**
+ * Start checkout country selects empty so the address modal can use its own
+ * explicit country placeholder instead of the store base country.
+ *
+ * @param string $country Default checkout country.
+ * @return string
+ */
+function muukal_astra_clear_default_checkout_country( $country ) {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) ) {
+		return $country;
+	}
+
+	return '';
+}
+add_filter( 'default_checkout_billing_country', 'muukal_astra_clear_default_checkout_country' );
+add_filter( 'default_checkout_shipping_country', 'muukal_astra_clear_default_checkout_country' );
+
+/**
  * Get the first cart product ID to drive the custom shipping selector.
  *
  * @return int

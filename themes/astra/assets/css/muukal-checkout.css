@@ -294,9 +294,9 @@
 .muukal-checkout-address-modal__dialog {
 	position: relative;
 	z-index: 1;
-	width: min(760px, 100%);
-	max-height: min(90vh, 920px);
-	overflow: auto;
+	width: min(560px, 100%);
+	max-height: min(90vh, 860px);
+	overflow: visible;
 	border: 1px solid #d9d3cc;
 	background: #fff;
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
@@ -308,7 +308,7 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	padding: 16px 18px;
+	padding: 16px 20px;
 }
 
 .muukal-checkout-address-modal__header {
@@ -339,7 +339,10 @@
 }
 
 .muukal-checkout-address-modal__body {
-	padding: 18px;
+	max-height: min(68vh, 640px);
+	padding: 20px;
+	overflow: auto;
+	overscroll-behavior: contain;
 }
 
 .muukal-checkout-address-modal__body .muukal-checkout-customer {
@@ -348,13 +351,45 @@
 
 .muukal-checkout-address-modal__body .muukal-checkout-customer__col {
 	display: grid;
-	gap: 18px;
+	gap: 0;
 }
 
 .muukal-checkout-address-modal__body .muukal-checkout-customer__col--shipping .woocommerce-shipping-fields {
 	padding: 0;
 	border: 0;
 	background: transparent;
+}
+
+.muukal-checkout-address-modal__body .woocommerce-billing-fields,
+.muukal-checkout-address-modal__body .woocommerce-shipping-fields,
+.muukal-checkout-address-modal__body .woocommerce-additional-fields {
+	gap: 0;
+}
+
+.muukal-checkout-address-modal__body .woocommerce-billing-fields__field-wrapper,
+.muukal-checkout-address-modal__body .woocommerce-shipping-fields__field-wrapper,
+.muukal-checkout-address-modal__body .woocommerce-additional-fields__field-wrapper {
+	gap: 14px 16px;
+}
+
+.muukal-checkout-address-modal__body .form-row label {
+	margin-bottom: 6px;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.muukal-checkout-address-modal__body input[type="text"],
+.muukal-checkout-address-modal__body input[type="email"],
+.muukal-checkout-address-modal__body input[type="tel"],
+.muukal-checkout-address-modal__body textarea,
+.muukal-checkout-address-modal__body select {
+	min-height: 42px;
+	padding: 10px 12px;
+	font-size: 14px;
+}
+
+.muukal-checkout-address-modal__body textarea {
+	min-height: 88px;
 }
 
 .muukal-checkout-address-modal__footer {
@@ -471,6 +506,7 @@ body.muukal-checkout-address-modal-open {
 .muukal-checkout-payment .wc_payment_methods {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: stretch;
 	gap: 18px 22px;
 	margin: 0;
 	padding: 0;
@@ -479,8 +515,17 @@ body.muukal-checkout-address-modal-open {
 
 .muukal-checkout-payment .wc_payment_method {
 	display: block;
-	flex: 1 1 calc(50% - 11px);
-	margin: 0;
+	box-sizing: border-box;
+	flex: 0 0 calc(50% - 11px) !important;
+	width: calc(50% - 11px) !important;
+	max-width: calc(50% - 11px) !important;
+	margin: 0 !important;
+	float: none !important;
+	clear: none !important;
+}
+
+.muukal-checkout-payment .wc_payment_method > label {
+	width: 100%;
 }
 
 .muukal-checkout-payment-card {
@@ -490,9 +535,11 @@ body.muukal-checkout-address-modal-open {
 	align-items: center;
 	gap: 18px 22px;
 	min-height: 108px;
+	width: 100%;
 	padding: 18px 52px 18px 18px;
 	border: 1px solid #ded9d3;
 	background: #fff;
+	box-sizing: border-box;
 	cursor: pointer;
 	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -878,7 +925,9 @@ body.muukal-checkout-address-modal-open {
 	}
 
 	.muukal-checkout-payment .wc_payment_method {
-		flex-basis: 100%;
+		flex: 0 0 100% !important;
+		width: 100% !important;
+		max-width: 100% !important;
 	}
 
 	.muukal-checkout-review__item-media img {
@@ -965,6 +1014,10 @@ body.muukal-checkout-address-modal-open {
 
 	.muukal-checkout-address-modal {
 		padding: 12px;
+	}
+
+	.muukal-checkout-address-modal__body {
+		padding: 16px;
 	}
 
 	.muukal-checkout-place-order__button {

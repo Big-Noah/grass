@@ -33,7 +33,6 @@ $shipping_cards = muukal_astra_render_checkout_shipping_options();
 					<div class="muukal-checkout-address-intro">
 						<div class="muukal-checkout-address-actions">
 							<button type="button" class="muukal-checkout-address-action" data-muukal-address-open="modal"><?php esc_html_e( 'Add New Address', 'astra' ); ?></button>
-							<button type="button" class="muukal-checkout-address-action" data-muukal-address-open="modal"><?php esc_html_e( 'Manage Address', 'astra' ); ?></button>
 						</div>
 
 						<div class="muukal-checkout-address-summary">

@@ -33,30 +33,26 @@
       : "billing";
   }
 
-  function initAddressModalSelects() {
+  function normalizeAddressModalSelects() {
     const modal = $(addressModalSelector);
-    const dialog = modal.find(".muukal-checkout-address-modal__dialog");
 
-    if (!modal.length || !dialog.length || !$.fn.selectWoo) {
+    if (!modal.length) {
       return;
     }
 
     modal.find("select").each(function () {
       const select = $(this);
-      const currentValue = select.val();
 
-      if (select.hasClass("select2-hidden-accessible")) {
-        select.selectWoo("destroy");
+      if ($.fn.selectWoo && select.hasClass("select2-hidden-accessible")) {
+        try {
+          select.selectWoo("destroy");
+        } catch (error) {
+          // Ignore selectWoo teardown errors and keep the native select visible.
+        }
       }
 
-      select.selectWoo({
-        width: "100%",
-        dropdownParent: dialog,
-      });
-
-      if (typeof currentValue !== "undefined") {
-        select.val(currentValue).trigger("change.select2");
-      }
+      select.removeClass("select2-hidden-accessible").show();
+      select.siblings(".select2").remove();
     });
   }
 
@@ -138,7 +134,7 @@
     modal.addClass(modalOpenClass).attr("aria-hidden", "false");
     $("body").addClass(bodyModalOpenClass);
     window.setTimeout(function () {
-      initAddressModalSelects();
+      normalizeAddressModalSelects();
       modal.find("input, select, textarea").filter(":visible").first().trigger("focus");
     }, 0);
   }
@@ -204,11 +200,12 @@
   $(document.body).on("updated_checkout", function () {
     syncCheckedPaymentCards();
     syncAddressSummary();
+    normalizeAddressModalSelects();
   });
 
   $(function () {
     syncCheckedPaymentCards();
     syncAddressSummary();
-    initAddressModalSelects();
+    normalizeAddressModalSelects();
   });
 })(jQuery);
