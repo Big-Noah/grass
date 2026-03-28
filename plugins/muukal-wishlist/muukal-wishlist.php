@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Muukal Wishlist
  * Description: Wishlist service layer for existing Muukal render templates, with area toggles, shortcodes, and a dedicated wishlist page.
- * Version: 0.2.0
+ * Version: 0.2.1
  * Author: Codex
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MUUKAL_WISHLIST_VERSION', '0.2.0' );
+define( 'MUUKAL_WISHLIST_VERSION', '0.2.1' );
 define( 'MUUKAL_WISHLIST_FILE', __FILE__ );
 define( 'MUUKAL_WISHLIST_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUUKAL_WISHLIST_URL', plugin_dir_url( __FILE__ ) );
@@ -781,7 +781,34 @@ function muukal_wishlist_shortcode() {
 				<?php foreach ( $products as $product ) : ?>
 					<?php
 					$product_id = $product->get_id();
-					$image_html = $product->get_image( 'woocommerce_thumbnail' );
+					$image_id   = $product->get_image_id();
+					$image_html = '';
+
+					if ( $image_id ) {
+						$image_html = wp_get_attachment_image(
+							$image_id,
+							'large',
+							false,
+							array(
+								'class'    => 'muukal-wishlist-card__image',
+								'loading'  => 'lazy',
+								'decoding' => 'async',
+								'alt'      => $product->get_name(),
+							)
+						);
+					}
+
+					if ( ! $image_html ) {
+						$image_html = wc_placeholder_img(
+							'large',
+							array(
+								'class'    => 'muukal-wishlist-card__image',
+								'loading'  => 'lazy',
+								'decoding' => 'async',
+							)
+						);
+					}
+
 					$price_html = $product->get_price_html();
 					?>
 					<article class="muukal-wishlist-card" data-product-id="<?php echo esc_attr( $product_id ); ?>">
