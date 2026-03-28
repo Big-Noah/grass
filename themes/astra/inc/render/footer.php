@@ -152,6 +152,8 @@ function muukal_render_footer( $args ) {
 	$link_groups   = muukal_footer_default_link_groups();
 	$social_links  = muukal_footer_social_links();
 	$star_icon     = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.75l2.55 5.17 5.71.83-4.13 4.03.98 5.69L10 14.79l-5.11 2.68.98-5.69L1.74 7.75l5.71-.83L10 1.75Z"></path></svg>';
+	$logo_id       = get_theme_mod( 'custom_logo' );
+	$logo_markup   = $logo_id ? wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'muukal-footer__logo-image' ) ) : '';
 
 	ob_start();
 	?>
@@ -202,7 +204,11 @@ function muukal_render_footer( $args ) {
 				<div class="muukal-footer__main">
 					<div class="muukal-footer__brand">
 						<a class="muukal-footer__logo" href="<?php echo $link_url; ?>">
-							<img src="<?php echo esc_url( $asset_base . 'logo_n.png' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="lazy" decoding="async">
+							<?php if ( $logo_markup ) : ?>
+								<?php echo $logo_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php else : ?>
+								<img src="<?php echo esc_url( $asset_base . 'logo_n.png' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="lazy" decoding="async">
+							<?php endif; ?>
 						</a>
 
 						<div class="muukal-footer__support">
