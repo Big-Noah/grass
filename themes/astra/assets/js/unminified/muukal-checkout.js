@@ -49,6 +49,9 @@
 
   function buildAddressSummary() {
     const prefix = getActiveAddressPrefix();
+    const city = getFieldValue(prefix + "_city");
+    const state = getFieldValue(prefix + "_state");
+    const postcode = getFieldValue(prefix + "_postcode");
     const name = $.trim(
       [getFieldValue(prefix + "_first_name"), getFieldValue(prefix + "_last_name")]
         .filter(Boolean)
@@ -57,19 +60,13 @@
     const addressOne = getFieldValue(prefix + "_address_1");
     const addressTwo = getFieldValue(prefix + "_address_2");
     const locality = $.trim(
-      [
-        getFieldValue(prefix + "_city"),
-        getFieldValue(prefix + "_state"),
-        getFieldValue(prefix + "_postcode"),
-      ]
-        .filter(Boolean)
-        .join(", ")
+      [city, state, postcode].filter(Boolean).join(", ")
     );
     const country = getFieldValue(prefix + "_country");
     const phone = getFieldValue("billing_phone");
     const email = getFieldValue("billing_email");
 
-    if (![name, addressOne, addressTwo, locality, phone, email].some(Boolean)) {
+    if (![name, addressOne, addressTwo, city, postcode, phone, email].some(Boolean)) {
       return [];
     }
 
