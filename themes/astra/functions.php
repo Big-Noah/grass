@@ -246,6 +246,123 @@ function muukal_astra_enqueue_account_assets() {
 add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_account_assets', 40 );
 
 /**
+ * Force WooCommerce archive pages to use a full-width outer container.
+ *
+ * Astra injects a max-width on `.ast-woo-shop-archive .site-content > .ast-container`
+ * from the Customizer, so we override it late on product archive screens only.
+ */
+function muukal_astra_is_product_archive_request() {
+	$queried_object = get_queried_object();
+
+	if ( function_exists( 'is_shop' ) && is_shop() ) {
+		return true;
+	}
+
+	if ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() ) {
+		return true;
+	}
+
+	if ( $queried_object instanceof WP_Term && 'product_cat' === $queried_object->taxonomy ) {
+		return true;
+	}
+
+	if ( get_query_var( 'product_cat' ) ) {
+		return true;
+	}
+
+	return isset( $_GET['product_cat'] ) && '' !== wp_unslash( $_GET['product_cat'] );
+}
+
+/**
+ * Force WooCommerce archive pages to use a full-width outer container.
+ *
+ * Astra injects a max-width on `.ast-woo-shop-archive .site-content > .ast-container`
+ * from the Customizer, so we override it late on product archive screens only.
+ */
+function muukal_astra_force_fullwidth_shop_archive() {
+	if ( ! function_exists( 'is_woocommerce' ) ) {
+		return;
+	}
+
+	if ( ! muukal_astra_is_product_archive_request() ) {
+		return;
+	}
+
+	$inline_css = '
+		.ast-woo-shop-archive .site-content > .ast-container {
+			width: 100% !important;
+			max-width: 100% !important;
+			padding-left: 0 !important;
+			padding-right: 0 !important;
+		}
+
+		.ast-woo-shop-archive .site-content .ast-woocommerce-container {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.ast-woo-shop-archive .site-content .muukal-filter-archive.product-area {
+			padding-left: 32px;
+			padding-right: 32px;
+		}
+
+		@media (max-width: 921px) {
+			.ast-woo-shop-archive .site-content .muukal-filter-archive.product-area {
+				padding-left: 20px;
+				padding-right: 20px;
+			}
+		}
+	';
+
+	wp_add_inline_style( 'astra-theme-css', $inline_css );
+}
+add_action( 'wp_enqueue_scripts', 'muukal_astra_force_fullwidth_shop_archive', 99 );
+
+/**
+ * Print a hard override for the WooCommerce archive outer container.
+ *
+ * Some Astra dynamic CSS is rendered after the normal enqueue stack, so we keep
+ * a small scoped override in the document head for product archive pages.
+ */
+function muukal_astra_print_fullwidth_shop_archive_css() {
+	if ( ! function_exists( 'is_woocommerce' ) ) {
+		return;
+	}
+
+	if ( ! muukal_astra_is_product_archive_request() ) {
+		return;
+	}
+	?>
+	<style id="muukal-fullwidth-shop-archive">
+		.ast-woo-shop-archive .site-content > .ast-container {
+			width: 100% !important;
+			max-width: 100% !important;
+			padding-left: 0 !important;
+			padding-right: 0 !important;
+		}
+
+		.ast-woo-shop-archive .site-content .ast-woocommerce-container {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.ast-woo-shop-archive .site-content .muukal-filter-archive.product-area {
+			padding-left: 32px;
+			padding-right: 32px;
+		}
+
+		@media (max-width: 921px) {
+			.ast-woo-shop-archive .site-content .muukal-filter-archive.product-area {
+				padding-left: 20px;
+				padding-right: 20px;
+			}
+		}
+	</style>
+	<?php
+}
+add_action( 'wp_head', 'muukal_astra_print_fullwidth_shop_archive_css', 999 );
+
+/**
  * Force WooCommerce to use the custom account form template from the theme.
  *
  * @param string $template Resolved template path.

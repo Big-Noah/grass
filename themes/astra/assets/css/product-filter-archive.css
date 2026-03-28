@@ -1,3 +1,20 @@
+.ast-woo-shop-archive .site-content > .ast-container {
+	width: 100%;
+	max-width: 100%;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.ast-woo-shop-archive .site-content .ast-woocommerce-container {
+	width: 100%;
+	max-width: 100%;
+}
+
+.ast-woo-shop-archive .site-content .muukal-filter-archive.product-area {
+	padding-left: 32px;
+	padding-right: 32px;
+}
+
 .muukal-filter-archive {
 	display: flex;
 	flex-direction: column;
