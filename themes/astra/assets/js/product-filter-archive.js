@@ -76,12 +76,97 @@
 		}
 	}
 
+	function getSliderContext( slider ) {
+		return {
+			minRange: slider.querySelector( '.muukal-price-range-min' ),
+			maxRange: slider.querySelector( '.muukal-price-range-max' ),
+			minHandle: slider.querySelector( '.muukal-price-handle-min' ),
+			maxHandle: slider.querySelector( '.muukal-price-handle-max' ),
+			minBound: Number( slider.dataset.min || 0 ),
+			maxBound: Number( slider.dataset.max || 0 )
+		};
+	}
+
+	function valueFromPointer( slider, clientX, minBound, maxBound ) {
+		const rect = slider.getBoundingClientRect();
+		const ratio = rect.width ? Math.min( Math.max( ( clientX - rect.left ) / rect.width, 0 ), 1 ) : 0;
+
+		return Math.round( minBound + ratio * ( maxBound - minBound ) );
+	}
+
+	function startHandleDrag( slider, handleType, startEvent ) {
+		const context = getSliderContext( slider );
+		const handle = handleType === 'min' ? context.minHandle : context.maxHandle;
+
+		if ( ! handle ) {
+			return;
+		}
+
+		handle.classList.add( 'is-dragging' );
+
+		function updateFromClientX( clientX ) {
+			const nextValue = valueFromPointer( slider, clientX, context.minBound, context.maxBound );
+			let minValue = Number( context.minRange.value || context.minBound );
+			let maxValue = Number( context.maxRange.value || context.maxBound );
+
+			if ( handleType === 'min' ) {
+				minValue = Math.min( nextValue, maxValue );
+				context.minRange.value = String( minValue );
+			} else {
+				maxValue = Math.max( nextValue, minValue );
+				context.maxRange.value = String( maxValue );
+			}
+
+			updatePriceSlider( slider );
+		}
+
+		function onPointerMove( moveEvent ) {
+			updateFromClientX( moveEvent.clientX );
+		}
+
+		function stopDrag() {
+			handle.classList.remove( 'is-dragging' );
+			window.removeEventListener( 'pointermove', onPointerMove );
+			window.removeEventListener( 'pointerup', stopDrag );
+			window.removeEventListener( 'pointercancel', stopDrag );
+		}
+
+		updateFromClientX( startEvent.clientX );
+		window.addEventListener( 'pointermove', onPointerMove );
+		window.addEventListener( 'pointerup', stopDrag );
+		window.addEventListener( 'pointercancel', stopDrag );
+	}
+
 	function bindPriceSliders( root ) {
 		root.querySelectorAll( '.muukal-price-slider' ).forEach( function ( slider ) {
-			slider.querySelectorAll( '.muukal-price-range' ).forEach( function ( input ) {
-				input.addEventListener( 'input', function () {
-					updatePriceSlider( slider );
+			const context = getSliderContext( slider );
+
+			if ( context.minHandle ) {
+				context.minHandle.addEventListener( 'pointerdown', function ( event ) {
+					event.preventDefault();
+					startHandleDrag( slider, 'min', event );
 				} );
+			}
+
+			if ( context.maxHandle ) {
+				context.maxHandle.addEventListener( 'pointerdown', function ( event ) {
+					event.preventDefault();
+					startHandleDrag( slider, 'max', event );
+				} );
+			}
+
+			slider.addEventListener( 'pointerdown', function ( event ) {
+				if ( event.target.closest( '.muukal-price-handle' ) ) {
+					return;
+				}
+
+				const minValue = Number( context.minRange.value || context.minBound );
+				const maxValue = Number( context.maxRange.value || context.maxBound );
+				const nextValue = valueFromPointer( slider, event.clientX, context.minBound, context.maxBound );
+				const targetHandle = Math.abs( nextValue - minValue ) <= Math.abs( nextValue - maxValue ) ? 'min' : 'max';
+
+				event.preventDefault();
+				startHandleDrag( slider, targetHandle, event );
 			} );
 
 			updatePriceSlider( slider );

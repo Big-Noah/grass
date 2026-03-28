@@ -324,8 +324,14 @@
 	background: #111827;
 	box-shadow: 0 2px 8px rgba(17, 24, 39, 0.16);
 	transform: translateX(-50%);
-	pointer-events: none;
-	z-index: 2;
+	pointer-events: auto;
+	cursor: grab;
+	touch-action: none;
+	z-index: 4;
+}
+
+.muukal-price-handle.is-dragging {
+	cursor: grabbing;
 }
 
 .muukal-price-range {
@@ -342,9 +348,8 @@
 	outline: none;
 	box-shadow: none;
 	opacity: 0;
-	cursor: pointer;
-	pointer-events: auto;
-	z-index: 3;
+	pointer-events: none;
+	z-index: 1;
 }
 
 .muukal-price-range:focus {
