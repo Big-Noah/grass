@@ -144,6 +144,9 @@
       var openTimer = null;
       var closeTimer = null;
       var activeItem = null;
+      var activeOpenDelay = 220;
+      var initialOpenDelay = 70;
+      var closeDelay = 240;
 
       function clearTimers() {
         if (openTimer) {
@@ -169,14 +172,14 @@
         clearTimers();
         openTimer = window.setTimeout(function () {
           setActiveItem(item);
-        }, 60);
+        }, activeItem && activeItem !== item ? activeOpenDelay : initialOpenDelay);
       }
 
       function queueClose() {
         clearTimers();
         closeTimer = window.setTimeout(function () {
           setActiveItem(null);
-        }, 180);
+        }, closeDelay);
       }
 
       Array.prototype.forEach.call(desktopItems, function (item) {
