@@ -197,6 +197,23 @@
   box-shadow: 0 6px 16px rgba(239, 95, 120, 0.16);
 }
 
+.muukal-wishlist-page__remove::before,
+.muukal-wishlist-page__remove.is-saved::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 17.25 3.74 11a4.43 4.43 0 0 1 6.26-6.26L10 5.74l1-1a4.43 4.43 0 1 1 6.26 6.26Z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 17.25 3.74 11a4.43 4.43 0 0 1 6.26-6.26L10 5.74l1-1a4.43 4.43 0 1 1 6.26 6.26Z'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
 .muukal-wishlist-page__remove:hover,
 .muukal-wishlist-page__remove.is-saved:hover {
   border-color: rgba(239, 95, 120, 0.34);
@@ -206,19 +223,7 @@
 }
 
 .muukal-wishlist-page__remove .muukal-wishlist-manual-button__heart {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  line-height: 1;
-}
-
-.muukal-wishlist-page__remove .muukal-wishlist-manual-button__heart svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
+  display: none;
 }
 
 .muukal-wishlist-page__remove .muukal-wishlist-manual-button__label {
