@@ -11,8 +11,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$gateway_title = trim( wp_strip_all_tags( $gateway->get_title() ) );
-$gateway_desc  = trim( wp_strip_all_tags( $gateway->get_description() ) );
+$gateway_title = '';
+$gateway_desc  = '';
+$has_fields    = false;
+$is_static     = ! empty( $gateway->is_static );
+
+if ( is_object( $gateway ) && method_exists( $gateway, 'get_title' ) ) {
+	$gateway_title = trim( wp_strip_all_tags( $gateway->get_title() ) );
+} elseif ( isset( $gateway->title ) ) {
+	$gateway_title = trim( wp_strip_all_tags( (string) $gateway->title ) );
+}
+
+if ( is_object( $gateway ) && method_exists( $gateway, 'get_description' ) ) {
+	$gateway_desc = trim( wp_strip_all_tags( $gateway->get_description() ) );
+} elseif ( isset( $gateway->description ) ) {
+	$gateway_desc = trim( wp_strip_all_tags( (string) $gateway->description ) );
+}
+
+if ( is_object( $gateway ) && method_exists( $gateway, 'has_fields' ) ) {
+	$has_fields = (bool) $gateway->has_fields();
+}
+
 $is_paypal     = false !== stripos( $gateway->id, 'paypal' ) || false !== stripos( $gateway_title, 'paypal' );
 $is_card       = ! $is_paypal && (
 	false !== stripos( $gateway->id, 'card' )
@@ -33,7 +52,7 @@ $visa_logo   = content_url( 'plugins/woocommerce/assets/images/payment-methods-c
 $master_logo = content_url( 'plugins/woocommerce/assets/images/payment-methods-cards/mastercard.svg' );
 ?>
 <li class="wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?> <?php echo $gateway->chosen ? 'is-checked' : ''; ?>">
-	<label for="payment_method_<?php echo esc_attr( $gateway->id ); ?>" class="muukal-checkout-payment-card <?php echo $is_paypal ? 'muukal-checkout-payment-card--paypal' : 'muukal-checkout-payment-card--card'; ?>">
+	<label for="payment_method_<?php echo esc_attr( $gateway->id ); ?>" class="muukal-checkout-payment-card <?php echo $is_paypal ? 'muukal-checkout-payment-card--paypal' : 'muukal-checkout-payment-card--card'; ?> <?php echo $is_static ? 'muukal-checkout-payment-card--static' : ''; ?>">
 		<input id="payment_method_<?php echo esc_attr( $gateway->id ); ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> data-order_button_text="<?php echo esc_attr( $gateway->order_button_text ); ?>" />
 
 		<span class="muukal-checkout-payment-card__copy">
@@ -63,7 +82,7 @@ $master_logo = content_url( 'plugins/woocommerce/assets/images/payment-methods-c
 		</span>
 	</label>
 
-	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
+	<?php if ( ! $is_static && ( $has_fields || '' !== $gateway_desc ) ) : ?>
 		<div class="payment_box payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : ?>style="display:none;"<?php endif; ?>>
 			<?php $gateway->payment_fields(); ?>
 		</div>

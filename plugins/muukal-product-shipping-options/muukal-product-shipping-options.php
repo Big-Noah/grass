@@ -309,7 +309,7 @@ function muukal_product_shipping_options_get_product_options( $product_id ) {
 
 	$rows = get_post_meta( $product_id, '_muukal_product_shipping_options', true );
 	if ( ! is_array( $rows ) ) {
-		return array();
+		$rows = muukal_product_shipping_options_get_seeded_options( $product_id );
 	}
 
 	$defaults    = muukal_product_shipping_options_default_row();
@@ -339,7 +339,60 @@ function muukal_product_shipping_options_get_product_options( $product_id ) {
 		$clean_rows[] = $item;
 	}
 
+	if ( empty( $clean_rows ) ) {
+		$clean_rows = muukal_product_shipping_options_get_seeded_options( $product_id );
+	}
+
 	return array_values( $clean_rows );
+}
+
+/**
+ * Return seeded shipping cards for specific products that need immediate checkout display.
+ *
+ * @param int $product_id Product ID.
+ * @return array<int, array<string, string>>
+ */
+function muukal_product_shipping_options_get_seeded_options( $product_id ) {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return array();
+	}
+
+	$product_slug = $product->get_slug();
+
+	if ( 'altus-1354' !== $product_slug ) {
+		return array();
+	}
+
+	return array(
+		array(
+			'label'       => 'Standard Shipping',
+			'description' => 'Estimated time of arrival: 12-21 Business Days',
+			'eta'         => '',
+			'price'       => '0',
+			'icon'        => 'standard',
+			'is_default'  => '1',
+			'is_enabled'  => '1',
+		),
+		array(
+			'label'       => 'Advanced Shipping',
+			'description' => 'Estimated time of arrival: 9-18 Business Days (Only for US/UK)',
+			'eta'         => '',
+			'price'       => '4.95',
+			'icon'        => 'clock',
+			'is_default'  => '',
+			'is_enabled'  => '1',
+		),
+		array(
+			'label'       => 'Express Shipping',
+			'description' => 'Estimated time of arrival: 6-12 Business Days',
+			'eta'         => '',
+			'price'       => '19.95',
+			'icon'        => 'plane',
+			'is_default'  => '',
+			'is_enabled'  => '1',
+		),
+	);
 }
 
 /**

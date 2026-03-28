@@ -298,6 +298,14 @@
 	background: #f3f9ff;
 }
 
+.muukal-checkout-payment-card--card {
+	background: #f8f6f2;
+}
+
+.muukal-checkout-payment-card--static {
+	cursor: default;
+}
+
 .muukal-checkout-payment-card__copy {
 	display: flex;
 	flex: 1 1 auto;

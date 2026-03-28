@@ -9,21 +9,50 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! function_exists( 'muukal_astra_get_static_checkout_gateways' ) ) {
+	/**
+	 * Build static checkout gateway cards when live gateways are not ready yet.
+	 *
+	 * @return array<int, object>
+	 */
+	function muukal_astra_get_static_checkout_gateways() {
+		return array(
+			(object) array(
+				'id'                => 'muukal_static_paypal',
+				'title'             => 'Paypal',
+				'description'       => 'Safe and popular digital wallet payment.',
+				'order_button_text' => __( 'Checkout', 'astra' ),
+				'chosen'            => true,
+				'is_static'         => true,
+			),
+			(object) array(
+				'id'                => 'muukal_static_card',
+				'title'             => 'Credit Card',
+				'description'       => 'Protection you can count on.',
+				'order_button_text' => __( 'Checkout', 'astra' ),
+				'chosen'            => false,
+				'is_static'         => true,
+			),
+		);
+	}
+}
+
 if ( ! wp_doing_ajax() ) {
 	do_action( 'woocommerce_review_order_before_payment' );
 }
 
 $button_text = ! empty( $order_button_text ) ? $order_button_text : __( 'Checkout', 'astra' );
+$payment_gateways = ! empty( $available_gateways ) ? $available_gateways : muukal_astra_get_static_checkout_gateways();
 
 if ( 'Place order' === wp_strip_all_tags( $button_text ) ) {
 	$button_text = __( 'Checkout', 'astra' );
 }
 ?>
 <div id="payment" class="woocommerce-checkout-payment muukal-checkout-payment">
-	<?php if ( WC()->cart && WC()->cart->needs_payment() ) : ?>
+	<?php if ( WC()->cart && ( WC()->cart->needs_payment() || ! empty( $payment_gateways ) ) ) : ?>
 		<ul class="wc_payment_methods payment_methods methods">
-			<?php if ( ! empty( $available_gateways ) ) : ?>
-				<?php foreach ( $available_gateways as $gateway ) : ?>
+			<?php if ( ! empty( $payment_gateways ) ) : ?>
+				<?php foreach ( $payment_gateways as $gateway ) : ?>
 					<?php wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) ); ?>
 				<?php endforeach; ?>
 			<?php else : ?>
