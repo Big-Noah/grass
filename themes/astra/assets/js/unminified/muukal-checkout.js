@@ -33,6 +33,33 @@
       : "billing";
   }
 
+  function initAddressModalSelects() {
+    const modal = $(addressModalSelector);
+    const dialog = modal.find(".muukal-checkout-address-modal__dialog");
+
+    if (!modal.length || !dialog.length || !$.fn.selectWoo) {
+      return;
+    }
+
+    modal.find("select").each(function () {
+      const select = $(this);
+      const currentValue = select.val();
+
+      if (select.hasClass("select2-hidden-accessible")) {
+        select.selectWoo("destroy");
+      }
+
+      select.selectWoo({
+        width: "100%",
+        dropdownParent: dialog,
+      });
+
+      if (typeof currentValue !== "undefined") {
+        select.val(currentValue).trigger("change.select2");
+      }
+    });
+  }
+
   function getFieldValue(name) {
     const field = $('[name="' + name + '"]');
 
@@ -110,7 +137,10 @@
 
     modal.addClass(modalOpenClass).attr("aria-hidden", "false");
     $("body").addClass(bodyModalOpenClass);
-    modal.find("input, select, textarea").filter(":visible").first().trigger("focus");
+    window.setTimeout(function () {
+      initAddressModalSelects();
+      modal.find("input, select, textarea").filter(":visible").first().trigger("focus");
+    }, 0);
   }
 
   function closeAddressModal() {
@@ -179,5 +209,6 @@
   $(function () {
     syncCheckedPaymentCards();
     syncAddressSummary();
+    initAddressModalSelects();
   });
 })(jQuery);

@@ -253,6 +253,18 @@
 	right: 8px;
 }
 
+.select2-container--open {
+	z-index: 10050;
+}
+
+.muukal-checkout-address-modal .select2-container {
+	width: 100% !important;
+}
+
+.muukal-checkout-address-modal .select2-dropdown {
+	z-index: 10050;
+}
+
 .muukal-checkout-address-modal {
 	position: fixed;
 	inset: 0;
@@ -457,8 +469,8 @@ body.muukal-checkout-address-modal-open {
 }
 
 .muukal-checkout-payment .wc_payment_methods {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	display: flex;
+	flex-wrap: wrap;
 	gap: 18px 22px;
 	margin: 0;
 	padding: 0;
@@ -466,6 +478,8 @@ body.muukal-checkout-address-modal-open {
 }
 
 .muukal-checkout-payment .wc_payment_method {
+	display: block;
+	flex: 1 1 calc(50% - 11px);
 	margin: 0;
 }
 
@@ -858,10 +872,13 @@ body.muukal-checkout-address-modal-open {
 	.muukal-checkout .woocommerce-billing-fields__field-wrapper,
 	.muukal-checkout .woocommerce-shipping-fields__field-wrapper,
 	.muukal-checkout .woocommerce-additional-fields__field-wrapper,
-	.muukal-checkout-payment .wc_payment_methods,
 	.muukal-checkout-shipping-selector .muukal-shipping-options__list,
 	.muukal-checkout-review__item {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.muukal-checkout-payment .wc_payment_method {
+		flex-basis: 100%;
 	}
 
 	.muukal-checkout-review__item-media img {
