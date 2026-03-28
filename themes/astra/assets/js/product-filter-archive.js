@@ -35,6 +35,8 @@
 	function updatePriceSlider( slider ) {
 		const minRange = slider.querySelector( '.muukal-price-range-min' );
 		const maxRange = slider.querySelector( '.muukal-price-range-max' );
+		const minHandle = slider.querySelector( '.muukal-price-handle-min' );
+		const maxHandle = slider.querySelector( '.muukal-price-handle-max' );
 		const minInput = slider.parentElement.querySelector( '.muukal-price-input-min' );
 		const maxInput = slider.parentElement.querySelector( '.muukal-price-input-max' );
 		const amount = slider.parentElement.querySelector( '.muukal-price-amount' );
@@ -63,6 +65,14 @@
 			const right = ( ( max - minBound ) / ( maxBound - minBound ) ) * 100;
 			progress.style.left = left + '%';
 			progress.style.width = Math.max( right - left, 0 ) + '%';
+
+			if ( minHandle ) {
+				minHandle.style.left = left + '%';
+			}
+
+			if ( maxHandle ) {
+				maxHandle.style.left = right + '%';
+			}
 		}
 	}
 

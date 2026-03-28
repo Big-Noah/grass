@@ -295,6 +295,20 @@
 	background: #111827;
 }
 
+.muukal-price-handle {
+	position: absolute;
+	top: 2px;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: #111827;
+	box-shadow: 0 2px 8px rgba(17, 24, 39, 0.16);
+	transform: translateX(-50%);
+	pointer-events: none;
+	z-index: 2;
+}
+
 .muukal-price-range {
 	position: absolute;
 	top: 0;
@@ -308,7 +322,10 @@
 	border: 0;
 	outline: none;
 	box-shadow: none;
-	pointer-events: none;
+	opacity: 0;
+	cursor: pointer;
+	pointer-events: auto;
+	z-index: 3;
 }
 
 .muukal-price-range:focus {
@@ -316,10 +333,22 @@
 	box-shadow: none;
 }
 
+.muukal-price-range:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.muukal-price-range::-webkit-slider-container {
+	background: transparent;
+	border: 0;
+}
+
 .muukal-price-range::-webkit-slider-runnable-track {
 	height: 3px;
 	background: transparent;
 	border: 0;
+	border-color: transparent;
+	color: transparent;
 	box-shadow: none;
 }
 

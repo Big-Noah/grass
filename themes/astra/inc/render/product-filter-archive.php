@@ -478,6 +478,8 @@ function muukal_product_filter_archive_render_price_group( $atts, $min_price, $m
 				<div class="muukal-price-slider" data-min="<?php echo esc_attr( $bounds['min'] ); ?>" data-max="<?php echo esc_attr( $bounds['max'] ); ?>">
 					<div class="muukal-price-track"></div>
 					<div class="muukal-price-progress"></div>
+					<div class="muukal-price-handle muukal-price-handle-min" aria-hidden="true"></div>
+					<div class="muukal-price-handle muukal-price-handle-max" aria-hidden="true"></div>
 					<input class="muukal-price-range muukal-price-range-min" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_min ); ?>">
 					<input class="muukal-price-range muukal-price-range-max" type="range" min="<?php echo esc_attr( $bounds['min'] ); ?>" max="<?php echo esc_attr( $bounds['max'] ); ?>" step="1" value="<?php echo esc_attr( $slider_max ); ?>">
 				</div>
