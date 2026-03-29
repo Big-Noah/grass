@@ -625,7 +625,6 @@ function muukal_render_product_filter_archive( $atts ) {
 	?>
 	<div class="muukal-filter-archive product-area pl-55 pr-55">
 		<div class="container-fluid muukal-filter-shell">
-			<?php muukal_product_filter_archive_render_selected_filters( $atts, $sort_by, (int) $query->found_posts ); ?>
 			<div class="muukal-filter-toolbar">
 				<ul class="nav navbar-nav filter-nav muukal-filter-nav muukal-filter-groups">
 					<?php foreach ( muukal_product_filter_archive_get_filter_config() as $key => $config ) : ?>
