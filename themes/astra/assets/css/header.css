@@ -515,8 +515,7 @@
 
 .muukal-header__mobile-toggle {
   display: none;
-  align-items: center;
-  justify-content: center;
+  position: relative;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -526,12 +525,42 @@
 }
 
 .muukal-header__mobile-toggle span {
+  position: absolute;
+  left: 50%;
   display: block;
-  width: 22px;
+  width: 20px;
   height: 2px;
-  margin: 3px auto;
+  margin: 0;
   background: var(--muukal-text);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transition: transform 0.22s ease, opacity 0.18s ease, top 0.22s ease;
+}
+
+.muukal-header__mobile-toggle span:nth-child(2) {
+  top: 14px;
+}
+
+.muukal-header__mobile-toggle span:nth-child(3) {
+  top: 21px;
+}
+
+.muukal-header__mobile-toggle span:nth-child(4) {
+  top: 28px;
+}
+
+.muukal-header__mobile-toggle[aria-expanded="true"] span:nth-child(2) {
+  top: 21px;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.muukal-header__mobile-toggle[aria-expanded="true"] span:nth-child(3) {
+  opacity: 0;
+}
+
+.muukal-header__mobile-toggle[aria-expanded="true"] span:nth-child(4) {
+  top: 21px;
+  transform: translateX(-50%) rotate(-45deg);
 }
 
 .muukal-header__search-panel,
