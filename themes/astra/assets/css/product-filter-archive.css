@@ -551,6 +551,66 @@
 	.muukal-filter-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-archive.product-area {
+		gap: 18px;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-toolbar {
+		padding: 12px 0;
+		border-top: 0;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-groups {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+		align-items: start;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-item {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-item.muukal-filter-item-sort {
+		grid-column: 1 / -1;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-item > .dropdown-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-height: 42px;
+		padding: 10px 12px;
+		border: 1px solid #e4e7ec;
+		border-radius: 10px;
+		background: #fff;
+		font-size: 14px;
+		line-height: 1.3;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-item > .dropdown-toggle.filter-nav-choose {
+		border-color: #cfd6de;
+		background: #fafbfc;
+	}
+
+	.elementor-element.elementor-element-cc9527a .muukal-filter-arrow {
+		flex: 0 0 12px;
+		width: 12px;
+		margin-left: 8px;
+	}
+
+	.elementor-element.elementor-element-cc9527a .dropdown-menu.filter-opt-box,
+	.elementor-element.elementor-element-cc9527a .dropdown-menu.filter-color-box {
+		margin-top: 8px;
+		padding: 12px 14px;
+		border-radius: 10px;
+		box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+	}
 }
 
 @media (max-width: 520px) {
