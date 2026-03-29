@@ -1689,6 +1689,182 @@ select:disabled {
 	}
 }
 
+@media (max-width: 767px) {
+	#lens_box {
+		height: 100dvh;
+		max-height: 100dvh;
+		border-radius: 24px 24px 0 0;
+	}
+
+	.mlr-app #lens_box > .container {
+		width: 100%;
+		padding: 14px 12px 96px;
+	}
+
+	#lens_left_close {
+		top: 12px;
+		right: 12px;
+		width: 40px;
+		height: 40px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.96);
+		box-shadow: 0 10px 24px rgba(34, 34, 34, 0.12);
+	}
+
+	#lens_left_close i {
+		width: 20px;
+		height: 20px;
+	}
+
+	#lens_left_close i:before,
+	#lens_left_close i:after {
+		top: 0;
+		left: 9px;
+		height: 20px;
+	}
+
+	#step1_div_box .panel,
+	.mlr-rx-shell,
+	.mlr-static-note,
+	#lens_goods_box {
+		border: 1px solid #efe7df;
+		border-radius: 18px;
+		box-shadow: 0 12px 28px rgba(34, 34, 34, 0.06);
+		overflow: hidden;
+	}
+
+	.panel-heading,
+	.lens_key .panel-heading {
+		min-height: 0;
+		padding: 14px 16px;
+		font-size: 15px;
+		line-height: 1.35;
+	}
+
+	.step_div_info {
+		min-height: 0;
+	}
+
+	.mlr-rx-toolbar,
+	.mlr-rx-grid,
+	.mlr-pd-section,
+	.mlr-rx-comments,
+	.mlr-rx-name,
+	.mlr-upload-row,
+	.mlr-app .mlr-upload-copy {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.mlr-rx-toolbar {
+		grid-template-columns: 1fr;
+		gap: 10px;
+		padding-top: 16px;
+		padding-bottom: 16px;
+		min-height: 0;
+	}
+
+	.mlr-rx-prescription-select select,
+	#lens_container .lens-select > select,
+	#lens_container .mlr-rx-row select,
+	#lens_container .mlr-pd-box select,
+	#lens_container .mlr-prism-grid select {
+		min-height: 48px;
+		padding: 0 40px 0 14px !important;
+		border: 1px solid #e8e0d7 !important;
+		border-radius: 14px !important;
+		background-position: right 14px center !important;
+		box-shadow: none !important;
+		font-size: 15px;
+	}
+
+	.mlr-rx-grid {
+		gap: 12px;
+		padding-top: 16px;
+		padding-bottom: 16px;
+		background: #fffaf7;
+	}
+
+	.mlr-rx-grid-head {
+		display: none;
+	}
+
+	.mlr-rx-eye,
+	.mlr-pd-label,
+	.mlr-rx-comments label,
+	.mlr-rx-name label,
+	.mlr-upload-copy-block,
+	.mlr-app #step2_div_box label,
+	.mlr-app .mlr-prism-grid label {
+		font-size: 13px;
+		font-weight: 600;
+		color: #5d5d5d;
+	}
+
+	.mlr-pd-section,
+	.mlr-rx-comments,
+	.mlr-rx-name,
+	.mlr-upload-row {
+		gap: 12px;
+		padding-top: 14px;
+	}
+
+	.mlr-check,
+	.mlr-prism-toggle {
+		flex-wrap: wrap;
+	}
+
+	.mlr-rx-comments textarea,
+	.mlr-rx-name input[type="text"] {
+		border: 1px solid #e8e0d7;
+		border-radius: 14px;
+		padding: 12px 14px;
+		font-size: 15px;
+	}
+
+	.mlr-upload-trigger {
+		width: 76px;
+		height: 76px;
+		border-radius: 16px;
+		border-color: #ddd3c7;
+	}
+
+	.mlr-upload-note,
+	.mlr-app .mlr-upload-copy {
+		font-size: 13px;
+		line-height: 1.6;
+	}
+
+	.mlr-step-submit,
+	#power-sure,
+	#lensbox_right #lens-add-cart {
+		width: 100%;
+		min-width: 0;
+		padding: 16px 18px;
+		border-radius: 16px;
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	#lensbox_right {
+		margin-top: 16px;
+	}
+
+	#lensbox_right .lens_goods_actions,
+	#lensbox_right .lens_goods_summary,
+	#lensbox_right .lens_goods_meta,
+	#lensbox_right .lens_goods_pricing,
+	#lensbox_right .lens_goods_info > .mt-10.pb-10.ml-10.mr-10,
+	#lensbox_right .lens_goods_info > .mt-10.ml-20.lens-line.borderb-d7,
+	#lensbox_right .lens_goods_info > .ml-20.lens-line:not(.borderb-d7),
+	#lensbox_right #lens_goods_box > .mt-20.ml-20.mr-20 {
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+}
+
 /* Override theme select chrome so step 2 shows only one down-arrow. */
 #lens_container .lens-select:after {
 	content: none !important;

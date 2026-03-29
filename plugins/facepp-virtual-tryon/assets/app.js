@@ -60,6 +60,7 @@
 		}
 
 		var fixedHost = modal.parentElement === document.body ? null : findFixedContainingBlock(root);
+		var lastActivationAt = 0;
 
 		function findFixedContainingBlock(node) {
 			var current = node ? node.parentElement : null;
@@ -93,6 +94,38 @@
 			modal.style.bottom = 'auto';
 			modal.style.width = String(window.innerWidth) + 'px';
 			modal.style.height = String(window.innerHeight) + 'px';
+		}
+
+		function bindPrimaryActivation(element, handler) {
+			if (!element) {
+				return;
+			}
+
+			function invoke(event) {
+				var eventType = event && event.type ? event.type : '';
+
+				if ('pointerup' === eventType && event.pointerType === 'mouse') {
+					return;
+				}
+
+				if ('click' === eventType && Date.now() - lastActivationAt < 700) {
+					return;
+				}
+
+				if ('touchend' === eventType || 'pointerup' === eventType) {
+					lastActivationAt = Date.now();
+
+					if (event.cancelable) {
+						event.preventDefault();
+					}
+				}
+
+				handler(event);
+			}
+
+			element.addEventListener('click', invoke);
+			element.addEventListener('touchend', invoke, { passive: false });
+			element.addEventListener('pointerup', invoke);
 		}
 
 		var state = {
@@ -705,7 +738,7 @@
 			}
 		}
 
-		openBtn.addEventListener('click', function () {
+		function handleOpen() {
 			syncModalViewport();
 			modal.hidden = false;
 			if (bodyOverflowBeforeOpen === null) {
@@ -723,7 +756,9 @@
 
 			window.requestAnimationFrame(syncModalViewport);
 			render();
-		});
+		}
+
+		bindPrimaryActivation(openBtn, handleOpen);
 
 		modal.addEventListener('click', function (event) {
 			if (event.target.getAttribute('data-close') === '1') {

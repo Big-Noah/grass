@@ -214,6 +214,7 @@
 		var upgradeSkip = root.querySelector('.mlr-upgrade-skip');
 		var closeTimer = null;
 		var fixedHost = findFixedContainingBlock(root);
+		var lastActivationAt = 0;
 
 		function findFixedContainingBlock(node) {
 			var current = node ? node.parentElement : null;
@@ -251,6 +252,38 @@
 			container.style.bottom = 'auto';
 			container.style.width = String(window.innerWidth) + 'px';
 			container.style.height = String(window.innerHeight) + 'px';
+		}
+
+		function bindPrimaryActivation(element, handler) {
+			if (!element) {
+				return;
+			}
+
+			function invoke(event) {
+				var eventType = event && event.type ? event.type : '';
+
+				if ('pointerup' === eventType && event.pointerType === 'mouse') {
+					return;
+				}
+
+				if ('click' === eventType && Date.now() - lastActivationAt < 700) {
+					return;
+				}
+
+				if ('touchend' === eventType || 'pointerup' === eventType) {
+					lastActivationAt = Date.now();
+
+					if (event.cancelable) {
+						event.preventDefault();
+					}
+				}
+
+				handler(event);
+			}
+
+			element.addEventListener('click', invoke);
+			element.addEventListener('touchend', invoke, { passive: false });
+			element.addEventListener('pointerup', invoke);
 		}
 
 		var state = {
@@ -1065,9 +1098,9 @@
 			setStatus('Configured item added to cart.');
 		}
 
-		openButton.addEventListener('click', openOverlay);
+		bindPrimaryActivation(openButton, openOverlay);
 		closeButtons.forEach(function (button) {
-			button.addEventListener('click', closeOverlay);
+			bindPrimaryActivation(button, closeOverlay);
 		});
 		root.querySelectorAll('.mlr-step-toggle').forEach(function (toggle) {
 			toggle.addEventListener('click', function () {
