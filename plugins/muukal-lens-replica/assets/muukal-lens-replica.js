@@ -598,7 +598,6 @@
 			mount.innerHTML = '<div class="mlr-rx-shell">' +
 				'<div class="mlr-rx-toolbar">' +
 					'<div class="lens-select mlr-rx-prescription-select"><select aria-label="Select Prescription"><option selected>Select Prescription</option></select></div>' +
-					'<button type="button" class="mlr-add-new-link">Add new</button>' +
 					'<button type="button" class="mlr-toolbar-help" aria-label="Prescription help">?</button>' +
 				'</div>' +
 				'<div class="mlr-rx-grid">' +
@@ -659,10 +658,6 @@
 					}
 					render();
 				});
-			});
-			mount.querySelector('.mlr-add-new-link').addEventListener('click', function () {
-				state.step2Submitted = false;
-				setStatus('');
 			});
 			mount.querySelector('[data-next-step="3"]').addEventListener('click', function () {
 				state.step2Submitted = true;

@@ -852,6 +852,11 @@ select:disabled {
 	padding-bottom: 6px;
 }
 
+.mlr-rx-shell .text-center.mt-20 {
+	margin-top: 28px !important;
+	margin-bottom: 36px;
+}
+
 .mlr-upload-trigger {
 	display: inline-flex;
 	align-items: center;
