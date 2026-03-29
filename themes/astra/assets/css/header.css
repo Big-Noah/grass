@@ -598,7 +598,7 @@
 
   .muukal-header__mobile-menu .ast-menu-toggle {
     position: absolute;
-    top: 50%;
+    top: 9px;
     right: 0;
     display: flex;
     align-items: center;
@@ -610,7 +610,7 @@
     border: 0;
     background: transparent;
     color: #303030;
-    transform: translateY(-50%);
+    transform: none;
     box-shadow: none;
   }
 
@@ -635,7 +635,7 @@
 
   .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle,
   .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] {
-    transform: translateY(-50%) !important;
+    transform: none !important;
   }
 
   .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle .ast-arrow-svg,
