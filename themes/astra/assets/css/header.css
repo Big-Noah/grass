@@ -596,9 +596,9 @@
     padding-right: 52px;
   }
 
-  .muukal-header__mobile-menu .ast-menu-toggle {
+  .muukal-header__mobile-menu .menu-item-has-children > .ast-menu-toggle {
     position: absolute;
-    top: 9px;
+    top: 9px !important;
     right: 0;
     display: flex;
     align-items: center;
@@ -610,7 +610,7 @@
     border: 0;
     background: transparent;
     color: #303030;
-    transform: none;
+    transform: none !important;
     box-shadow: none;
   }
 
