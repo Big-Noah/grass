@@ -135,6 +135,10 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
 }
 
 .muukal-buyer-showcase__backdrop {
@@ -147,7 +151,7 @@
   position: relative;
   width: min(920px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
-  margin: 16px auto;
+  margin: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   overflow: hidden;
@@ -170,6 +174,20 @@
   font-size: 30px;
   line-height: 1;
   cursor: pointer;
+  box-shadow: none;
+  transition: none;
+}
+
+.muukal-buyer-showcase__close:hover,
+.muukal-buyer-showcase__close:focus,
+.muukal-buyer-showcase__close:focus-visible,
+.muukal-buyer-showcase__close:active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #231815;
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+  transform: none;
 }
 
 .muukal-buyer-showcase__modal-media {
