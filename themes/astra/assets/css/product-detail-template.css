@@ -665,7 +665,7 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-width: 959px) {
 	.muukal-product-detail-template .lit_gpic,
 	.muukal-product-detail-template .tyr-btn {
 		width: calc(50% - 20px);
@@ -678,5 +678,203 @@
 
 	.muukal-product-detail-template .muukal-gallery-main {
 		max-height: 420px;
+	}
+
+	.muukal-product-detail-template {
+		width: min(calc(100vw - 24px), 100%);
+		max-width: calc(100vw - 24px);
+	}
+
+	.muukal-product-detail-template .product-area,
+	.muukal-product-detail-template .shop-banner-area,
+	.muukal-product-detail-template .product-desc-area {
+		padding-top: 18px;
+		padding-bottom: 22px;
+	}
+
+	.muukal-product-detail-template .breadcrumb {
+		gap: 8px;
+		font-size: 13px;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-column,
+	.muukal-product-detail-template .muukal-details-column {
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-stage {
+		min-height: auto;
+		padding: 12px 0 6px;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-main {
+		display: block;
+		width: auto;
+		max-width: 100%;
+		max-height: 320px;
+		margin: 0 auto;
+	}
+
+	.muukal-product-detail-template #goods-lit-box {
+		gap: 10px;
+		align-items: stretch;
+		justify-content: stretch;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-thumb-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		flex: 1 1 100%;
+		width: 100%;
+		gap: 10px;
+	}
+
+	.muukal-product-detail-template .lit_gpic {
+		width: 100%;
+		min-height: 68px;
+		margin: 0;
+		padding: 8px;
+		border-radius: 14px;
+	}
+
+	.muukal-product-detail-template .facepp-tryon-app {
+		flex: 1 1 100%;
+		width: 100%;
+		max-width: none;
+	}
+
+	.muukal-product-detail-template .tyr-btn {
+		width: 100%;
+		min-height: 54px;
+		margin: 0;
+		padding: 0 18px;
+		border-radius: 999px;
+		font-size: 14px;
+		letter-spacing: 0.04em;
+	}
+
+	.muukal-product-detail-template .feature_sp {
+		margin-right: 0;
+		margin-bottom: 10px;
+		padding: 0 12px;
+	}
+
+	.muukal-product-detail-template .product-details {
+		margin-top: 10px;
+		padding-left: 0;
+	}
+
+	.muukal-product-detail-template .product-details-title .fs26 {
+		font-size: 24px;
+		line-height: 1.25;
+	}
+
+	.muukal-product-detail-template .product-sub-name {
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
+	.muukal-product-detail-template .price.details-price {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 8px 10px;
+		margin-top: 14px;
+		margin-bottom: 12px;
+		padding-bottom: 0;
+	}
+
+	.muukal-product-detail-template .product-details .details-price .goods-price {
+		font-size: 30px;
+		line-height: 1;
+	}
+
+	.muukal-product-detail-template .details-price .like_num_box {
+		float: none;
+		width: 100%;
+		margin-top: 0;
+		font-size: 13px;
+	}
+
+	.muukal-product-detail-template .goods-color-box {
+		gap: 10px;
+	}
+
+	.muukal-product-detail-template .ip-g-img {
+		width: 74px;
+		height: 74px;
+	}
+
+	.muukal-product-detail-template .goods-color-box.is-text-swatches .ip-cspan {
+		flex: 0 0 calc(50% - 5px);
+		min-width: calc(50% - 5px);
+		padding: 0 12px;
+	}
+
+	.muukal-product-detail-template .product-cat {
+		gap: 8px 14px;
+		font-size: 14px;
+	}
+
+	.muukal-product-detail-template .goods-size {
+		width: 100%;
+	}
+
+	.muukal-product-detail-template .product-details-action {
+		margin-top: 22px;
+		gap: 10px;
+	}
+
+	.muukal-product-detail-template .add-wishlist-btn,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock {
+		min-height: 58px;
+		padding: 12px 16px;
+		border-radius: 16px;
+	}
+
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock {
+		gap: 2px;
+		font-size: 15px;
+	}
+
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock .fs14 {
+		font-size: 12px;
+		line-height: 1.25;
+	}
+
+	.muukal-product-detail-template .promotion_box {
+		margin-top: 18px;
+	}
+
+	.muukal-product-detail-template .promotion_head {
+		padding: 10px 12px;
+	}
+
+	.muukal-product-detail-template .promotion_box img {
+		border-radius: 12px;
+	}
+
+	.muukal-product-detail-template .shipping_row {
+		row-gap: 0;
+	}
+
+	.muukal-product-detail-template .service {
+		padding: 14px 10px;
+	}
+
+	.muukal-product-detail-template .service .content {
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+	.muukal-product-detail-template #goods-desc .good-s-v {
+		margin: 8px 0 0;
+	}
+
+	.muukal-product-detail-template .mlr-app #lens_box > .container {
+		width: calc(100vw - 12px);
+		padding-left: 8px;
+		padding-right: 8px;
 	}
 }
