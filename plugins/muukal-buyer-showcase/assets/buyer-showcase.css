@@ -245,10 +245,6 @@
   opacity: 0.92;
 }
 
-body.muukal-buyer-showcase-modal-open {
-  overflow: hidden;
-}
-
 .muukal-buyer-showcase-admin__table-wrap {
   overflow-x: auto;
 }
