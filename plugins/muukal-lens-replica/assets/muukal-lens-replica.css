@@ -552,7 +552,17 @@ input[type="text"] {
 	border-radius: 0;
 	box-sizing: border-box;
 	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	background-image: none !important;
 	padding-right: 34px;
+}
+
+.lens-select > select::-ms-expand,
+.mlr-rx-row select::-ms-expand,
+.mlr-pd-box select::-ms-expand,
+.mlr-prism-grid select::-ms-expand {
+	display: none;
 }
 
 select:disabled {
