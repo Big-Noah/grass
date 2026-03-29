@@ -337,8 +337,8 @@
 }
 
 .woocommerce-account.logged-in .entry-content > .woocommerce {
-	width: 85%;
-	max-width: none;
+	width: calc(100% - 64px);
+	max-width: 1180px;
 	margin: 0 auto;
 }
 
