@@ -629,6 +629,16 @@
     transition: transform 0.2s ease;
   }
 
+  .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle,
+  .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] {
+    transform: translateY(-50%) !important;
+  }
+
+  .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle .ast-arrow-svg,
+  .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] .ast-arrow-svg {
+    transform: rotate(180deg);
+  }
+
 }
 
 .muukal-header.is-scrolled .muukal-header__main {
