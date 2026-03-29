@@ -16,18 +16,21 @@ require_once ASTRA_THEME_DIR . 'inc/render/trustpilot-bar.php';
  * Register assets for the custom header.
  */
 function muukal_header_register_assets() {
+	$header_css_version = file_exists( ASTRA_THEME_DIR . 'assets/css/header.css' ) ? filemtime( ASTRA_THEME_DIR . 'assets/css/header.css' ) : ASTRA_THEME_VERSION;
+	$header_js_version  = file_exists( ASTRA_THEME_DIR . 'assets/js/header.js' ) ? filemtime( ASTRA_THEME_DIR . 'assets/js/header.js' ) : ASTRA_THEME_VERSION;
+
 	wp_register_style(
 		'muukal-header',
 		ASTRA_THEME_URI . 'assets/css/header.css',
 		array(),
-		ASTRA_THEME_VERSION
+		$header_css_version
 	);
 
 	wp_register_script(
 		'muukal-header',
 		ASTRA_THEME_URI . 'assets/js/header.js',
 		array( 'jquery' ),
-		ASTRA_THEME_VERSION,
+		$header_js_version,
 		true
 	);
 }
