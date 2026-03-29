@@ -245,6 +245,9 @@
 			}
 
 			var hostRect = fixedHost ? fixedHost.getBoundingClientRect() : { left: 0, top: 0 };
+			var prefersMobileLayout =
+				(window.matchMedia && window.matchMedia('(max-width: 959px)').matches) ||
+				(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
 			container.style.left = String(-hostRect.left) + 'px';
 			container.style.top = String(-hostRect.top) + 'px';
@@ -252,6 +255,7 @@
 			container.style.bottom = 'auto';
 			container.style.width = String(window.innerWidth) + 'px';
 			container.style.height = String(window.innerHeight) + 'px';
+			container.classList.toggle('mlr-mobile-layout', !!prefersMobileLayout);
 		}
 
 		function bindPrimaryActivation(element, handler) {

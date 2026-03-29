@@ -87,6 +87,9 @@
 
 		function syncModalViewport() {
 			var hostRect = fixedHost ? fixedHost.getBoundingClientRect() : { left: 0, top: 0 };
+			var prefersMobileLayout =
+				(window.matchMedia && window.matchMedia('(max-width: 959px)').matches) ||
+				(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
 			modal.style.left = String(-hostRect.left) + 'px';
 			modal.style.top = String(-hostRect.top) + 'px';
@@ -94,6 +97,7 @@
 			modal.style.bottom = 'auto';
 			modal.style.width = String(window.innerWidth) + 'px';
 			modal.style.height = String(window.innerHeight) + 'px';
+			modal.classList.toggle('facepp-tryon-mobile-layout', !!prefersMobileLayout);
 		}
 
 		function bindPrimaryActivation(element, handler) {

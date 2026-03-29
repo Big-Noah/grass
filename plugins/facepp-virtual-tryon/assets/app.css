@@ -487,6 +487,170 @@
 	}
 }
 
+.facepp-tryon-modal.facepp-tryon-mobile-layout {
+	align-items: flex-end;
+	padding: 0;
+	background: rgba(17, 17, 17, 0.42);
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-dialog {
+	width: 100vw;
+	max-width: 100vw;
+	height: 100dvh;
+	max-height: 100dvh;
+	margin: 0;
+	border-radius: 24px 24px 0 0;
+	box-shadow: none;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-header {
+	padding: 14px 58px 14px 16px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-title {
+	font-size: 20px;
+	line-height: 1.3;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-close {
+	top: 14px;
+	right: 14px;
+	transform: none;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-close:hover,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-close:active {
+	transform: none;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-main {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 14px;
+	padding: 12px 12px 28px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage-shell,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-panel {
+	flex-basis: 100%;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage-shell {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	padding-bottom: 6px;
+	background: #fff;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage-wrap,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage {
+	width: 100%;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage {
+	height: min(50vh, 360px);
+	border-radius: 18px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-upload {
+	margin-top: 10px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-upload-trigger {
+	height: 46px;
+	line-height: 46px;
+	border-radius: 14px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-controls {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-controls .tdo_btn {
+	height: 42px;
+	border-radius: 14px;
+	font-size: 17px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding-bottom: 24px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-panel-title {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-models,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-frames,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-color-list {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 10px;
+	overflow-x: auto;
+	padding-bottom: 2px;
+	scroll-snap-type: x proximity;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-model-item,
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-frame-item {
+	flex: 0 0 auto;
+	scroll-snap-align: start;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .try_sys_pic img {
+	width: 74px;
+	height: 88px;
+	border-radius: 12px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .cv-btn img {
+	width: 92px;
+	height: 58px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-helper {
+	margin-top: 0;
+	padding: 14px 14px 10px;
+	border-radius: 16px;
+	background: #faf7f4;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-pd-row {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 10px;
+	margin-top: 0;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-pd-row select {
+	width: 100%;
+	height: 46px;
+	border-radius: 14px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-status {
+	margin-top: 4px;
+	font-size: 13px;
+}
+
+.facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-footnote {
+	margin-top: 0;
+	padding: 0 2px;
+	line-height: 1.55;
+}
+
 @media (max-width: 767px) {
 	.facepp-tryon-modal {
 		align-items: flex-end;
