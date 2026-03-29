@@ -629,9 +629,6 @@
     transition: transform 0.2s ease;
   }
 
-  .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] .ast-arrow-svg {
-    transform: rotate(180deg);
-  }
 }
 
 .muukal-header.is-scrolled .muukal-header__main {
