@@ -1106,8 +1106,11 @@ function facepp_tryon_save_product_assets( $post_id, $post ) {
 add_action( 'save_post_product', 'facepp_tryon_save_product_assets', 10, 2 );
 
 function facepp_tryon_register_assets() {
-	wp_register_style( 'facepp-tryon-style', FACEPP_TRYON_URL . 'assets/app.css', array(), FACEPP_TRYON_VERSION );
-	wp_register_script( 'facepp-tryon-script', FACEPP_TRYON_URL . 'assets/app.js', array(), FACEPP_TRYON_VERSION, true );
+	$style_version  = file_exists( FACEPP_TRYON_DIR . 'assets/app.css' ) ? (string) filemtime( FACEPP_TRYON_DIR . 'assets/app.css' ) : FACEPP_TRYON_VERSION;
+	$script_version = file_exists( FACEPP_TRYON_DIR . 'assets/app.js' ) ? (string) filemtime( FACEPP_TRYON_DIR . 'assets/app.js' ) : FACEPP_TRYON_VERSION;
+
+	wp_register_style( 'facepp-tryon-style', FACEPP_TRYON_URL . 'assets/app.css', array(), $style_version );
+	wp_register_script( 'facepp-tryon-script', FACEPP_TRYON_URL . 'assets/app.js', array(), $script_version, true );
 }
 add_action( 'init', 'facepp_tryon_register_assets' );
 

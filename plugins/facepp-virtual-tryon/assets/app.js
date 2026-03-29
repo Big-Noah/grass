@@ -110,6 +110,7 @@
 			auto: { x: 0, y: 0, rotate: 0, width: 0 },
 			manual: { x: 0, y: 0, rotate: 0, scale: 1 }
 		};
+		var bodyOverflowBeforeOpen = null;
 
 		function setStatus(message) {
 			if (status) {
@@ -685,7 +686,10 @@
 
 		function closeModal() {
 			modal.hidden = true;
-			document.body.style.overflow = '';
+			if (bodyOverflowBeforeOpen !== null) {
+				document.body.style.overflow = bodyOverflowBeforeOpen;
+				bodyOverflowBeforeOpen = null;
+			}
 			setBusy(false);
 		}
 
@@ -700,7 +704,9 @@
 		openBtn.addEventListener('click', function () {
 			syncModalViewport();
 			modal.hidden = false;
-			document.body.style.overflow = 'hidden';
+			if (bodyOverflowBeforeOpen === null) {
+				bodyOverflowBeforeOpen = document.body.style.overflow || '';
+			}
 			modal.scrollTop = 0;
 
 			if (!state.photoLoaded) {
