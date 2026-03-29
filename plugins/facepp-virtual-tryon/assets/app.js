@@ -59,7 +59,7 @@
 			document.body.appendChild(modal);
 		}
 
-		var fixedHost = findFixedContainingBlock(root);
+		var fixedHost = modal.parentElement === document.body ? null : findFixedContainingBlock(root);
 
 		function findFixedContainingBlock(node) {
 			var current = node ? node.parentElement : null;
