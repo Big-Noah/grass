@@ -615,12 +615,11 @@
   }
 
   .muukal-header__mobile-menu .ast-menu-toggle .ast-icon {
-    display: inline-flex;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 16px;
     height: 16px;
-    transition: transform 0.2s ease;
   }
 
   .muukal-header__mobile-menu .ast-menu-toggle .ast-arrow-svg {
@@ -629,14 +628,25 @@
     fill: currentColor;
   }
 
+  .muukal-header__mobile-menu .ast-menu-toggle::after {
+    content: "";
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
   .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle,
   .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] {
     transform: translateY(-50%) !important;
   }
 
-  .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle .ast-icon,
-  .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"] .ast-icon {
-    transform: rotate(180deg);
+  .ast-mobile-popup-content .ast-submenu-expanded > .ast-menu-toggle::after,
+  .muukal-header__mobile-menu .ast-menu-toggle[aria-expanded="true"]::after {
+    transform: rotate(-135deg);
   }
 
 }
