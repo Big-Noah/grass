@@ -157,6 +157,18 @@
 	color: #111827;
 }
 
+.muukal-loop-item .muukal-card-actions .facepp-tryon-app {
+	display: block;
+	width: 100%;
+}
+
+.muukal-loop-item .muukal-card-actions .facepp-tryon-open {
+	display: inline-flex;
+	justify-content: center;
+	width: 100%;
+	min-width: 100%;
+}
+
 .muukal-loop-item .product-content {
 	display: flex;
 	flex: 1 1 auto;

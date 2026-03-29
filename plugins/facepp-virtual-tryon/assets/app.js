@@ -55,6 +55,10 @@
 			return;
 		}
 
+		if (modal.parentElement !== document.body) {
+			document.body.appendChild(modal);
+		}
+
 		var fixedHost = findFixedContainingBlock(root);
 
 		function findFixedContainingBlock(node) {
