@@ -1345,3 +1345,24 @@ function muukal_astra_get_checkout_item_summary( $cart_item, $cart_item_key ) {
 		'subtotal_html'=> WC()->cart ? WC()->cart->get_product_subtotal( $_product, isset( $cart_item['quantity'] ) ? (int) $cart_item['quantity'] : 0 ) : wc_price( 0 ),
 	);
 }
+
+/**
+ * Enqueue the custom mobile menu toggle script for the header menu.
+ */
+function muukal_astra_enqueue_mobile_menu_script() {
+	$script_relative_path = '/assets/js/unminified/muukal-mobile-menu.js';
+	$script_path          = get_template_directory() . $script_relative_path;
+
+	if ( ! file_exists( $script_path ) ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'muukal-astra-mobile-menu',
+		get_template_directory_uri() . $script_relative_path,
+		array(),
+		(string) filemtime( $script_path ),
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'muukal_astra_enqueue_mobile_menu_script', 20 );
