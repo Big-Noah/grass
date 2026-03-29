@@ -88,7 +88,7 @@
 }
 
 .muukal-filter-toolbar {
-	padding: 18px 0 20px;
+	padding: 8px 0 8px;
 	border-top: 1px solid #ececec;
 	border-bottom: 1px solid #ececec;
 }
@@ -97,7 +97,9 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	column-gap: 34px;
+	justify-content: space-between;
+	width: 100%;
+	column-gap: 20px;
 	row-gap: 18px;
 }
 
@@ -506,6 +508,7 @@
 
 @media (max-width: 768px) {
 	.muukal-filter-groups {
+		justify-content: flex-start;
 		column-gap: 24px;
 		row-gap: 14px;
 	}
