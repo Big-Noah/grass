@@ -40,12 +40,12 @@ fi
 Write-Host "Publishing code directories into wp-content..."
 Invoke-DockerSh @"
 set -eu
+rm -rf /var/www/html/wp-content/themes
+rm -rf /var/www/html/wp-content/plugins
+rm -rf /var/www/html/wp-content/mu-plugins
 mkdir -p /var/www/html/wp-content/themes
 mkdir -p /var/www/html/wp-content/plugins
 mkdir -p /var/www/html/wp-content/mu-plugins
-find /var/www/html/wp-content/themes -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-find /var/www/html/wp-content/plugins -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-find /var/www/html/wp-content/mu-plugins -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 cp -a '$RepoPath/themes/.' /var/www/html/wp-content/themes/
 cp -a '$RepoPath/plugins/.' /var/www/html/wp-content/plugins/
 cp -a '$RepoPath/mu-plugins/.' /var/www/html/wp-content/mu-plugins/
