@@ -1868,6 +1868,10 @@ select:disabled {
 	border-radius: 16px;
 	font-size: 15px;
 	font-weight: 700;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
 }
 
 #lens_container.mlr-mobile-layout #lensbox_right #lens_img_v_box {
