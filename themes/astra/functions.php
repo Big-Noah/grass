@@ -213,6 +213,7 @@ require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-loop-item-price-shortcode
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-filter-archive-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/product-detail-template-shortcode.php';
 require_once ASTRA_THEME_DIR . 'inc/shortcodes/blue-light-info-shortcode.php';
+require_once ASTRA_THEME_DIR . 'inc/shortcodes/progressive-info-shortcode.php';
 
 /**
  * Enqueue custom account page styling for the WooCommerce My Account page.
