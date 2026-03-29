@@ -275,6 +275,22 @@ function muukal_render_product_loop_item( $args ) {
 
 	$default_row   = muukal_loop_swatch_get_default_row( $rows );
 	$default_state = muukal_loop_swatch_build_row_state( $product, $default_row, $fallback_row );
+	$tryon_markup  = '';
+
+	if ( shortcode_exists( 'facepp_virtual_tryon' ) ) {
+		$tryon_markup = do_shortcode(
+			sprintf(
+				'[facepp_virtual_tryon product_id="%1$d" button_label="%2$s" button_class="%3$s"]',
+				(int) $product_id,
+				esc_attr( 'TRY ON' ),
+				esc_attr( 'muukal-card-action muukal-card-action-primary' )
+			)
+		);
+	}
+
+	if ( '' === $tryon_markup ) {
+		$tryon_markup = '<button type="button" class="muukal-card-action muukal-card-action-primary">TRY ON</button>';
+	}
 
 	ob_start();
 	?>
@@ -304,7 +320,7 @@ function muukal_render_product_loop_item( $args ) {
 				</span>
 			</button>
 			<div class="muukal-card-actions" aria-hidden="true">
-				<button type="button" class="muukal-card-action muukal-card-action-primary">TRY ON</button>
+				<?php echo $tryon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<a class="muukal-card-action muukal-card-action-secondary muukal-product-link" href="<?php echo esc_url( $default_state['link'] ); ?>">View Similar Frames</a>
 			</div>
 			<div class="product-content">
