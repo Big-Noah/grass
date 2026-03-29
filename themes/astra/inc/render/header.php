@@ -210,7 +210,7 @@ function muukal_render_header( $args ) {
 	$cart_count     = muukal_header_get_cart_count();
 	$logo_id      = get_theme_mod( 'custom_logo' );
 	$logo_markup  = $logo_id ? wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'muukal-header__logo-image' ) ) : '';
-	$promo_icon   = '<span class="muukal-header__promo-icon" aria-hidden="true"></span>';
+	$promo_icon   = '<span class="muukal-header__promo-icon" aria-hidden="true"><svg viewBox="0 0 1024 1024"><path d="M384 213.333333h426.666667v597.333334H213.333333V213.333333h170.666667z m298.666667 85.333334H384v42.666666h85.333333v42.666667c0 25.6 17.066667 42.666667 42.666667 42.666667s42.666667-17.066667 42.666667-42.666667V341.333333h85.333333v42.666667c0 72.533333-55.466667 128-128 128s-128-55.466667-128-128V298.666667H298.666667v426.666666h426.666666V298.666667h-42.666666z"></path></svg></span>';
 	$search_icon  = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l5 5"></path></svg>';
 	$account_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.2" r="3.2"></circle><path d="M5 19c1.9-3 4.3-4.5 7-4.5s5.1 1.5 7 4.5"></path></svg>';
 	$heart_icon   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.35-9.18-8.18C.92 9.87 2.08 5.88 5.86 5.2c2.07-.37 3.74.57 4.94 2.01 1.2-1.44 2.87-2.38 4.94-2.01 3.78.68 4.94 4.67 3.04 7.62C18.7 16.65 12 21 12 21z"></path></svg>';
