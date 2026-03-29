@@ -83,8 +83,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: #2d2d2d;
   text-decoration: none;
   transition: color 0.2s ease, opacity 0.2s ease;
@@ -98,21 +98,16 @@
 
 .muukal-header__social-link svg {
   display: block;
-  width: 16px;
-  height: 16px;
-  overflow: visible;
+  width: 14px;
+  height: 14px;
   fill: currentColor !important;
-  stroke: currentColor !important;
+  stroke: none !important;
   color: currentColor !important;
-  stroke-width: 36;
-  vector-effect: non-scaling-stroke;
 }
 
 .muukal-header__social-link svg path {
   fill: currentColor !important;
-  stroke: currentColor !important;
-  stroke-width: 36 !important;
-  vector-effect: non-scaling-stroke;
+  stroke: none !important;
 }
 
 .muukal-header__utility-icon {
