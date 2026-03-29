@@ -100,8 +100,14 @@
   display: block;
   width: 14px;
   height: 14px;
-  fill: currentColor;
+  fill: #000000 !important;
   stroke: none;
+  color: #000000 !important;
+}
+
+.muukal-header__social-link svg path {
+  fill: #000000 !important;
+  stroke: none !important;
 }
 
 .muukal-header__utility-icon {
