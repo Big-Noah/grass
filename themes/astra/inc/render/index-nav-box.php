@@ -10,53 +10,107 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get the primary internal product archive page URL.
+ *
+ * @return string
+ */
+function muukal_index_nav_box_get_archive_url() {
+	static $archive_url = null;
+
+	if ( null !== $archive_url ) {
+		return $archive_url;
+	}
+
+	$archive_page = get_posts(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'meta_query'     => array(
+				array(
+					'key'     => '_elementor_data',
+					'value'   => 'muukal_product_filter_archive',
+					'compare' => 'LIKE',
+				),
+			),
+		)
+	);
+
+	if ( ! empty( $archive_page[0] ) && $archive_page[0] instanceof WP_Post ) {
+		$page_link = get_permalink( $archive_page[0] );
+
+		if ( $page_link ) {
+			$archive_url = $page_link;
+			return $archive_url;
+		}
+	}
+
+	$archive_url = home_url( '/?page_id=172' );
+
+	return $archive_url;
+}
+
+/**
  * Render the homepage index nav box.
  *
  * @param array $args Shortcode attributes.
  * @return string
  */
 function muukal_render_index_nav_box( $args ) {
-	$link_base       = isset( $args['link_base'] ) ? untrailingslashit( esc_url_raw( $args['link_base'] ) ) : 'https://muukal.com';
 	$container_width = isset( $args['container_width'] ) ? sanitize_text_field( $args['container_width'] ) : '1900px';
 	$padding_top     = isset( $args['padding_top'] ) ? sanitize_text_field( $args['padding_top'] ) : '55px';
 	$use_local       = isset( $args['use_local_images'] ) ? filter_var( $args['use_local_images'], FILTER_VALIDATE_BOOLEAN ) : true;
+	$archive_url     = muukal_index_nav_box_get_archive_url();
 
 	$items = array(
 		array(
-			'href'  => '/lenses/block-blue-light.html',
-			'image' => 'bluelight_2.png',
-			'remote'=> 'https://img.muukal.com/img/index/bluelight_2.png',
-			'label' => 'Blue Light Glasses',
+			'image'      => 'bluelight_2.png',
+			'remote'     => 'https://img.muukal.com/img/index/bluelight_2.png',
+			'label'      => 'Blue Light Glasses',
+			'query_args' => array(
+				'feature' => 'block-blue-light',
+			),
 		),
 		array(
-			'href'  => '/eyeglasses/index/set/floral/color/1.html',
-			'image' => 'floral.png',
-			'remote'=> 'https://img.muukal.com/img/index/floral.png',
-			'label' => 'Floral Glasses',
+			'image'      => 'floral.png',
+			'remote'     => 'https://img.muukal.com/img/index/floral.png',
+			'label'      => 'Floral Glasses',
+			'query_args' => array(
+				'color' => 'floral',
+			),
 		),
 		array(
-			'href'  => '/eyeglasses/index/set/sunglasses.html',
-			'image' => 'rxsunglasses_1.png',
-			'remote'=> 'https://img.muukal.com/img/index/rxsunglasses_1.png',
-			'label' => 'Prescription Sunglasses',
+			'image'      => 'rxsunglasses_1.png',
+			'remote'     => 'https://img.muukal.com/img/index/rxsunglasses_1.png',
+			'label'      => 'Prescription Sunglasses',
+			'query_args' => array(
+				'feature' => 'sunglass-lens',
+			),
 		),
 		array(
-			'href'  => '/lenses/progressive.html',
-			'image' => 'progressive_2.png',
-			'remote'=> 'https://img.muukal.com/img/index/progressive_2.png',
-			'label' => 'Progressive',
+			'image'      => 'progressive_2.png',
+			'remote'     => 'https://img.muukal.com/img/index/progressive_2.png',
+			'label'      => 'Progressive',
+			'query_args' => array(
+				'feature' => 'progressive',
+			),
 		),
 		array(
-			'href'  => '/eyeglasses/index/set/rainbow/color/22.html',
-			'image' => 'bycolor_2.png',
-			'remote'=> 'https://img.muukal.com/img/index/bycolor_2.png',
-			'label' => 'Multicolor Glasses',
+			'image'      => 'bycolor_2.png',
+			'remote'     => 'https://img.muukal.com/img/index/bycolor_2.png',
+			'label'      => 'Multicolor Glasses',
+			'query_args' => array(
+				'color' => 'multicolor',
+			),
 		),
 		array(
-			'href'  => '/eyeglasses/index/set/flashsale.html',
-			'image' => 'sale_2.png',
-			'remote'=> 'https://img.muukal.com/img/index/sale_2.png',
-			'label' => 'Flash Sale',
+			'image'      => 'sale_2.png',
+			'remote'     => 'https://img.muukal.com/img/index/sale_2.png',
+			'label'      => 'Flash Sale',
+			'query_args' => array(
+				'sort_by'   => 'price_low',
+				'max_price' => '30',
+			),
 		),
 	);
 
@@ -67,7 +121,7 @@ function muukal_render_index_nav_box( $args ) {
 			<div class="row">
 				<?php foreach ( $items as $item ) : ?>
 					<?php
-					$item_url = esc_url( $link_base . $item['href'] );
+					$item_url = esc_url( add_query_arg( $item['query_args'], $archive_url ) );
 					$img_url  = $use_local
 						? esc_url( ASTRA_THEME_URI . 'assets/images/index-nav-box/' . $item['image'] )
 						: esc_url( $item['remote'] );
