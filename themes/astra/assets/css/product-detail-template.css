@@ -505,6 +505,8 @@
 	top: 50%;
 	left: 50%;
 	width: min(860px, calc(100vw - 30px));
+	box-sizing: border-box;
+	max-width: calc(100vw - 30px);
 	max-height: calc(100vh - 40px);
 	padding: 24px;
 	overflow: auto;
@@ -916,8 +918,28 @@
 		border-bottom: 0;
 	}
 
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger .mlr-app,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger .facepp-tryon-app,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #lens_box,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #lens_box > .container,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #hadStock,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger iframe,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger img,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger video,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger canvas {
+		box-sizing: border-box;
+		max-width: 100%;
+	}
+
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #lens_box,
+	.muukal-product-detail-template .muukal-product-detail-lens-trigger #lens_box > .container {
+		width: 100%;
+		overflow-x: hidden;
+	}
+
 	.muukal-product-detail-template .mlr-app #lens_box > .container {
-		width: calc(100vw - 12px);
+		width: 100%;
 		padding-left: 8px;
 		padding-right: 8px;
 	}
