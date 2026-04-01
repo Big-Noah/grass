@@ -1211,4 +1211,14 @@
 	.muukal-product-detail-template .muukal-details-column {
 		padding-bottom: calc(100px + env(safe-area-inset-bottom, 0));
 	}
+
+	body.single-product {
+		padding-bottom: calc(104px + env(safe-area-inset-bottom, 0));
+	}
+
+	body.single-product #page > footer,
+	body.single-product .site-footer,
+	body.single-product .muukal-footer__bottom {
+		padding-bottom: calc(104px + env(safe-area-inset-bottom, 0));
+	}
 }
