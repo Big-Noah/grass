@@ -716,6 +716,10 @@
 		transform: none;
 	}
 
+	.muukal-product-detail-template .product-area {
+		display: none;
+	}
+
 	.muukal-product-detail-template .feature_sp {
 		margin-right: 8px;
 		padding: 0 12px;
