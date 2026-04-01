@@ -753,25 +753,25 @@ function muukal_render_product_detail_template( $args ) {
 										</button>
 									<?php endforeach; ?>
 								</div>
+								<?php if ( ! empty( $variants ) ) : ?>
+									<div class="muukal-mobile-swatch-strip<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
+										<?php foreach ( $variants as $variant_key => $variant ) : ?>
+											<button
+												type="button"
+												class="ip-cspan ip-g-span<?php echo $variant_key === $default_key ? ' choose-color is-active' : ''; ?><?php echo $show_image_swatches ? ' has-image-swatch' : ' is-text-swatch'; ?>"
+												data-variant-key="<?php echo esc_attr( $variant_key ); ?>"
+											>
+												<?php if ( $show_image_swatches && ! empty( $variant['thumb_image'] ) ) : ?>
+													<img class="ip-g-img" src="<?php echo esc_url( $variant['thumb_image'] ); ?>" alt="<?php echo esc_attr( $variant['color_name'] ); ?>">
+												<?php else : ?>
+													<span class="muukal-color-chip-label"><?php echo esc_html( $variant['color_name'] ); ?></span>
+												<?php endif; ?>
+											</button>
+										<?php endforeach; ?>
+									</div>
+								<?php endif; ?>
 								<?php echo $tryon_shortcode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>
-							<?php if ( ! empty( $variants ) ) : ?>
-								<div class="muukal-mobile-swatch-strip<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
-									<?php foreach ( $variants as $variant_key => $variant ) : ?>
-										<button
-											type="button"
-											class="ip-cspan ip-g-span<?php echo $variant_key === $default_key ? ' choose-color is-active' : ''; ?><?php echo $show_image_swatches ? ' has-image-swatch' : ' is-text-swatch'; ?>"
-											data-variant-key="<?php echo esc_attr( $variant_key ); ?>"
-										>
-											<?php if ( $show_image_swatches && ! empty( $variant['thumb_image'] ) ) : ?>
-												<img class="ip-g-img" src="<?php echo esc_url( $variant['thumb_image'] ); ?>" alt="<?php echo esc_attr( $variant['color_name'] ); ?>">
-											<?php else : ?>
-												<span class="muukal-color-chip-label"><?php echo esc_html( $variant['color_name'] ); ?></span>
-											<?php endif; ?>
-										</button>
-									<?php endforeach; ?>
-								</div>
-							<?php endif; ?>
 							<div class="mt-10 ncpd960_mb0 text-center muukal-gallery-features">
 								<p>
 									<?php foreach ( $feature_links as $feature_link ) : ?>
