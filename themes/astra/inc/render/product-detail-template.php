@@ -741,6 +741,10 @@ function muukal_render_product_detail_template( $args ) {
 									<img class="muukal-gallery-main" src="<?php echo esc_url( $default_gallery[0] ); ?>" alt="<?php echo esc_attr( $product_name ); ?>" data-gallery-main>
 								<?php endif; ?>
 							</div>
+							<div class="muukal-mobile-gallery-meta">
+								<span class="muukal-mobile-gallery-count" data-gallery-count><?php echo esc_html( '1 / ' . max( count( $default_gallery ), 1 ) ); ?></span>
+								<span class="muukal-mobile-gallery-color" data-product-color-mobile><?php echo esc_html( $default_variant['color_name'] ); ?></span>
+							</div>
 							<div id="goods-lit-box" class="text-center pt-10">
 								<div class="muukal-gallery-thumb-list" data-gallery-thumb-list>
 									<?php foreach ( $default_gallery as $index => $gallery_url ) : ?>
@@ -751,7 +755,24 @@ function muukal_render_product_detail_template( $args ) {
 								</div>
 								<?php echo $tryon_shortcode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>
-							<div class="mt-10 ncpd960_mb0 text-center">
+							<?php if ( ! empty( $variants ) ) : ?>
+								<div class="muukal-mobile-swatch-strip<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
+									<?php foreach ( $variants as $variant_key => $variant ) : ?>
+										<button
+											type="button"
+											class="ip-cspan ip-g-span<?php echo $variant_key === $default_key ? ' choose-color is-active' : ''; ?><?php echo $show_image_swatches ? ' has-image-swatch' : ' is-text-swatch'; ?>"
+											data-variant-key="<?php echo esc_attr( $variant_key ); ?>"
+										>
+											<?php if ( $show_image_swatches && ! empty( $variant['thumb_image'] ) ) : ?>
+												<img class="ip-g-img" src="<?php echo esc_url( $variant['thumb_image'] ); ?>" alt="<?php echo esc_attr( $variant['color_name'] ); ?>">
+											<?php else : ?>
+												<span class="muukal-color-chip-label"><?php echo esc_html( $variant['color_name'] ); ?></span>
+											<?php endif; ?>
+										</button>
+									<?php endforeach; ?>
+								</div>
+							<?php endif; ?>
+							<div class="mt-10 ncpd960_mb0 text-center muukal-gallery-features">
 								<p>
 									<?php foreach ( $feature_links as $feature_link ) : ?>
 										<a href="<?php echo esc_url( $feature_link['url'] ); ?>">
@@ -761,11 +782,35 @@ function muukal_render_product_detail_template( $args ) {
 								</p>
 							</div>
 						</div>
+						<div class="muukal-mobile-product-overview">
+							<div class="muukal-mobile-price-row">
+								<span class="old-price goods-price mk-price" data-product-price-mobile><?php echo wp_kses_post( $current_price ); ?></span>
+							</div>
+							<div class="muukal-mobile-heading-row">
+								<div class="muukal-mobile-heading-copy">
+									<h1 class="muukal-mobile-short-name" data-product-short-name-mobile><?php echo esc_html( $default_variant['short_name'] ); ?></h1>
+									<div class="muukal-mobile-sub-name" data-product-sub-name-mobile><?php echo esc_html( $default_variant['sub_name'] ); ?></div>
+								</div>
+								<button type="button" class="muukal-mobile-share-button" data-product-share aria-label="Share this product">
+									<span class="muukal-mobile-share-icon" aria-hidden="true">↥</span>
+								</button>
+							</div>
+							<div class="muukal-mobile-social-row">
+								<span class="muukal-mobile-like-count mk-blue"><span data-product-like-count-mobile><?php echo esc_html( $like_count ); ?></span> Like</span>
+							</div>
+							<div class="muukal-mobile-feature-list">
+								<?php foreach ( $feature_links as $feature_link ) : ?>
+									<a href="<?php echo esc_url( $feature_link['url'] ); ?>">
+										<span class="feature_sp"><?php echo esc_html( $feature_link['label'] ); ?></span>
+									</a>
+								<?php endforeach; ?>
+							</div>
+						</div>
 					</div>
 
 					<div class="col-xl-4 muukal-details-column">
 						<div class="product-details mb-30 mt-20 pl-10 ncpd960_mb0">
-							<div class="product-details-title">
+							<div class="product-details-title muukal-desktop-summary">
 								<div>
 									<h1 class="inline-left fs26 mr-30 fw400 tf-cap" data-product-short-name><?php echo esc_html( $default_variant['short_name'] ); ?></h1>
 									<div class="on-sale-tag"<?php echo $discount > 0 ? '' : ' style="display:none;"'; ?> data-product-discount><?php echo esc_html( $discount ); ?>% OFF</div>
@@ -784,7 +829,7 @@ function muukal_render_product_detail_template( $args ) {
 							</div>
 
 							<?php if ( ! empty( $variants ) ) : ?>
-								<div class="goods-color-box mt30<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
+								<div class="goods-color-box mt30 muukal-desktop-swatches<?php echo $show_image_swatches ? ' has-image-swatches' : ' is-text-swatches'; ?>">
 									<?php foreach ( $variants as $variant_key => $variant ) : ?>
 										<button
 											type="button"
@@ -801,7 +846,7 @@ function muukal_render_product_detail_template( $args ) {
 								</div>
 							<?php endif; ?>
 
-							<div class="product-cat mt-25">
+							<div class="product-cat mt-25 muukal-desktop-meta">
 								<span>Select Color:&nbsp;&nbsp;</span>
 								<a id="s-color-n" data-product-color><?php echo esc_html( $default_variant['color_name'] ); ?></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

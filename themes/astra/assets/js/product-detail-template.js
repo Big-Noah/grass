@@ -27,6 +27,12 @@
 		thumbList.classList.toggle('is-multi-thumb', thumbCount > 1);
 	}
 
+	function updateGalleryCount(root, activeIndex, total) {
+		root.querySelectorAll('[data-gallery-count]').forEach(function (node) {
+			node.textContent = String(activeIndex) + ' / ' + String(total || 1);
+		});
+	}
+
 	function bindGalleryThumbs(root) {
 		var main = root.querySelector('[data-gallery-main]');
 		var thumbList = root.querySelector('[data-gallery-thumb-list]');
@@ -40,12 +46,16 @@
 		thumbList.querySelectorAll('[data-gallery-thumb]').forEach(function (thumb) {
 			thumb.addEventListener('click', function () {
 				main.src = thumb.getAttribute('data-gallery-thumb');
-				thumbList.querySelectorAll('[data-gallery-thumb]').forEach(function (entry) {
+				var thumbs = thumbList.querySelectorAll('[data-gallery-thumb]');
+				thumbs.forEach(function (entry) {
 					entry.classList.remove('is-active');
 				});
 				thumb.classList.add('is-active');
+				updateGalleryCount(root, Array.prototype.indexOf.call(thumbs, thumb) + 1, thumbs.length);
 			});
 		});
+
+		updateGalleryCount(root, 1, thumbList.querySelectorAll('[data-gallery-thumb]').length);
 	}
 
 	function renderThumbs(root, images, altText) {
@@ -72,6 +82,8 @@
 		if (main && images && images.length) {
 			main.src = images[0];
 		}
+
+		updateGalleryCount(root, 1, images && images.length ? images.length : 1);
 	}
 
 	function dispatchVariant(root, variant, data) {
@@ -114,18 +126,35 @@
 		var regularPrice = root.querySelector('[data-product-regular-price]');
 		var discount = root.querySelector('[data-product-discount]');
 		var likeCount = root.querySelector('[data-product-like-count]');
+		var likeCountMobile = root.querySelector('[data-product-like-count-mobile]');
 		var color = root.querySelector('[data-product-color]');
+		var colorMobile = root.querySelector('[data-product-color-mobile]');
+		var priceMobile = root.querySelector('[data-product-price-mobile]');
+		var shortNameMobile = root.querySelector('[data-product-short-name-mobile]');
+		var subNameMobile = root.querySelector('[data-product-sub-name-mobile]');
 
 		if (shortName) {
 			shortName.textContent = variant.shortName || '';
+		}
+
+		if (shortNameMobile) {
+			shortNameMobile.textContent = variant.shortName || '';
 		}
 
 		if (subName) {
 			subName.textContent = variant.subName || '';
 		}
 
+		if (subNameMobile) {
+			subNameMobile.textContent = variant.subName || '';
+		}
+
 		if (price) {
 			price.innerHTML = variant.priceHtml || '';
+		}
+
+		if (priceMobile) {
+			priceMobile.innerHTML = variant.priceHtml || '';
 		}
 
 		if (regularPrice) {
@@ -142,8 +171,16 @@
 			likeCount.textContent = variant.likeCount || '';
 		}
 
+		if (likeCountMobile) {
+			likeCountMobile.textContent = variant.likeCount || '';
+		}
+
 		if (color) {
 			color.textContent = variant.colorName || '';
+		}
+
+		if (colorMobile) {
+			colorMobile.textContent = variant.colorName || '';
 		}
 
 		renderThumbs(root, variant.gallery || [], variant.subName || variant.shortName || '');
@@ -192,15 +229,43 @@
 		});
 	}
 
+	function initShare(root) {
+		root.querySelectorAll('[data-product-share]').forEach(function (button) {
+			button.addEventListener('click', function () {
+				var titleNode = root.querySelector('[data-product-sub-name-mobile]') || root.querySelector('[data-product-sub-name]');
+				var shareData = {
+					title: document.title,
+					text: titleNode ? titleNode.textContent : document.title,
+					url: window.location.href
+				};
+
+				if (navigator.share) {
+					navigator.share(shareData).catch(function () {});
+					return;
+				}
+
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(window.location.href).then(function () {
+						button.classList.add('is-copied');
+						window.setTimeout(function () {
+							button.classList.remove('is-copied');
+						}, 1600);
+					}).catch(function () {});
+				}
+			});
+		});
+	}
+
 	function initProductDetail(root) {
 		var data = parseData(root);
 
 		if (!data || !data.variants) {
-			bindGalleryThumbs(root);
-			initMeasurements(root);
-			initSizeGuide(root);
-			return;
-		}
+		bindGalleryThumbs(root);
+		initMeasurements(root);
+		initSizeGuide(root);
+		initShare(root);
+		return;
+	}
 
 		root.querySelectorAll('[data-variant-key]').forEach(function (button) {
 			button.addEventListener('click', function () {
@@ -211,6 +276,7 @@
 		bindGalleryThumbs(root);
 		initMeasurements(root);
 		initSizeGuide(root);
+		initShare(root);
 
 		if (data.defaultVariant) {
 			applyVariant(root, data.defaultVariant, data);
