@@ -420,6 +420,8 @@
 
 .muukal-product-detail-template .product-desc-copy p {
 	margin: 0 0 1em;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .muukal-product-detail-template .section_title_row {
