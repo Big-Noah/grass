@@ -690,9 +690,13 @@
 		width: 100%;
 	}
 
-	.muukal-product-detail-template .muukal-product-card-grid,
 	.muukal-product-detail-template .muukal-modal-measurements {
 		grid-template-columns: 1fr;
+	}
+
+	.muukal-product-detail-template .product-recommended .muukal-product-card-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px;
 	}
 
 	.muukal-product-detail-template .btn,
