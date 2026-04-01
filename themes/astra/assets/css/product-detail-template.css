@@ -1213,12 +1213,16 @@
 	}
 
 	body.single-product {
-		padding-bottom: calc(104px + env(safe-area-inset-bottom, 0));
+		padding-bottom: calc(20px + env(safe-area-inset-bottom, 0));
 	}
 
 	body.single-product #page > footer,
 	body.single-product .site-footer,
 	body.single-product .muukal-footer__bottom {
-		padding-bottom: calc(104px + env(safe-area-inset-bottom, 0));
+		padding-bottom: calc(20px + env(safe-area-inset-bottom, 0));
+	}
+
+	body.single-product .muukal-footer-block__newsletter form {
+		display: none !important;
 	}
 }
