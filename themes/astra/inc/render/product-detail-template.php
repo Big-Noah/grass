@@ -791,9 +791,6 @@ function muukal_render_product_detail_template( $args ) {
 									<h1 class="muukal-mobile-short-name" data-product-short-name-mobile><?php echo esc_html( $default_variant['short_name'] ); ?></h1>
 									<div class="muukal-mobile-sub-name" data-product-sub-name-mobile><?php echo esc_html( $default_variant['sub_name'] ); ?></div>
 								</div>
-								<button type="button" class="muukal-mobile-share-button" data-product-share aria-label="Share this product">
-									<span class="muukal-mobile-share-icon" aria-hidden="true">↥</span>
-								</button>
 							</div>
 							<div class="muukal-mobile-social-row">
 								<span class="muukal-mobile-like-count mk-blue"><span data-product-like-count-mobile><?php echo esc_html( $like_count ); ?></span> Like</span>
