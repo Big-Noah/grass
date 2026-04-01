@@ -473,6 +473,10 @@
 	gap: 20px;
 }
 
+.muukal-product-detail-template .product-recommended .muukal-card-chips {
+	display: none;
+}
+
 .muukal-product-detail-template .latest-comments ul {
 	margin: 0;
 	padding: 0;
