@@ -545,11 +545,15 @@
 
 .facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage-wrap,
 .facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage {
-	width: 100%;
+	width: min(350px, 100%);
+	max-width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .facepp-tryon-modal.facepp-tryon-mobile-layout .facepp-tryon-stage {
-	height: min(50vh, 360px);
+	height: auto;
+	aspect-ratio: 350 / 410;
 	border-radius: 18px;
 }
 
@@ -700,11 +704,15 @@
 
 	.facepp-tryon-stage-wrap,
 	.facepp-tryon-stage {
-		width: 100%;
+		width: min(350px, 100%);
+		max-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.facepp-tryon-stage {
-		height: min(52vh, 380px);
+		height: auto;
+		aspect-ratio: 350 / 410;
 		border-radius: 18px;
 	}
 
