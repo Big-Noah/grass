@@ -670,11 +670,6 @@
 }
 
 @media (max-width: 959px) {
-	.muukal-product-detail-template .lit_gpic,
-	.muukal-product-detail-template .tyr-btn {
-		width: calc(50% - 20px);
-	}
-
 	.muukal-product-detail-template .feature_sp {
 		margin-right: 8px;
 		padding: 0 12px;
@@ -721,28 +716,64 @@
 	}
 
 	.muukal-product-detail-template #goods-lit-box {
+		display: flex;
+		flex-direction: column;
 		gap: 10px;
 		align-items: stretch;
 		justify-content: stretch;
 	}
 
 	.muukal-product-detail-template .muukal-gallery-thumb-list {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		flex: 1 1 100%;
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: flex-start;
+		flex: 1 1 auto;
 		width: 100%;
+		max-width: 100%;
 		gap: 10px;
+		padding: 2px 2px 8px;
+		overflow-x: auto;
+		overflow-y: hidden;
+		scroll-snap-type: x proximity;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.muukal-product-detail-template .lit_gpic {
-		width: 100%;
-		min-height: 68px;
+		flex: 0 0 76px;
+		width: 76px;
+		min-width: 76px;
+		min-height: 76px;
 		margin: 0;
-		padding: 8px;
-		border-radius: 14px;
+		padding: 6px;
+		border-radius: 18px;
+		scroll-snap-align: start;
+		box-shadow: 0 0 0 1px rgba(34, 34, 34, 0.04);
+	}
+
+	.muukal-product-detail-template .muukal-gallery-thumb-list.is-single-thumb {
+		justify-content: center;
+		overflow-x: visible;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-thumb-list.is-single-thumb .lit_gpic {
+		flex-basis: 88px;
+		width: 88px;
+		min-width: 88px;
+		min-height: 88px;
+	}
+
+	.muukal-product-detail-template .muukal-gallery-thumb-list::-webkit-scrollbar {
+		display: none;
+	}
+
+	.muukal-product-detail-template .lit_gpic img {
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.muukal-product-detail-template .facepp-tryon-app {
+		order: 2;
 		flex: 1 1 100%;
 		width: 100%;
 		max-width: none;

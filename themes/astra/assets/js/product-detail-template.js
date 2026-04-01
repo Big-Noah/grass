@@ -15,6 +15,18 @@
 		}
 	}
 
+	function syncThumbLayout(root) {
+		var thumbList = root.querySelector('[data-gallery-thumb-list]');
+
+		if (!thumbList) {
+			return;
+		}
+
+		var thumbCount = thumbList.querySelectorAll('[data-gallery-thumb]').length;
+		thumbList.classList.toggle('is-single-thumb', thumbCount <= 1);
+		thumbList.classList.toggle('is-multi-thumb', thumbCount > 1);
+	}
+
 	function bindGalleryThumbs(root) {
 		var main = root.querySelector('[data-gallery-main]');
 		var thumbList = root.querySelector('[data-gallery-thumb-list]');
@@ -22,6 +34,8 @@
 		if (!main || !thumbList) {
 			return;
 		}
+
+		syncThumbLayout(root);
 
 		thumbList.querySelectorAll('[data-gallery-thumb]').forEach(function (thumb) {
 			thumb.addEventListener('click', function () {
@@ -183,6 +197,8 @@
 
 		if (!data || !data.variants) {
 			bindGalleryThumbs(root);
+			initMeasurements(root);
+			initSizeGuide(root);
 			return;
 		}
 
